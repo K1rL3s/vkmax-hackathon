@@ -142,16 +142,25 @@ class EventRepo(BaseAlchemyRepo):
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
 
-    async def add_tag(self, event_id: EventId, tag_id: TagId) -> TagsToEvents:
-        relation = TagsToEvents(event_id=event_id, tag_id=tag_id)
-        try:
-            self._session.add(relation)
-            await self._session.flush()
-            await self._session.refresh(relation)
-        except (ProgrammingError, IntegrityError) as e:
-            raise RuntimeError from e
+    async def add_tag(self, event_id: EventId, tag_ids: list[TagId]) -> list[TagsToEvents]:
+        relations = []
 
-        return relation
+        for tag_id_item in tag_ids:
+            relation = TagsToEvents(event_id=event_id, tag_id=tag_id_item)
+            relations.append(relation)
+
+        try:
+            self._session.add_all(relations)
+            await self._session.flush()
+
+            for relation in relations:
+                await self._session.refresh(relation)
+
+        except (ProgrammingError, IntegrityError) as e:
+            await self._session.rollback()
+            raise RuntimeError(f"Failed to add tags to event: {e}") from e
+
+        return relations
 
     async def remove_tag(self, event_id: EventId, tag_id: TagId) -> bool:
         stmt = (
@@ -174,16 +183,27 @@ class EventRepo(BaseAlchemyRepo):
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
 
-    async def add_user(self, event_id: EventId, user_id: UserId) -> UsersToEvents:
-        relation = UsersToEvents(event_id=event_id, user_id=user_id)
-        try:
-            self._session.add(relation)
-            await self._session.flush()
-            await self._session.refresh(relation)
-        except (ProgrammingError, IntegrityError) as e:
-            raise RuntimeError from e
+    async def add_user(self, event_id: EventId, user_ids: list[UserId]) -> list[UsersToEvents]:
+        relations = [
+            UsersToEvents(event_id=event_id, user_id=user_id)
+            for user_id in user_ids
+        ]
 
-        return relation
+        if not relations:
+            return []
+
+        try:
+            self._session.add_all(relations)
+            await self._session.flush()
+
+            for relation in relations:
+                await self._session.refresh(relation)
+
+        except (ProgrammingError, IntegrityError) as e:
+            await self._session.rollback()
+            raise RuntimeError(f"Failed to add users to event: {e}") from e
+
+        return relations
 
     async def remove_user(self, event_id: EventId, user_id: UserId) -> bool:
         stmt = (

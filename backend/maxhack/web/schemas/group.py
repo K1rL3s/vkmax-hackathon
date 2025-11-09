@@ -19,7 +19,6 @@ class GroupResponse(Model):
     description: str | None = None
 
 
-
 class GroupMemberAddRequest(Model):
     invite_key: InviteKey
 
@@ -34,7 +33,6 @@ class GroupMemberResponse(Model):
     user_id: UserId
     group_id: GroupId
     role_id: RoleId
-
 
 
 class GroupUserItem(Model):

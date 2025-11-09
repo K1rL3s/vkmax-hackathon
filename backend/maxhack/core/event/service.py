@@ -1,5 +1,6 @@
 from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
 from maxhack.core.ids import EventId, GroupId, TagId, UserId
+from maxhack.core.responds.service import RespondService
 from maxhack.core.role.ids import CREATOR_ROLE_ID, EDITOR_ROLE_ID
 from maxhack.infra.database.models import EventModel, TagModel, UsersToGroupsModel
 from maxhack.infra.database.repos.event import EventRepo
@@ -11,18 +12,20 @@ from maxhack.infra.database.repos.users_to_groups import UsersToGroupsRepo
 
 class EventService:
     def __init__(
-        self,
-        event_repo: EventRepo,
-        tag_repo: TagRepo,
-        group_repo: GroupRepo,
-        user_repo: UserRepo,
-        users_to_group_repo: UsersToGroupsRepo,
+            self,
+            event_repo: EventRepo,
+            tag_repo: TagRepo,
+            group_repo: GroupRepo,
+            user_repo: UserRepo,
+            users_to_group_repo: UsersToGroupsRepo,
+            respond_service: RespondService,
     ) -> None:
         self._event_repo = event_repo
         self._tag_repo = tag_repo
         self._group_repo = group_repo
         self._user_repo = user_repo
         self._users_to_group_repo = users_to_group_repo
+        self._respond_service = respond_service
 
     async def _ensure_group_exists(self, group_id: GroupId | None) -> None:
         if group_id is None:
@@ -49,11 +52,11 @@ class EventService:
         return tag
 
     async def _ensure_membership_role(
-        self,
-        *,
-        user_id: UserId,
-        group_id: GroupId | None,
-        allowed_roles: set[int],
+            self,
+            *,
+            user_id: UserId,
+            group_id: GroupId | None,
+            allowed_roles: set[int],
     ) -> UsersToGroupsModel | None:
         if group_id is None:
             return None
@@ -91,14 +94,16 @@ class EventService:
         return event
 
     async def create_event(
-        self,
-        title: str,
-        description: str | None,
-        cron: str,
-        is_cycle: bool,
-        type: str,
-        creator_id: UserId,
-        group_id: GroupId | None,
+            self,
+            title: str,
+            description: str | None,
+            cron: str,
+            is_cycle: bool,
+            type: str,
+            creator_id: UserId,
+            group_id: GroupId | None,
+            user_ids: list[UserId] | None = None,
+            tag_ids: list[TagId] | None = None,
     ) -> EventModel:
         await self._ensure_user_exists(creator_id)
         await self._ensure_group_exists(group_id)
@@ -109,8 +114,7 @@ class EventService:
                 group_id=group_id,
                 allowed_roles={CREATOR_ROLE_ID, EDITOR_ROLE_ID},
             )
-
-        return await self._event_repo.create(
+        event = await self._event_repo.create(
             title=title,
             description=description,
             cron=cron,
@@ -120,15 +124,26 @@ class EventService:
             group_id=group_id,
         )
 
+        await self.add_tag_to_event(event.id, tag_ids, user_id=creator_id)
+        await self.add_user_to_event(event.id, user_ids, user_id=creator_id)
+
+        if type == "event":
+            for tag_id in tag_ids:
+                user, _ = await self._tag_repo.list_tag_users(group_id=event.group_id, tag_id=tag_id)
+                user_ids.append(user.id)
+            await self._respond_service.create(list(set(user_ids)), event.id, status="mb")
+
+        return event
+
     async def update_event(
-        self,
-        event_id: EventId,
-        user_id: UserId,
-        title: str | None = None,
-        description: str | None = None,
-        cron: str | None = None,
-        is_cycle: bool | None = None,
-        type: str | None = None,
+            self,
+            event_id: EventId,
+            user_id: UserId,
+            title: str | None = None,
+            description: str | None = None,
+            cron: str | None = None,
+            is_cycle: bool | None = None,
+            type: str | None = None,
     ) -> EventModel:
         event = await self._ensure_event_exists(event_id)
 
@@ -178,74 +193,100 @@ class EventService:
             raise EntityNotFound("Событие не найдено")
 
     async def add_tag_to_event(
-        self,
-        event_id: EventId,
-        tag_id: TagId,
-        user_id: UserId,
+            self,
+            event_id: EventId,
+            tag_ids: list[TagId],
+            user_id: UserId,
     ) -> None:
         event = await self._ensure_event_exists(event_id)
-        tag = await self._ensure_tag_exists(tag_id)
 
-        # Проверяем права: только создатель или пользователь с ролью 1 или 2 в группе
+        if not tag_ids:
+            return
+
+        tags = [await self._ensure_tag_exists(tag_id) for tag_id in tag_ids]
+
         if event.group_id is not None:
             await self._ensure_membership_role(
                 user_id=user_id,
                 group_id=event.group_id,
                 allowed_roles={CREATOR_ROLE_ID, EDITOR_ROLE_ID},
             )
-            # Проверяем, что тег принадлежит той же группе
-            if tag.group_id != event.group_id:
-                raise InvalidValue("Тег не принадлежит группе события")
+            invalid_tags = [
+                tag.id for tag in tags if tag.group_id != event.group_id
+            ]
+            if invalid_tags:
+                raise InvalidValue(f"Теги не принадлежат группе события: {invalid_tags}")
         elif event.creator_id != user_id:
             raise NotEnoughRights("Недостаточно прав для добавления тега")
 
-        # Проверяем, не добавлен ли уже тег
         event_tags = await self._event_repo.get_event_tags(event_id)
-        if tag_id in event_tags:
-            raise InvalidValue("Тег уже добавлен к событию")
+        new_tag_ids = [tag_id for tag_id in tag_ids if tag_id not in event_tags]
 
-        await self._event_repo.add_tag(event_id, tag_id)
+        if not new_tag_ids:
+            raise InvalidValue("Все указанные теги уже добавлены к событию")
+
+        await self._event_repo.add_tag(event_id, new_tag_ids)
+
+        if event.type == "event":
+            user_ids = []
+            for tag_id in new_tag_ids:
+                user, _ = await self._tag_repo.list_tag_users(group_id=event.group_id, tag_id=tag_id)
+                user_ids.append(user.id)
+            await self._respond_service.create(user_ids, event.id, status="mb")
 
     async def add_user_to_event(
-        self,
-        event_id: EventId,
-        target_user_id: UserId,
-        user_id: UserId,
+            self,
+            event_id: EventId,
+            target_user_ids: list[UserId],
+            user_id: UserId,
     ) -> None:
-        event = await self._ensure_event_exists(event_id)
-        await self._ensure_user_exists(target_user_id)
+        if not target_user_ids:
+            return
 
-        # Проверяем права: только создатель или пользователь с ролью 1 или 2 в группе
+        event = await self._ensure_event_exists(event_id)
+
+        for target_user_id in target_user_ids:
+            await self._ensure_user_exists(target_user_id)
+
         if event.group_id is not None:
             await self._ensure_membership_role(
                 user_id=user_id,
                 group_id=event.group_id,
                 allowed_roles={CREATOR_ROLE_ID, EDITOR_ROLE_ID},
             )
-            # Проверяем, что целевой пользователь тоже в группе
-            target_membership = await self._users_to_group_repo.get_membership(
-                user_id=target_user_id,
-                group_id=event.group_id,
-            )
-            if target_membership is None:
-                raise InvalidValue("Пользователь не состоит в группе события")
+
+            for target_user_id in target_user_ids:
+                target_membership = await self._users_to_group_repo.get_membership(
+                    user_id=target_user_id,
+                    group_id=event.group_id,
+                )
+                if target_membership is None:
+                    raise InvalidValue(f"Пользователь {target_user_id} не состоит в группе события")
+
         elif event.creator_id != user_id:
             raise NotEnoughRights("Недостаточно прав для добавления пользователя")
 
-        # Проверяем, не добавлен ли уже пользователь
-        is_in_event = await self._event_repo.check_user_in_event(
-            event_id,
-            target_user_id,
-        )
-        if is_in_event:
-            raise InvalidValue("Пользователь уже добавлен к событию")
+        existing_users = []
+        for target_user_id in target_user_ids:
+            is_in_event = await self._event_repo.check_user_in_event(
+                event_id,
+                target_user_id,
+            )
+            if is_in_event:
+                existing_users.append(target_user_id)
 
-        await self._event_repo.add_user(event_id, target_user_id)
+        if existing_users:
+            raise InvalidValue(f"Пользователи уже добавлены к событию: {existing_users}")
+
+        await self._event_repo.add_user(event_id, target_user_ids)
+
+        if event.type == "event":
+            await self._respond_service.create(target_user_ids, event.id, status="mb")
 
     async def get_group_events(
-        self,
-        group_id: GroupId,
-        user_id: UserId,
+            self,
+            group_id: GroupId,
+            user_id: UserId,
     ) -> list[EventModel]:
         await self._ensure_group_exists(group_id)
 
@@ -264,9 +305,9 @@ class EventService:
         return await self._event_repo.get_created_by_user(user_id)
 
     async def get_other_user_events(
-        self,
-        target_user_id: UserId,
-        user_id: UserId,
+            self,
+            target_user_id: UserId,
+            user_id: UserId,
     ) -> list[EventModel]:
         await self._ensure_user_exists(target_user_id)
         await self._ensure_user_exists(user_id)

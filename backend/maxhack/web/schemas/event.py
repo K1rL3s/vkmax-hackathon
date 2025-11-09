@@ -1,4 +1,4 @@
-from ...core.ids import EventId, GroupId, TagId, UserId
+from ...core.ids import EventId, GroupId, TagId, UserId, RespondId
 from .core import Model
 
 
@@ -9,6 +9,8 @@ class EventCreateRequest(Model):
     is_cycle: bool
     type: str
     group_id: GroupId | None = None
+    user_ids: list[UserId] | None = None
+    tag_ids: list[TagId] | None = None
 
 
 class EventUpdateRequest(Model):
@@ -30,14 +32,24 @@ class EventResponse(Model):
     group_id: GroupId | None = None
 
 
-
 class EventAddTagRequest(Model):
-    tag_id: TagId
+    tag_ids: list[TagId]
 
 
 class EventAddUserRequest(Model):
-    user_id: UserId
+    user_ids: list[UserId]
 
 
 class EventsResponse(Model):
     events: list[EventResponse]
+
+
+class RespondChangeResponse(Model):
+    status: str
+
+
+class RespondResponse(Model):
+    id: RespondId
+    user_id: UserId
+    event_id: EventId
+    status: str

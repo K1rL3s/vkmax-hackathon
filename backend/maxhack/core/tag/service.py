@@ -150,7 +150,6 @@ class TagService:
 
         await self._ensure_user_exists(user_id)
 
-        # Пользователь должен быть в группе
         await self._ensure_membership_role(
             user_id=user_id,
             group_id=group_id,
