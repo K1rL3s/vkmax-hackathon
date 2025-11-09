@@ -1,5 +1,5 @@
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from maxhack.core.event.service import EventService
@@ -26,12 +26,13 @@ async def add_tag_to_event_route(
     event_id: EventId,
     body: EventAddTagRequest,
     event_service: FromDishka[EventService],
+    master_id: UserId = Header(...),
 ) -> None:
     try:
         await event_service.add_tag_to_event(
             event_id=event_id,
             tag_id=body.tag_id,
-            user_id=body.master_id,
+            user_id=master_id,
         )
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -48,12 +49,12 @@ async def add_tag_to_event_route(
 )
 async def get_event_route(
     event_id: EventId,
-    user_id: UserId,
     event_service: FromDishka[EventService],
     session: FromDishka[AsyncSession],
+    master_id: UserId = Header(...),
 ) -> EventResponse:
     try:
-        event = await event_service.get_event(event_id=event_id, user_id=user_id)
+        event = await event_service.get_event(event_id=event_id, user_id=master_id)
         return await EventResponse.from_orm_async(event, session)
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -71,6 +72,7 @@ async def create_event_route(
     body: EventCreateRequest,
     event_service: FromDishka[EventService],
     session: FromDishka[AsyncSession],
+    master_id: UserId = Header(...),
 ) -> EventResponse:
     try:
         event = await event_service.create_event(
@@ -79,7 +81,7 @@ async def create_event_route(
             cron=body.cron,
             is_cycle=body.is_cycle,
             type=body.type,
-            creator_id=body.creator_id,
+            creator_id=master_id,
             group_id=body.group_id,
         )
         return await EventResponse.from_orm_async(event, session)
@@ -99,11 +101,12 @@ async def update_event_route(
     body: EventUpdateRequest,
     event_service: FromDishka[EventService],
     session: FromDishka[AsyncSession],
+    master_id: UserId = Header(...),
 ) -> EventResponse:
     try:
         event = await event_service.update_event(
             event_id=event_id,
-            user_id=body.master_id,
+            user_id=master_id,
             title=body.title,
             description=body.description,
             cron=body.cron,
@@ -124,11 +127,11 @@ async def update_event_route(
 )
 async def delete_event_route(
     event_id: EventId,
-    user_id: UserId,
     event_service: FromDishka[EventService],
+    master_id: UserId = Header(...),
 ) -> None:
     try:
-        await event_service.delete_event(event_id=event_id, user_id=user_id)
+        await event_service.delete_event(event_id=event_id, user_id=master_id)
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except NotEnoughRights as e:
@@ -144,12 +147,13 @@ async def add_user_to_event_route(
     event_id: EventId,
     body: EventAddUserRequest,
     event_service: FromDishka[EventService],
+    master_id: UserId = Header(...),
 ) -> None:
     try:
         await event_service.add_user_to_event(
             event_id=event_id,
             target_user_id=body.user_id,
-            user_id=body.master_id,
+            user_id=master_id,
         )
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -166,14 +170,14 @@ async def add_user_to_event_route(
 )
 async def get_group_events_route(
     group_id: GroupId,
-    user_id: UserId,
     event_service: FromDishka[EventService],
     session: FromDishka[AsyncSession],
+    master_id: UserId = Header(...),
 ) -> EventsResponse:
     try:
         events = await event_service.get_group_events(
             group_id=group_id,
-            user_id=user_id,
+            user_id=master_id,
         )
         response_events = [
             await EventResponse.from_orm_async(event, session) for event in events
@@ -186,17 +190,17 @@ async def get_group_events_route(
 
 
 @event_router.get(
-    "/users/{user_id}",
+    "/",
     response_model=EventsResponse,
     description="Просмотр всех своих событий",
 )
 async def get_user_events_route(
-    user_id: UserId,
     event_service: FromDishka[EventService],
     session: FromDishka[AsyncSession],
+    master_id: UserId = Header(...),
 ) -> EventsResponse:
     try:
-        events = await event_service.get_user_events(user_id=user_id)
+        events = await event_service.get_user_events(user_id=master_id)
         response_events = [
             await EventResponse.from_orm_async(event, session) for event in events
         ]
@@ -205,27 +209,27 @@ async def get_user_events_route(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
-@event_router.get(
-    "/users/{target_user_id}/events",
-    response_model=EventsResponse,
-    description="Просмотр событий другого пользователя (Если вы в одной группе)",
-)
-async def get_other_user_events_route(
-    target_user_id: UserId,
-    user_id: UserId,
-    event_service: FromDishka[EventService],
-    session: FromDishka[AsyncSession],
-) -> EventsResponse:
-    try:
-        events = await event_service.get_other_user_events(
-            target_user_id=target_user_id,
-            user_id=user_id,
-        )
-        response_events = [
-            await EventResponse.from_orm_async(event, session) for event in events
-        ]
-        return EventsResponse(events=response_events)
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+# @event_router.get(
+#     "/users/{slave_id}/events",
+#     response_model=EventsResponse,
+#     description="Просмотр событий другого пользователя (Если вы в одной группе)",
+# )
+# async def get_other_user_events_route(
+#     slave_id: UserId,
+#     event_service: FromDishka[EventService],
+#     session: FromDishka[AsyncSession],
+#     master_id: UserId = Header(...),
+# ) -> EventsResponse:
+#     try:
+#         events = await event_service.get_other_user_events(
+#             target_user_id=slave_id,
+#             user_id=master_id,
+#         )
+#         response_events = [
+#             await EventResponse.from_orm_async(event, session) for event in events
+#         ]
+#         return EventsResponse(events=response_events)
+#     except EntityNotFound as e:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+#     except NotEnoughRights as e:
+#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))

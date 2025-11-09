@@ -3,14 +3,12 @@ from .core import Model
 
 
 class TagCreateRequest(Model):
-    master_id: UserId
     name: str
     descriptions: str | None = None
     color: str
 
 
 class TagUpdateRequest(Model):
-    master_id: UserId
     name: str | None = None
     descriptions: str | None = None
     color: str | None = None
@@ -29,7 +27,6 @@ class TagDeleteRequest(Model):
 
 
 class TagAssignRequest(Model):
-    master_id: UserId
     user_id: UserId
     tag_id: TagId
 
@@ -39,14 +36,6 @@ class TagAssignmentResponse(Model):
     tag_id: TagId
 
 
-class GroupTagsResponse(Model):
-    tags: list[TagResponse]
-
-
-class UserTagsResponse(Model):
-    tags: list[TagResponse]
-
-
 class TagUserItem(Model):
     user_id: UserId
     max_id: int
@@ -54,7 +43,3 @@ class TagUserItem(Model):
     last_name: str | None = None
     phone: str
     role_id: RoleId
-
-
-class TagUsersResponse(Model):
-    users: list[TagUserItem]

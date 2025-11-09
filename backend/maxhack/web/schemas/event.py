@@ -3,7 +3,6 @@ from .core import Model
 
 
 class EventCreateRequest(Model):
-    creator_id: UserId
     title: str
     description: str | None = None
     cron: str
@@ -13,7 +12,6 @@ class EventCreateRequest(Model):
 
 
 class EventUpdateRequest(Model):
-    master_id: UserId
     title: str | None = None
     description: str | None = None
     cron: str | None = None
@@ -36,12 +34,10 @@ class EventResponse(Model):
 
 
 class EventAddTagRequest(Model):
-    master_id: UserId
     tag_id: TagId
 
 
 class EventAddUserRequest(Model):
-    master_id: UserId
     user_id: UserId
 
 

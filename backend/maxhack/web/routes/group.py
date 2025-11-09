@@ -1,5 +1,5 @@
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
@@ -15,7 +15,6 @@ from maxhack.web.schemas.group import (
     GroupResponse,
     GroupUpdateRequest,
     GroupUserItem,
-    GroupUsersResponse,
 )
 from maxhack.web.schemas.tag import (
     TagCreateRequest,
@@ -32,12 +31,13 @@ group_router = APIRouter(prefix="/groups", tags=["Groups"], route_class=DishkaRo
     description="Создание группы",
 )
 async def create_group_route(
-    body: GroupCreateRequest,
-    group_service: FromDishka[GroupService],
+        body: GroupCreateRequest,
+        group_service: FromDishka[GroupService],
+        master_id: UserId = Header(...),
 ) -> GroupResponse:
     try:
         group = await group_service.create_group(
-            creator_id=body.creator_id,
+            creator_id=master_id,
             name=body.name,
             description=body.description,
         )
@@ -53,14 +53,15 @@ async def create_group_route(
     description="Редактирование группы (только создатель)",
 )
 async def update_group_route(
-    group_id: GroupId,
-    body: GroupUpdateRequest,
-    group_service: FromDishka[GroupService],
+        group_id: GroupId,
+        body: GroupUpdateRequest,
+        group_service: FromDishka[GroupService],
+        master_id: UserId = Header(...),
 ) -> GroupResponse:
     try:
         group = await group_service.update_group(
             group_id=group_id,
-            editor_id=body.master_id,
+            editor_id=master_id,
             name=body.name,
             description=body.description,
         )
@@ -79,12 +80,13 @@ async def update_group_route(
     description="Добавление пользователя в группу",
 )
 async def join_group(
-    body: GroupMemberAddRequest,
-    group_service: FromDishka[GroupService],
+        body: GroupMemberAddRequest,
+        group_service: FromDishka[GroupService],
+        master_id: UserId = Header(...),
 ) -> GroupMemberResponse:
     try:
         group = await group_service.join_group(
-            user_id=body.user_id,
+            user_id=master_id,
             invite_key=body.invite_key,
         )
     except EntityNotFound as e:
@@ -107,15 +109,16 @@ async def join_group(
     description="Редактирование связи пользователя и группы",
 )
 async def update_group_membership(
-    body: GroupMemberUpdateRequest,
-    group_service: FromDishka[GroupService],
+        body: GroupMemberUpdateRequest,
+        group_service: FromDishka[GroupService],
+        master_id: UserId = Header(...),
 ) -> GroupMemberResponse:
     try:
         membership = await group_service.update_membership(
             group_id=body.group_id,
             new_role_id=body.new_role_id,
             slave_id=body.slave_id,
-            master_id=body.master_id,
+            master_id=master_id,
         )
 
         return GroupMemberResponse(
@@ -133,33 +136,32 @@ async def update_group_membership(
 
 @group_router.get(
     "/{group_id}/users",
-    response_model=GroupUsersResponse,
+    response_model=list[GroupUserItem],
     description="Получить список всех пользователей группы",
 )
 async def list_group_users_route(
-    group_id: GroupId,
-    user_id: UserId,
-    group_service: FromDishka[GroupService],
-) -> GroupUsersResponse:
+        group_id: GroupId,
+        group_service: FromDishka[GroupService],
+        master_id: UserId = Header(...),
+) -> list[GroupUserItem]:
     try:
         group_users = await group_service.get_group_users(
             group_id=group_id,
-            user_id=user_id,
+            user_id=master_id,
         )
-        return GroupUsersResponse(
-            users=[
-                GroupUserItem(
-                    user_id=user_model.id,
-                    group_id=group_id,
-                    role_id=role_model.id,
-                    max_id=user_model.max_id,
-                    first_name=user_model.first_name,
-                    last_name=user_model.last_name,
-                    phone=user_model.phone,
-                )
-                for user_model, role_model in group_users
-            ],
-        )
+        return [
+            GroupUserItem(
+                user_id=user_model.id,
+                group_id=group_id,
+                role_id=role_model.id,
+                role_name=role_model.name,
+                max_id=user_model.max_id,
+                first_name=user_model.first_name,
+                last_name=user_model.last_name,
+                phone=user_model.phone,
+            )
+            for user_model, role_model in group_users
+        ]
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except NotEnoughRights as e:
@@ -167,15 +169,15 @@ async def list_group_users_route(
 
 
 @group_router.delete(
-    "/{group_id}/users/{user_id}",
+    "/{group_id}/users/{slave_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     description="Удаление участника из группы",
 )
 async def remove_group_member_route(
-    group_id: GroupId,
-    slave_id: UserId,
-    master_id: UserId | None,
-    group_service: FromDishka[GroupService],
+        group_id: GroupId,
+        slave_id: UserId,
+        group_service: FromDishka[GroupService],
+        master_id: UserId = Header(...),
 ) -> None:
     try:
         await group_service.remove_user_from_group(
@@ -197,14 +199,14 @@ async def remove_group_member_route(
     description="Удаление группы (только администратор)",
 )
 async def delete_group_route(
-    group_id: GroupId,
-    user_id: UserId,
-    group_service: FromDishka[GroupService],
+        group_id: GroupId,
+        group_service: FromDishka[GroupService],
+        master_id: UserId = Header(...),
 ) -> None:
     try:
         await group_service.delete_group(
             group_id=group_id,
-            editor_id=user_id,
+            editor_id=master_id,
         )
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -219,15 +221,16 @@ async def delete_group_route(
     description="Создание тега",
 )
 async def create_tag_route(
-    group_id: GroupId,
-    body: TagCreateRequest,
-    tag_service: FromDishka[TagService],
-    session: FromDishka[AsyncSession],
+        group_id: GroupId,
+        body: TagCreateRequest,
+        tag_service: FromDishka[TagService],
+        session: FromDishka[AsyncSession],
+        master_id: UserId = Header(...),
 ) -> TagResponse:
     try:
         tag = await tag_service.create_tag(
             group_id=group_id,
-            master_id=body.master_id,
+            master_id=master_id,
             name=body.name,
             descriptions=body.descriptions,
             color=body.color,
