@@ -7,7 +7,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from maxhack.config import load_config
-from maxhack.core.config import Config
+
 from maxhack.di import make_container
 from maxhack.utils.log_config import set_logging
 from maxhack.web.routes import (
@@ -49,7 +49,8 @@ app = fastapi.FastAPI(
     },
 )
 
-container = make_container(config=load_config())  # TODO: Передать конфиг
+config = load_config()
+container = make_container(config=config)
 setup_dishka(container, app)
 
 app.include_router(healthcheck_router)
@@ -59,12 +60,12 @@ app.include_router(tag_router)
 app.include_router(event_router)
 
 set_logging(
-    level=cast(Literal["DEBUG", "INFO", "ERROR", "WARNING"], Config.log_level),
-    enable_additional_debug=Config.additional_debug,
+    level=cast(Literal["DEBUG", "INFO", "ERROR", "WARNING"], config.log_level),
+    enable_additional_debug=config.app.additional_debug,
     app=app,
 )
 
-app.add_middleware(SessionMiddleware, secret_key=Config.secret.encode("utf-8").hex())
+app.add_middleware(SessionMiddleware, secret_key=config.app.secret.encode("utf-8").hex())
 
 default_errors = {
     401: {"description": "Unauthorized"},
@@ -77,7 +78,7 @@ default_errors = {
 # Todo: Сделать обработтчики ошибок
 # add_exception_handlers(app)
 
-if Config.cors_policy_disabled:
+if config.app.cors_policy_disabled:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],

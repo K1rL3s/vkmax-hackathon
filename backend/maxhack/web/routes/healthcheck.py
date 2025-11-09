@@ -8,7 +8,7 @@ from maxhack.infra.database.database_connection import db_async_session
 
 healthcheck_router = APIRouter(prefix="/healthcheck", tags=["Healthcheck"])
 
-
+# TODO: ДИШКА
 @healthcheck_router.get(
     "",
     description="Проверка соединения с базой данных",

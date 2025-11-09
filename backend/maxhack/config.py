@@ -1,6 +1,7 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from urllib import parse
 
 
 @dataclass(slots=True, frozen=True, kw_only=True)
@@ -36,11 +37,41 @@ class RedisConfig:
 
 
 @dataclass(slots=True, frozen=True, kw_only=True)
+class AppSettings:
+    test_token: str | None
+    token_alive_hours: int = 4
+    refresh_token_alive_hours: int = 24 * 7
+    reset_password_alive_hours: int = 2
+    reset_password_redirect_page: str | None
+
+
+@dataclass(slots=True, frozen=True, kw_only=True)
+class AppConfig:
+    host: str = "localhost"
+    port: int = 7001
+    portal_address: str | None
+    debug_mode: bool = False
+    cors_policy_disabled: bool = True
+    secret: str = "Pepa the pig"
+    file_directory: str | None
+    additional_debug: bool = False
+
+
+@dataclass(slots=True, frozen=True, kw_only=True)
+class SwaggerConfig:
+    root_path: str = ""
+    testing_path: str = ""
+    testing_description: str = "Отсутствует"
+
+
+@dataclass(slots=True, frozen=True, kw_only=True)
 class Config:
     max: MaxConfig
     db: DbConfig
     redis: RedisConfig
-
+    app: AppConfig
+    app_settings: AppSettings
+    swagger: SwaggerConfig
     log_level: str
 
 
@@ -64,6 +95,32 @@ def load_config(env: str | Path | None = None) -> Config:
             port=int(os.environ["REDIS_PORT"]),
             password=os.getenv("REDIS_PASSWORD", None),
             database=int(os.getenv("REDIS_DB", 0)),
+        ),
+        app=AppConfig(
+            host=os.environ.get("HOST", "localhost"),
+            port=int(os.environ.get("PORT", 7001)),
+            portal_address=os.environ.get("PORTAL_ADDRESS"),
+            debug_mode=os.environ.get("DEBUG_MODE", "").lower() == "true",
+            cors_policy_disabled=(
+                os.environ.get("CORS_POLICY_DISABLED", "True").lower() == "true"
+            ),
+            secret=os.environ.get("SECRET", "Pepa the pig"),
+            file_directory=os.environ.get("FILE_DIRECTORY", None),
+            additional_debug=os.environ.get("ADDITIONAL_DEBUG", "False").lower() == "true",
+        ),
+        app_settings=AppSettings(
+            test_token=os.environ.get("TEST_TOKEN", None),
+            token_alive_hours=int(os.environ.get("TOKEN_ALIVE_HOURS", 4)),
+            refresh_token_alive_hours=int(
+                os.environ.get("REFRESH_TOKEN_ALIVE_HOURS", 24 * 7),
+            ),
+            reset_password_alive_hours=int(os.environ.get("RESET_PASSWORD_ALIVE_HOURS", 2)),
+            reset_password_redirect_page=os.environ.get("RESET_PASSWORD_REDIRECT_PAGE"),
+        ),
+        swagger=SwaggerConfig(
+            root_path=os.environ.get("ROOT_PATH", ""),
+            testing_path=os.environ.get("TESTING_PATH", ""),
+            testing_description=os.environ.get("TESTING_DESCRIPTION", "Отсутствует"),
         ),
         log_level=os.getenv("LOG_LEVEL", "DEBUG"),
     )

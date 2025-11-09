@@ -4,15 +4,16 @@ import sys
 import granian
 from granian.constants import Interfaces
 
-from maxhack.core.config import Config
+from maxhack.config import load_config
 
 if __name__ == "__main__":
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    config = load_config()
     granian.Granian(
         "maxhack.web.main:app",
-        address=Config.host,
-        port=Config.port,
+        address=config.app.host,
+        port=config.app.port,
         interface=Interfaces.ASGI,
         reload=True,
         log_access=True,
