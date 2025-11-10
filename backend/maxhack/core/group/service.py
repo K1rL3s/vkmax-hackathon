@@ -176,7 +176,7 @@ class GroupService:
             )
             member_tag_ids = {tag.id for tag in member_tags}
             to_add = set(tags).difference(member_tag_ids)
-            to_remove = set(member_tag_ids).difference(tags)r
+            to_remove = set(member_tag_ids).difference(tags)
             logger.info(
                 "Updating tags for user %d in group %d: adding %s, removing %s",
                 slave_id,
