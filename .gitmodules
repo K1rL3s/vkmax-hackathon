@@ -1,0 +1,3 @@
+[submodule "backend/maxo"]
+	path = backend/maxo
+	url = https://github.com/K1rL3s/maxo.git
