@@ -9,6 +9,7 @@ description = "Бот макс"
 authors = [
     { name = "Dyadechkov Ivan", email = "dyadechkoviv@uriit.ru" },
     { name = "Lesovoy Kirill", email = "lesovoi.k@velobike.ru" },
+    { name = "Daniil Karpenko", email = "daniil.karpenk0@yandex.ru" },
 ]
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
