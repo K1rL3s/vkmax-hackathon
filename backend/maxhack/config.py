@@ -1,5 +1,5 @@
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
@@ -51,6 +51,7 @@ class AppConfig:
     portal_address: str | None
     debug_mode: bool = False
     cors_policy_disabled: bool = True
+    cors: list[str] = field(default_factory=list[str])
     secret: str = "Pepa the pig"
     file_directory: str | None
     additional_debug: bool = False
@@ -103,6 +104,7 @@ def load_config(env: str | Path | None = None) -> Config:
             cors_policy_disabled=(
                 os.getenv("CORS_POLICY_DISABLED", "True").lower() == "true"
             ),
+            cors=os.getenv("CORS", "").split(","),
             secret=os.getenv("SECRET", "Pepa the pig"),
             file_directory=os.getenv("FILE_DIRECTORY", None),
             additional_debug=os.getenv("ADDITIONAL_DEBUG", "False").lower() == "true",

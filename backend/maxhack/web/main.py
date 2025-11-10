@@ -80,10 +80,11 @@ default_errors = {
 # Todo: Сделать обработтчики ошибок
 # add_exception_handlers(app)
 
-if config.app.cors_policy_disabled:
+if config.app.cors:
+    allowed_origins = ["*"] if config.app.cors_policy_disabled else config.app.cors
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=allowed_origins,
         allow_methods=["*"],
         allow_headers=["*"],
         expose_headers=["Content-Disposition"],
