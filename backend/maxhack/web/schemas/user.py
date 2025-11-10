@@ -7,6 +7,7 @@ class UserCreateRequest(Model):
     first_name: str
     last_name: str | None = None
     phone: str | None = None
+    timezone: int = 0
 
 
 class UserUpdateRequest(Model):
@@ -21,6 +22,7 @@ class UserResponse(Model):
     first_name: str
     last_name: str | None = None
     phone: str
+    timezone: int
 
 
 class UserGroupItem(Model):

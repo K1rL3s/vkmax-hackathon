@@ -40,6 +40,7 @@ class GroupService:
         creator_id: UserId,
         name: str,
         description: str | None,
+        timezone: int = 0
     ) -> GroupModel:
         creator = await self._user_repo.get_by_id(creator_id)
         if creator is None:
@@ -49,6 +50,7 @@ class GroupService:
             name=name,
             description=description,
             creator_id=creator.id,
+            timezone=timezone,
         )
 
     async def get_group(
@@ -70,6 +72,7 @@ class GroupService:
         editor_id: UserId,
         name: str | None,
         description: str | None,
+        timezone: int = 0,
     ) -> GroupModel:
         group = await self._group_repo.get_by_id(group_id)
         if group is None:
@@ -89,6 +92,7 @@ class GroupService:
                 group_id,
                 name=name,
                 description=description,
+                timezone=timezone,
             ),
         )
 
@@ -176,7 +180,7 @@ class GroupService:
             )
             member_tag_ids = {tag.id for tag in member_tags}
             to_add = set(tags).difference(member_tag_ids)
-            to_remove = set(member_tag_ids).difference(tags)r
+            to_remove = set(member_tag_ids).difference(tags)
             logger.info(
                 "Updating tags for user %d in group %d: adding %s, removing %s",
                 slave_id,

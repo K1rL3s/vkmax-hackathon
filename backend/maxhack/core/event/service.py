@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
 from maxhack.core.ids import EventId, GroupId, TagId, UserId
 from maxhack.core.responds.service import RespondService
@@ -8,6 +10,7 @@ from maxhack.infra.database.repos.group import GroupRepo
 from maxhack.infra.database.repos.tag import TagRepo
 from maxhack.infra.database.repos.user import UserRepo
 from maxhack.infra.database.repos.users_to_groups import UsersToGroupsRepo
+from maxhack.utils.utils import create_cron_expression
 
 
 class EventService:
@@ -97,17 +100,22 @@ class EventService:
         self,
         title: str,
         description: str | None,
-        cron: str,
-        is_cycle: bool,
+        event_date: datetime | None,
+        every_day: bool,
+        every_week: bool,
+        every_month: bool,
         type: str,
         creator_id: UserId,
         group_id: GroupId | None,
         user_ids: list[UserId] | None = None,
         tag_ids: list[TagId] | None = None,
+        timezone: int = 0,
     ) -> EventModel:
         await self._ensure_user_exists(creator_id)
         await self._ensure_group_exists(group_id)
 
+        cron = create_cron_expression(event_date, every_day, every_week, every_month)
+        is_cycle = any([every_day, every_week, every_month])
         if group_id is not None:
             await self._ensure_membership_role(
                 user_id=creator_id,
@@ -122,6 +130,7 @@ class EventService:
             type=type,
             creator_id=creator_id,
             group_id=group_id,
+            timezone=timezone,
         )
 
         await self.add_tag_to_event(event.id, tag_ids, user_id=creator_id)
@@ -146,15 +155,18 @@ class EventService:
         self,
         event_id: EventId,
         user_id: UserId,
+        event_date: datetime | None,
+        every_day: bool,
+        every_week: bool,
+        every_month: bool,
         title: str | None = None,
         description: str | None = None,
-        cron: str | None = None,
-        is_cycle: bool | None = None,
         type: str | None = None,
+        timezone: int = 0,
+
     ) -> EventModel:
         event = await self._ensure_event_exists(event_id)
 
-        # Проверяем права: только создатель или пользователь с ролью 1 или 2 в группе
         if event.group_id is not None:
             await self._ensure_membership_role(
                 user_id=user_id,
@@ -169,12 +181,15 @@ class EventService:
             values["title"] = title
         if description is not None:
             values["description"] = description
-        if cron is not None:
-            values["cron"] = cron
-        if is_cycle is not None:
-            values["is_cycle"] = is_cycle
         if type is not None:
             values["type"] = type
+        if event_date is not None:
+            cron = create_cron_expression(event_date, every_day, every_week, every_month)
+            is_cycle = any([every_day, every_week, every_month])
+            values["is_cycle"] = is_cycle
+            values["cron"] = cron
+
+        values["timezone"] = timezone
 
         updated_event = await self._event_repo.update(event_id, **values)
         if updated_event is None:
@@ -304,7 +319,6 @@ class EventService:
     ) -> list[EventModel]:
         await self._ensure_group_exists(group_id)
 
-        # Проверяем, что пользователь состоит в группе
         membership = await self._users_to_group_repo.get_membership(
             user_id=user_id,
             group_id=group_id,
@@ -324,21 +338,16 @@ class EventService:
         user_id: UserId,
     ) -> list[EventModel]:
         await self._ensure_user_exists(target_user_id)
-        await self._ensure_user_exists(user_id)
 
-        # Получаем группы целевого пользователя
         target_groups = await self._users_to_group_repo.user_groups(target_user_id)
         target_group_ids = {group.id for group, _ in target_groups}
 
-        # Получаем группы текущего пользователя
         user_groups = await self._users_to_group_repo.user_groups(user_id)
         user_group_ids = {group.id for group, _ in user_groups}
 
-        # Проверяем, есть ли общие группы
         common_groups = target_group_ids & user_group_ids
         if not common_groups:
             raise NotEnoughRights("Пользователи не состоят в общих группах")
 
-        # Получаем события целевого пользователя, которые связаны с общими группами
         all_events = await self._event_repo.get_created_by_user(target_user_id)
         return [event for event in all_events if event.group_id in common_groups]

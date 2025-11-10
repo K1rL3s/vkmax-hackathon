@@ -16,3 +16,4 @@ class UserModel(BaseAlchemyModel, IdMixin[UserId]):
     first_name: Mapped[str | None] = mapped_column(String(64), nullable=False)
     last_name: Mapped[str | None] = mapped_column(String(64), nullable=True)
     phone: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    timezone: Mapped[int] = mapped_column(Integer, nullable=False)
