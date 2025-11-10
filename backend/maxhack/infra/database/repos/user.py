@@ -25,6 +25,7 @@ class UserRepo(BaseAlchemyRepo):
         first_name: str | None,
         last_name: str | None,
         phone: str | None,
+        timezone: int = 0,
     ) -> UserModel:
         user = UserModel(
             max_id=max_id,
@@ -32,6 +33,7 @@ class UserRepo(BaseAlchemyRepo):
             first_name=first_name,
             last_name=last_name,
             phone=phone,
+            timezone=timezone
         )
         try:
             self._session.add(user)

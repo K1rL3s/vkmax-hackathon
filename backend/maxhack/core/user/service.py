@@ -1,3 +1,5 @@
+from typing import Any
+
 from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
 from maxhack.core.ids import MaxChatId, MaxId, UserId
 from maxhack.infra.database.models import (
@@ -28,6 +30,7 @@ class UserService:
         first_name: str,
         last_name: str | None = None,
         phone: str | None = None,
+        timezone: int = 0
     ) -> UserModel:
         exists = await self._user_repo.get_by_max_id(max_id)
         if exists is not None:
@@ -39,6 +42,7 @@ class UserService:
             first_name=first_name,
             last_name=last_name,
             phone=phone,
+            timezone=timezone,
         )
 
     async def get_user_by_id(
@@ -56,19 +60,21 @@ class UserService:
         first_name: str | None = None,
         last_name: str | None = None,
         phone: str | None = None,
+        timezone: int = 0,
     ) -> UserModel:
         user = await self._user_repo.get_by_id(user_id)
         if user is None:
             raise EntityNotFound("Пользователь не найден")
 
-        values: dict[str, str] = {}
+        values: dict[str, Any] = {}
         if first_name is not None:
             values["first_name"] = first_name
         if last_name is not None:
             values["last_name"] = last_name
         if phone is not None:
             values["phone"] = phone
-
+        if timezone is not None:
+            values["timezone"] = timezone
         user = await self._user_repo.update_user(user_id, **values)
         if user is None:
             raise EntityNotFound("Пользователь не найден")

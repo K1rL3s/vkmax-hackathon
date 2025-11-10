@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import Optional
+
 from maxhack.core.ids import EventId, GroupId, RespondId, TagId, UserId
 
 from .core import Model
@@ -6,8 +9,11 @@ from .core import Model
 class EventCreateRequest(Model):
     title: str
     description: str | None = None
-    cron: str
-    is_cycle: bool
+    event_date: datetime
+    timezone: int
+    every_day: bool = False
+    every_week: bool = False
+    every_month: bool = False
     type: str
     group_id: GroupId | None = None
     user_ids: list[UserId] | None = None
@@ -17,9 +23,13 @@ class EventCreateRequest(Model):
 class EventUpdateRequest(Model):
     title: str | None = None
     description: str | None = None
-    cron: str | None = None
     is_cycle: bool | None = None
     type: str | None = None
+    timezone: Optional[int]
+    event_date: Optional[datetime]
+    every_day: bool
+    every_week: bool
+    every_month: bool
 
 
 class EventResponse(Model):
@@ -31,6 +41,7 @@ class EventResponse(Model):
     type: str
     creator_id: UserId
     group_id: GroupId | None = None
+    timezone: int
 
 
 class EventAddTagRequest(Model):

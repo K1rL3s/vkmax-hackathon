@@ -17,4 +17,5 @@ if __name__ == "__main__":
         interface=Interfaces.ASGI,
         reload=True,
         log_access=True,
+        workers=1
     ).serve()

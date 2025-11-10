@@ -20,6 +20,40 @@ from maxhack.web.schemas.event import (
 event_router = APIRouter(prefix="/events", tags=["Events"], route_class=DishkaRoute)
 
 
+
+@event_router.post(
+    "",
+    response_model=EventResponse,
+    status_code=status.HTTP_201_CREATED,
+    description="Создание события (может только 1 и 2 роль)",
+)
+async def create_event_route(
+    body: EventCreateRequest,
+    event_service: FromDishka[EventService],
+    session: FromDishka[AsyncSession],
+    master_id: UserId = Header(...),
+) -> EventResponse:
+    try:
+        event = await event_service.create_event(
+            title=body.title,
+            description=body.description,
+            event_date=body.event_date,
+            every_day=body.every_day,
+            every_week=body.every_week,
+            every_month=body.every_month,
+            type=body.type,
+            creator_id=master_id,
+            group_id=body.group_id,
+            user_ids=body.user_ids,
+            tag_ids=body.tag_ids,
+            timezone=body.timezone
+        )
+        return await EventResponse.from_orm_async(event, session)
+    except EntityNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except NotEnoughRights as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+
 @event_router.post(
     "/{event_id}/tags",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -65,40 +99,6 @@ async def get_event_route(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
 
 
-@event_router.post(
-    "",
-    response_model=EventResponse,
-    status_code=status.HTTP_201_CREATED,
-    description="Создание события (может только 1 и 2 роль)",
-)
-async def create_event_route(
-    body: EventCreateRequest,
-    event_service: FromDishka[EventService],
-    session: FromDishka[AsyncSession],
-    master_id: UserId = Header(...),
-) -> EventResponse:
-    try:
-        event = await event_service.create_event(
-            title=body.title,
-            description=body.description,
-            cron=body.cron,
-            is_cycle=body.is_cycle,
-            type=body.type,
-            creator_id=master_id,
-            tag_ids=body.tag_ids,
-            group_id=body.group_id,
-        )
-        return await EventResponse.from_orm_async(event, session)
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e)
-        )
-
-
 @event_router.patch(
     "/{event_id}",
     response_model=EventResponse,
@@ -117,9 +117,12 @@ async def update_event_route(
             user_id=master_id,
             title=body.title,
             description=body.description,
-            cron=body.cron,
-            is_cycle=body.is_cycle,
             type=body.type,
+            timezone=body.timezone,
+            event_date=body.event_date,
+            every_day=body.every_day,
+            every_week=body.every_week,
+            every_month=body.every_month,
         )
         return await EventResponse.from_orm_async(event, session)
     except EntityNotFound as e:

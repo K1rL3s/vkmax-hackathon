@@ -1,4 +1,4 @@
-from sqlalchemy import String
+from sqlalchemy import String, Integer
 from sqlalchemy.orm import Mapped, mapped_column
 
 from maxhack.core.ids import GroupId
@@ -11,3 +11,4 @@ class GroupModel(BaseAlchemyModel, IdMixin[GroupId]):
 
     name: Mapped[str] = mapped_column(String(64), nullable=False)
     description: Mapped[str] = mapped_column(String(128), nullable=True)
+    timezone: Mapped[int] = mapped_column(Integer, nullable=False)

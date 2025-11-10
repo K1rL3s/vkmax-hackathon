@@ -1,5 +1,5 @@
 from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
-from maxhack.core.ids import GroupId, TagId, UserId
+from maxhack.core.ids import GroupId, TagId, UserId, RoleId
 from maxhack.core.role.ids import CREATOR_ROLE_ID, EDITOR_ROLE_ID, MEMBER_ROLE_ID
 from maxhack.infra.database.models import (
     TagModel,
@@ -234,7 +234,7 @@ class TagService:
         group_id: GroupId,
         tag_id: TagId,
         master_id: UserId,
-    ) -> list[tuple[UserModel, int]]:
+    ) -> list[tuple[UserModel, RoleId]]:
         await self._ensure_group_exists(group_id)
         await self._ensure_tag_exists(tag_id, group_id)
 

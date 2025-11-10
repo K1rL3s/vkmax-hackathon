@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, ForeignKey, String
+from sqlalchemy import Boolean, ForeignKey, String, Integer
 from sqlalchemy.orm import Mapped, mapped_column
 
 from maxhack.core.ids import EventId, GroupId, UserId
@@ -19,3 +19,4 @@ class EventModel(BaseAlchemyModel, IdMixin[EventId]):
         ForeignKey("groups.id"),
         nullable=True,
     )
+    timezone: Mapped[int] = mapped_column(Integer, nullable=False)

@@ -4,7 +4,7 @@ from sqlalchemy import and_, delete, select, update
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 from maxhack.core.exceptions import MaxHackError
-from maxhack.core.ids import GroupId, TagId, UserId
+from maxhack.core.ids import GroupId, TagId, UserId, RoleId
 from maxhack.infra.database.models import (
     TagModel,
     UserModel,
@@ -90,7 +90,7 @@ class TagRepo(BaseAlchemyRepo):
         self,
         group_id: GroupId,
         tag_id: TagId,
-    ) -> list[tuple[UserModel, int]]:
+    ) -> list[tuple[UserModel, RoleId]]:
         stmt = (
             select(UserModel, UsersToGroupsModel.role_id)
             .join(UsersToTagsModel, UsersToTagsModel.user_id == UserModel.id)
@@ -104,8 +104,8 @@ class TagRepo(BaseAlchemyRepo):
             .where(UsersToTagsModel.tag_id == tag_id)
         )
 
-        result = await self._session.execute(stmt)
-        return result.all()
+        result = (await self._session.execute(stmt)).all()
+        return result
 
     async def update_tag(self, tag_id: TagId, **values: Any) -> TagModel | None:
         stmt = (

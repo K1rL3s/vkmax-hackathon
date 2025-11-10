@@ -39,6 +39,7 @@ async def create_group_route(
             creator_id=master_id,
             name=body.name,
             description=body.description,
+            timezone=body.timezone,
         )
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
