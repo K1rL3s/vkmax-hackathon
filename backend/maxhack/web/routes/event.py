@@ -85,6 +85,7 @@ async def create_event_route(
             is_cycle=body.is_cycle,
             type=body.type,
             creator_id=master_id,
+            tag_ids=body.tag_ids,
             group_id=body.group_id,
         )
         return await EventResponse.from_orm_async(event, session)
@@ -92,6 +93,10 @@ async def create_event_route(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except NotEnoughRights as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e)
+        )
 
 
 @event_router.patch(
