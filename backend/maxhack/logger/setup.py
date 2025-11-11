@@ -7,11 +7,11 @@ def setup_logger(log_level: str) -> None:
     logging.getLogger().setLevel(logging.getLevelName(log_level))
 
     # чтобы писались как все:
-    get_logger("maxo", groups=("maxo", "max"))
+    # get_logger("maxo", groups=("maxo", "max"))
     get_logger("maxo.dispatcher", groups=("maxo", "max"))
     get_logger("maxo.long_polling", groups=("maxo", "max"))
     get_logger("maxo_dialog", groups=("maxo", "max"))
-    get_logger("retejo", groups=("retejo",))
+    # get_logger("retejo", groups=("retejo",))
     get_logger("retejo.http.method", groups=("retejo",))
     get_logger("retejo.http.request", groups=("retejo",))
     get_logger("taskiq", groups=("taskiq", "scheduler"))
