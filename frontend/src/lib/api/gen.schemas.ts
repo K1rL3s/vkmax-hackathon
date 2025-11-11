@@ -33,8 +33,11 @@ export type EventCreateRequestTagIds = Array<number> | null
 export interface EventCreateRequest {
   title: string
   description?: EventCreateRequestDescription
-  cron: string
-  isCycle: boolean
+  eventDate: string
+  timezone: number
+  everyDay?: boolean
+  everyWeek?: boolean
+  everyMonth?: boolean
   type: string
   groupId?: EventCreateRequestGroupId
   userIds?: EventCreateRequestUserIds
@@ -54,35 +57,50 @@ export interface EventResponse {
   type: string
   creatorId: number
   groupId?: EventResponseGroupId
+  timezone: number
 }
 
 export type EventUpdateRequestTitle = string | null
 
 export type EventUpdateRequestDescription = string | null
 
-export type EventUpdateRequestCron = string | null
-
 export type EventUpdateRequestIsCycle = boolean | null
 
 export type EventUpdateRequestType = string | null
 
+export type EventUpdateRequestTimezone = number | null
+
+export type EventUpdateRequestEventDate = string | null
+
 export interface EventUpdateRequest {
   title?: EventUpdateRequestTitle
   description?: EventUpdateRequestDescription
-  cron?: EventUpdateRequestCron
   isCycle?: EventUpdateRequestIsCycle
   type?: EventUpdateRequestType
+  timezone: EventUpdateRequestTimezone
+  eventDate: EventUpdateRequestEventDate
+  everyDay: boolean
+  everyWeek: boolean
+  everyMonth: boolean
 }
 
 export interface EventsResponse {
   events: Array<EventResponse>
 }
 
+export interface GetGroupResponse {
+  group: GroupResponse
+  role: RoleResponse
+}
+
 export type GroupCreateRequestDescription = string | null
+
+export type GroupCreateRequestTimezone = number | null
 
 export interface GroupCreateRequest {
   name: string
   description?: GroupCreateRequestDescription
+  timezone?: GroupCreateRequestTimezone
 }
 
 export interface GroupMemberAddRequest {
@@ -118,14 +136,13 @@ export interface GroupResponse {
   id: number
   name: string
   description?: GroupResponseDescription
+  timezone?: number
 }
-
-export type GroupUpdateRequestName = string | null
 
 export type GroupUpdateRequestDescription = string | null
 
 export interface GroupUpdateRequest {
-  name?: GroupUpdateRequestName
+  name: string
   description?: GroupUpdateRequestDescription
 }
 
@@ -238,6 +255,7 @@ export interface UserCreateRequest {
   firstName: string
   lastName?: UserCreateRequestLastName
   phone?: UserCreateRequestPhone
+  timezone?: number
 }
 
 export type UserGroupItemDescription = string | null
@@ -261,6 +279,7 @@ export interface UserResponse {
   firstName: string
   lastName?: UserResponseLastName
   phone: string
+  timezone: number
 }
 
 export type UserUpdateRequestFirstName = string | null

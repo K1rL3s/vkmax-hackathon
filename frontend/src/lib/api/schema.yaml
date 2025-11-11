@@ -354,7 +354,7 @@
                             {
                               'schema':
                                 {
-                                  '$ref': '#/components/schemas/GroupResponse',
+                                  '$ref': '#/components/schemas/GetGroupResponse',
                                 },
                             },
                         },
@@ -424,7 +424,7 @@
                             {
                               'schema':
                                 {
-                                  '$ref': '#/components/schemas/GroupResponse',
+                                  '$ref': '#/components/schemas/GetGroupResponse',
                                 },
                             },
                         },
@@ -477,7 +477,7 @@
                             {
                               'schema':
                                 {
-                                  '$ref': '#/components/schemas/GroupResponse',
+                                  '$ref': '#/components/schemas/GetGroupResponse',
                                 },
                             },
                         },
@@ -1337,6 +1337,70 @@
                 },
             },
         },
+      '/events':
+        {
+          'post':
+            {
+              'tags': ['Events'],
+              'summary': 'Create Event Route',
+              'description': 'Создание события (может только 1 и 2 роль)',
+              'operationId': 'create_event_route_events_post',
+              'parameters':
+                [
+                  {
+                    'name': 'master-id',
+                    'in': 'header',
+                    'required': true,
+                    'schema': { 'type': 'integer', 'title': 'Master-Id' },
+                  },
+                ],
+              'requestBody':
+                {
+                  'required': true,
+                  'content':
+                    {
+                      'application/json':
+                        {
+                          'schema':
+                            {
+                              '$ref': '#/components/schemas/EventCreateRequest',
+                            },
+                        },
+                    },
+                },
+              'responses':
+                {
+                  '201':
+                    {
+                      'description': 'Successful Response',
+                      'content':
+                        {
+                          'application/json':
+                            {
+                              'schema':
+                                {
+                                  '$ref': '#/components/schemas/EventResponse',
+                                },
+                            },
+                        },
+                    },
+                  '422':
+                    {
+                      'description': 'Validation Error',
+                      'content':
+                        {
+                          'application/json':
+                            {
+                              'schema':
+                                {
+                                  '$ref': '#/components/schemas/HTTPValidationError',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
       '/events/{event_id}/tags':
         {
           'post':
@@ -1540,70 +1604,6 @@
               'responses':
                 {
                   '204': { 'description': 'Successful Response' },
-                  '422':
-                    {
-                      'description': 'Validation Error',
-                      'content':
-                        {
-                          'application/json':
-                            {
-                              'schema':
-                                {
-                                  '$ref': '#/components/schemas/HTTPValidationError',
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        },
-      '/events':
-        {
-          'post':
-            {
-              'tags': ['Events'],
-              'summary': 'Create Event Route',
-              'description': 'Создание события (может только 1 и 2 роль)',
-              'operationId': 'create_event_route_events_post',
-              'parameters':
-                [
-                  {
-                    'name': 'master-id',
-                    'in': 'header',
-                    'required': true,
-                    'schema': { 'type': 'integer', 'title': 'Master-Id' },
-                  },
-                ],
-              'requestBody':
-                {
-                  'required': true,
-                  'content':
-                    {
-                      'application/json':
-                        {
-                          'schema':
-                            {
-                              '$ref': '#/components/schemas/EventCreateRequest',
-                            },
-                        },
-                    },
-                },
-              'responses':
-                {
-                  '201':
-                    {
-                      'description': 'Successful Response',
-                      'content':
-                        {
-                          'application/json':
-                            {
-                              'schema':
-                                {
-                                  '$ref': '#/components/schemas/EventResponse',
-                                },
-                            },
-                        },
-                    },
                   '422':
                     {
                       'description': 'Validation Error',
@@ -1905,8 +1905,31 @@
                       'anyOf': [{ 'type': 'string' }, { 'type': 'null' }],
                       'title': 'Description',
                     },
-                  'cron': { 'type': 'string', 'title': 'Cron' },
-                  'isCycle': { 'type': 'boolean', 'title': 'Iscycle' },
+                  'eventDate':
+                    {
+                      'type': 'string',
+                      'format': 'date-time',
+                      'title': 'Eventdate',
+                    },
+                  'timezone': { 'type': 'integer', 'title': 'Timezone' },
+                  'everyDay':
+                    {
+                      'type': 'boolean',
+                      'title': 'Everyday',
+                      'default': false,
+                    },
+                  'everyWeek':
+                    {
+                      'type': 'boolean',
+                      'title': 'Everyweek',
+                      'default': false,
+                    },
+                  'everyMonth':
+                    {
+                      'type': 'boolean',
+                      'title': 'Everymonth',
+                      'default': false,
+                    },
                   'type': { 'type': 'string', 'title': 'Type' },
                   'groupId':
                     {
@@ -1933,7 +1956,7 @@
                     },
                 },
               'type': 'object',
-              'required': ['title', 'cron', 'isCycle', 'type'],
+              'required': ['title', 'eventDate', 'timezone', 'type'],
               'title': 'EventCreateRequest',
             },
           'EventResponse':
@@ -1956,10 +1979,19 @@
                       'anyOf': [{ 'type': 'integer' }, { 'type': 'null' }],
                       'title': 'Groupid',
                     },
+                  'timezone': { 'type': 'integer', 'title': 'Timezone' },
                 },
               'type': 'object',
               'required':
-                ['id', 'title', 'cron', 'isCycle', 'type', 'creatorId'],
+                [
+                  'id',
+                  'title',
+                  'cron',
+                  'isCycle',
+                  'type',
+                  'creatorId',
+                  'timezone',
+                ],
               'title': 'EventResponse',
             },
           'EventUpdateRequest':
@@ -1976,11 +2008,6 @@
                       'anyOf': [{ 'type': 'string' }, { 'type': 'null' }],
                       'title': 'Description',
                     },
-                  'cron':
-                    {
-                      'anyOf': [{ 'type': 'string' }, { 'type': 'null' }],
-                      'title': 'Cron',
-                    },
                   'isCycle':
                     {
                       'anyOf': [{ 'type': 'boolean' }, { 'type': 'null' }],
@@ -1991,8 +2018,33 @@
                       'anyOf': [{ 'type': 'string' }, { 'type': 'null' }],
                       'title': 'Type',
                     },
+                  'timezone':
+                    {
+                      'anyOf': [{ 'type': 'integer' }, { 'type': 'null' }],
+                      'title': 'Timezone',
+                    },
+                  'eventDate':
+                    {
+                      'anyOf':
+                        [
+                          { 'type': 'string', 'format': 'date-time' },
+                          { 'type': 'null' },
+                        ],
+                      'title': 'Eventdate',
+                    },
+                  'everyDay': { 'type': 'boolean', 'title': 'Everyday' },
+                  'everyWeek': { 'type': 'boolean', 'title': 'Everyweek' },
+                  'everyMonth': { 'type': 'boolean', 'title': 'Everymonth' },
                 },
               'type': 'object',
+              'required':
+                [
+                  'timezone',
+                  'eventDate',
+                  'everyDay',
+                  'everyWeek',
+                  'everyMonth',
+                ],
               'title': 'EventUpdateRequest',
             },
           'EventsResponse':
@@ -2010,6 +2062,17 @@
               'required': ['events'],
               'title': 'EventsResponse',
             },
+          'GetGroupResponse':
+            {
+              'properties':
+                {
+                  'group': { '$ref': '#/components/schemas/GroupResponse' },
+                  'role': { '$ref': '#/components/schemas/RoleResponse' },
+                },
+              'type': 'object',
+              'required': ['group', 'role'],
+              'title': 'GetGroupResponse',
+            },
           'GroupCreateRequest':
             {
               'properties':
@@ -2019,6 +2082,11 @@
                     {
                       'anyOf': [{ 'type': 'string' }, { 'type': 'null' }],
                       'title': 'Description',
+                    },
+                  'timezone':
+                    {
+                      'anyOf': [{ 'type': 'integer' }, { 'type': 'null' }],
+                      'title': 'Timezone',
                     },
                 },
               'type': 'object',
@@ -2081,6 +2149,8 @@
                       'anyOf': [{ 'type': 'string' }, { 'type': 'null' }],
                       'title': 'Description',
                     },
+                  'timezone':
+                    { 'type': 'integer', 'title': 'Timezone', 'default': 0 },
                 },
               'type': 'object',
               'required': ['id', 'name'],
@@ -2090,11 +2160,7 @@
             {
               'properties':
                 {
-                  'name':
-                    {
-                      'anyOf': [{ 'type': 'string' }, { 'type': 'null' }],
-                      'title': 'Name',
-                    },
+                  'name': { 'type': 'string', 'title': 'Name' },
                   'description':
                     {
                       'anyOf': [{ 'type': 'string' }, { 'type': 'null' }],
@@ -2102,6 +2168,7 @@
                     },
                 },
               'type': 'object',
+              'required': ['name'],
               'title': 'GroupUpdateRequest',
             },
           'GroupUserItem':
@@ -2312,6 +2379,8 @@
                       'anyOf': [{ 'type': 'string' }, { 'type': 'null' }],
                       'title': 'Phone',
                     },
+                  'timezone':
+                    { 'type': 'integer', 'title': 'Timezone', 'default': 0 },
                 },
               'type': 'object',
               'required': ['maxId', 'maxChatId', 'firstName'],
@@ -2362,9 +2431,10 @@
                       'title': 'Lastname',
                     },
                   'phone': { 'type': 'string', 'title': 'Phone' },
+                  'timezone': { 'type': 'integer', 'title': 'Timezone' },
                 },
               'type': 'object',
-              'required': ['id', 'maxId', 'firstName', 'phone'],
+              'required': ['id', 'maxId', 'firstName', 'phone', 'timezone'],
               'title': 'UserResponse',
             },
           'UserUpdateRequest':

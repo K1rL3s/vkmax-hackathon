@@ -8,8 +8,8 @@ export type MaxUser = {
 
 export function useMaxUser(): MaxUser {
   return {
-    id: 3,
-    firstName: 'John',
+    id: 4,
+    firstName: 'Daniil',
     lastName: 'Doe',
     username: 'johndoe',
     photoUrl: 'https://example.com/photo.jpg',

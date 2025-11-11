@@ -31,6 +31,24 @@ import type { BodyType } from '.././client'
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1]
 
 /**
+ * Создание события (может только 1 и 2 роль)
+ * @summary Create Event Route
+ */
+export const createEventRouteEventsPost = (
+  eventCreateRequest: BodyType<EventCreateRequest>,
+  options?: SecondParameter<typeof request<EventResponse>>,
+) => {
+  return request<EventResponse>(
+    {
+      url: `/events`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: eventCreateRequest,
+    },
+    options,
+  )
+}
+/**
  * Добавить тег для события (может только 1 и 2 роль)
  * @summary Add Tag To Event Route
  */
@@ -90,24 +108,6 @@ export const deleteEventRouteEventsEventIdDelete = (
   options?: SecondParameter<typeof request<void>>,
 ) => {
   return request<void>({ url: `/events/${eventId}`, method: 'DELETE' }, options)
-}
-/**
- * Создание события (может только 1 и 2 роль)
- * @summary Create Event Route
- */
-export const createEventRouteEventsPost = (
-  eventCreateRequest: BodyType<EventCreateRequest>,
-  options?: SecondParameter<typeof request<EventResponse>>,
-) => {
-  return request<EventResponse>(
-    {
-      url: `/events`,
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      data: eventCreateRequest,
-    },
-    options,
-  )
 }
 /**
  * Добавить пользователя для события (может только 1 и 2 роль)
@@ -170,6 +170,9 @@ export const getUserEventsRouteEventsRespondRespondIdEventIdPatch = (
     options,
   )
 }
+export type CreateEventRouteEventsPostResult = NonNullable<
+  Awaited<ReturnType<typeof createEventRouteEventsPost>>
+>
 export type AddTagToEventRouteEventsEventIdTagsPostResult = NonNullable<
   Awaited<ReturnType<typeof addTagToEventRouteEventsEventIdTagsPost>>
 >
@@ -181,9 +184,6 @@ export type UpdateEventRouteEventsEventIdPatchResult = NonNullable<
 >
 export type DeleteEventRouteEventsEventIdDeleteResult = NonNullable<
   Awaited<ReturnType<typeof deleteEventRouteEventsEventIdDelete>>
->
-export type CreateEventRouteEventsPostResult = NonNullable<
-  Awaited<ReturnType<typeof createEventRouteEventsPost>>
 >
 export type AddUserToEventRouteEventsEventIdUsersPostResult = NonNullable<
   Awaited<ReturnType<typeof addUserToEventRouteEventsEventIdUsersPost>>

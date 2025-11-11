@@ -16,11 +16,11 @@
  */
 import { request } from '.././client'
 import type {
+  GetGroupResponse,
   GroupCreateRequest,
   GroupMemberAddRequest,
   GroupMemberResponse,
   GroupMemberUpdateRequest,
-  GroupResponse,
   GroupUpdateRequest,
   GroupUserItem,
   InviteCreateRequest,
@@ -37,9 +37,9 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1]
  */
 export const createGroupRouteGroupsPost = (
   groupCreateRequest: BodyType<GroupCreateRequest>,
-  options?: SecondParameter<typeof request<GroupResponse>>,
+  options?: SecondParameter<typeof request<GetGroupResponse>>,
 ) => {
-  return request<GroupResponse>(
+  return request<GetGroupResponse>(
     {
       url: `/groups`,
       method: 'POST',
@@ -56,9 +56,9 @@ export const createGroupRouteGroupsPost = (
 export const updateGroupRouteGroupsGroupIdPatch = (
   groupId: number,
   groupUpdateRequest: BodyType<GroupUpdateRequest>,
-  options?: SecondParameter<typeof request<GroupResponse>>,
+  options?: SecondParameter<typeof request<GetGroupResponse>>,
 ) => {
-  return request<GroupResponse>(
+  return request<GetGroupResponse>(
     {
       url: `/groups/${groupId}`,
       method: 'PATCH',
@@ -74,9 +74,9 @@ export const updateGroupRouteGroupsGroupIdPatch = (
  */
 export const getGroupGroupsGroupIdGet = (
   groupId: number,
-  options?: SecondParameter<typeof request<GroupResponse>>,
+  options?: SecondParameter<typeof request<GetGroupResponse>>,
 ) => {
-  return request<GroupResponse>(
+  return request<GetGroupResponse>(
     { url: `/groups/${groupId}`, method: 'GET' },
     options,
   )

@@ -1,5 +1,7 @@
 import {
   Button,
+  CellAction,
+  CellList,
   Container,
   Flex,
   Input,
@@ -11,6 +13,7 @@ import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
 import { Header } from '@/components/header'
 import { useCreateGroup } from '@/hooks/groups'
+import { TimezoneInput } from '@/components/timezone-input'
 
 export const Route = createFileRoute('/groups/create')({
   component: CreateGroupFormPage,
@@ -23,6 +26,7 @@ function CreateGroupFormPage() {
     defaultValues: {
       name: '',
       description: '',
+      timezone: { label: 'Москва', value: 180 },
     },
     validators: {
       onChange: z.object({
@@ -33,14 +37,28 @@ function CreateGroupFormPage() {
         description: z.string().max(500, {
           message: 'Описание группы не может превышать 500 символов',
         }),
+        timezone: z.object({
+          label: z.string(),
+          value: z.number(),
+        }),
       }),
     },
     onSubmit: ({ value }) => {
-      mutate(value, {
-        onSuccess: ({ id }) => {
-          navigate({ to: '/groups/$id', params: { id: id.toString() } })
+      mutate(
+        {
+          name: value.name,
+          description: value.description,
+          timezone: value.timezone.value,
         },
-      })
+        {
+          onSuccess: ({ group }) => {
+            navigate({
+              to: '/groups/$groupId',
+              params: { groupId: group.id.toString() },
+            })
+          },
+        },
+      )
     },
   })
 
@@ -99,6 +117,18 @@ function CreateGroupFormPage() {
                           .join(',')}
                       </em>
                     )}
+                  </>
+                )}
+              />
+              <form.Field
+                name="timezone"
+                children={(field) => (
+                  <>
+                    <TimezoneInput
+                      mode="secondary"
+                      value={field.state.value}
+                      onChange={field.handleChange}
+                    />
                   </>
                 )}
               />
