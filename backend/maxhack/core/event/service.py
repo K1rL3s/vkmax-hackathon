@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
+from maxhack.core.group.service import GroupService
 from maxhack.core.ids import EventId, GroupId, TagId, UserId
 from maxhack.core.responds.service import RespondService
 from maxhack.core.role.ids import CREATOR_ROLE_ID, EDITOR_ROLE_ID
@@ -22,6 +23,7 @@ class EventService:
         user_repo: UserRepo,
         users_to_group_repo: UsersToGroupsRepo,
         respond_service: RespondService,
+        group_service: GroupService,
     ) -> None:
         self._event_repo = event_repo
         self._tag_repo = tag_repo
@@ -29,6 +31,7 @@ class EventService:
         self._user_repo = user_repo
         self._users_to_group_repo = users_to_group_repo
         self._respond_service = respond_service
+        self._group_service = group_service
 
     async def _ensure_group_exists(self, group_id: GroupId | None) -> None:
         if group_id is None:
@@ -109,13 +112,17 @@ class EventService:
         group_id: GroupId | None,
         user_ids: list[UserId] | None = None,
         tag_ids: list[TagId] | None = None,
-        timezone: int = 0,
+        timezone: int | None = None,
     ) -> EventModel:
         await self._ensure_user_exists(creator_id)
-        await self._ensure_group_exists(group_id)
+        group, _ = await self._group_service.get_group(creator_id, group_id)
 
         cron = create_cron_expression(event_date, every_day, every_week, every_month)
         is_cycle = any([every_day, every_week, every_month])
+
+        if timezone is None:
+            timezone = group.timezone
+
         if group_id is not None:
             await self._ensure_membership_role(
                 user_id=creator_id,

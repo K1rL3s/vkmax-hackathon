@@ -9,7 +9,7 @@ class EventCreateRequest(Model):
     title: str
     description: str | None = None
     event_date: datetime
-    timezone: int
+    timezone: int | None = None
     every_day: bool = False
     every_week: bool = False
     every_month: bool = False
