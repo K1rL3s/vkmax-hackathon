@@ -1,9 +1,6 @@
-import asyncio
-import contextlib
-import sys
-
 from maxhack.bot.init_bot import init_bot
 from maxhack.logger import get_logger
+from maxhack.utils.run import run
 from maxo import Bot
 from maxo.tools.long_polling import LongPolling
 
@@ -23,19 +20,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    if sys.platform == "win32":
-        # раб винды :(
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
-    if __debug__:
-        runner = asyncio.run
-    else:
-        try:
-            import uvloop
-
-            runner = uvloop.run
-        except ImportError:
-            runner = asyncio.run
-
-    with contextlib.suppress(KeyboardInterrupt, SystemExit):
-        runner(main())
+    run(main())

@@ -1,6 +1,6 @@
 from dishka import Provider, Scope, from_context, provide
 
-from maxhack.config import Config, DbConfig, MaxConfig, RedisConfig
+from maxhack.config import Config, DbConfig, MaxConfig, RedisConfig, SchedulerConfig
 
 
 class ConfigProvider(Provider):
@@ -19,3 +19,7 @@ class ConfigProvider(Provider):
     @provide
     async def redis(self, config: Config) -> RedisConfig:
         return config.redis
+
+    @provide
+    async def scheduler(self, config: Config) -> SchedulerConfig:
+        return config.scheduler

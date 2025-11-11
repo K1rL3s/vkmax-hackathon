@@ -36,6 +36,11 @@ class RedisConfig:
 
 
 @dataclass(slots=True, frozen=True, kw_only=True)
+class SchedulerConfig:
+    tasks_key: str = "maxhack"
+
+
+@dataclass(slots=True, frozen=True, kw_only=True)
 class AppSettings:
     test_token: str | None
     token_alive_hours: int = 4
@@ -69,6 +74,7 @@ class Config:
     max: MaxConfig
     db: DbConfig
     redis: RedisConfig
+    scheduler: SchedulerConfig
     app: AppConfig
     app_settings: AppSettings
     swagger: SwaggerConfig
@@ -97,6 +103,7 @@ def load_config(env: str | Path | None = None) -> Config:
             password=os.getenv("REDIS_PASSWORD", None),
             database=int(os.getenv("REDIS_DB", 0)),
         ),
+        scheduler=SchedulerConfig(),
         app=AppConfig(
             host=os.getenv("HOST", "localhost"),
             port=int(os.getenv("PORT", 7001)),
