@@ -115,7 +115,7 @@ class EventService:
         user_ids: list[UserId] | None = None,
         tag_ids: list[TagId] | None = None,
         timezone: int | None = None,
-        minutes_before: int = 60
+        minutes_before: int = 60,
     ) -> EventModel:
         await self._ensure_user_exists(creator_id)
         group, _ = await self._group_service.get_group(creator_id, group_id)
@@ -158,7 +158,10 @@ class EventService:
                 event.id,
                 status="mb",
             )
-        await self._event_repo.create_notify(event_id=event.id, minutes_before=minutes_before)
+        await self._event_repo.create_notify(
+            event_id=event.id,
+            minutes_before=minutes_before,
+        )
 
         return event
 
@@ -368,10 +371,10 @@ class EventService:
         return [event for event in all_events if event.group_id in common_groups]
 
     async def list_user_events(
-            self,
-            group_id: GroupId,
-            user_id: UserId,
-            master_id: UserId,
+        self,
+        group_id: GroupId,
+        user_id: UserId,
+        master_id: UserId,
     ) -> list[EventModel]:
         await self._ensure_group_exists(group_id)
 

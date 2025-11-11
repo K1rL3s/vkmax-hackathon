@@ -2,7 +2,7 @@ from maxhack.bot.init_bot import init_bot
 from maxhack.logger import get_logger
 from maxhack.utils.run import run
 from maxo import Bot
-from maxo.tools.long_polling import LongPolling
+from maxo.utils.long_polling import LongPolling
 
 logger = get_logger(__name__, groups=("main", "bot", "maxbot"))
 

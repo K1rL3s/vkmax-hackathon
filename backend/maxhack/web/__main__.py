@@ -2,7 +2,6 @@ import asyncio
 import sys
 
 import granian
-import uvicorn
 from granian.constants import Interfaces
 
 from maxhack.config import load_config

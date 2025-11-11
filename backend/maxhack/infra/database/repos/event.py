@@ -3,11 +3,12 @@ from typing import Any
 from sqlalchemy import and_, delete, func, select, update
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
-from maxhack.core.ids import EventId, GroupId, TagId, UserId, EventNotifyId
+from maxhack.core.ids import EventId, EventNotifyId, GroupId, TagId, UserId
 from maxhack.infra.database.models import (
     EventModel,
+    EventNotifyModel,
     TagsToEvents,
-    UsersToEvents, EventNotifyModel,
+    UsersToEvents,
 )
 from maxhack.infra.database.repos.base import BaseAlchemyRepo
 
@@ -266,7 +267,11 @@ class EventRepo(BaseAlchemyRepo):
 
         return list(await self._session.scalars(stmt))
 
-    async def create_notify(self, event_id: EventId, minutes_before: int = 60) -> EventNotifyModel:
+    async def create_notify(
+        self,
+        event_id: EventId,
+        minutes_before: int = 60,
+    ) -> EventNotifyModel:
         notify = EventNotifyModel(event_id=event_id, minutes_before=minutes_before)
         try:
             self._session.add(notify)
@@ -277,10 +282,12 @@ class EventRepo(BaseAlchemyRepo):
 
         return notify
 
-    async def get_notify_by_id(self, event_notify_id: EventNotifyId) -> EventNotifyModel | None:
+    async def get_notify_by_id(
+        self,
+        event_notify_id: EventNotifyId,
+    ) -> EventNotifyModel | None:
         stmt = select(EventNotifyModel).where(
             EventNotifyModel.id == event_notify_id,
             EventNotifyModel.deleted_at.is_(None),
         )
         return await self._session.scalar(stmt)
-

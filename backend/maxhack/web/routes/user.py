@@ -155,7 +155,7 @@ async def list_user_tags_route(
 
 
 @user_router.get(
-        "/{user_id}/groups/{group_id}/events",
+    "/{user_id}/groups/{group_id}/events",
     response_model=list[EventResponse],
     description="Получить список тегов пользователя в рамках группы",
 )
@@ -172,7 +172,9 @@ async def list_user_tags_route(
             user_id=user_id,
             master_id=master_id,
         )
-        response_events = [await EventResponse.from_orm_async(event, session) for event in events]
+        response_events = [
+            await EventResponse.from_orm_async(event, session) for event in events
+        ]
         return response_events
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
