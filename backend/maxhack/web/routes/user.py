@@ -2,10 +2,12 @@ from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, HTTPException, Header, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from maxhack.core.event.service import EventService
 from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
 from maxhack.core.ids import GroupId, MaxChatId, MaxId, UserId
 from maxhack.core.tag.service import TagService
 from maxhack.core.user.service import UserService
+from maxhack.web.schemas.event import EventResponse
 from maxhack.web.schemas.tag import TagResponse
 from maxhack.web.schemas.user import (
     UserCreateRequest,
@@ -146,6 +148,32 @@ async def list_user_tags_route(
         )
         response_tags = [await TagResponse.from_orm_async(tag, session) for tag in tags]
         return response_tags
+    except EntityNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except NotEnoughRights as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+
+
+@user_router.get(
+        "/{user_id}/groups/{group_id}/events",
+    response_model=list[EventResponse],
+    description="Получить список тегов пользователя в рамках группы",
+)
+async def list_user_tags_route(
+    user_id: UserId,
+    group_id: GroupId,
+    event_service: FromDishka[EventService],
+    session: FromDishka[AsyncSession],
+    master_id: UserId = Header(...),
+) -> list[EventResponse]:
+    try:
+        events = await event_service.list_user_events(
+            group_id=group_id,
+            user_id=user_id,
+            master_id=master_id,
+        )
+        response_events = [await EventResponse.from_orm_async(event, session) for event in events]
+        return response_events
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except NotEnoughRights as e:

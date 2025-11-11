@@ -17,6 +17,7 @@ class EventCreateRequest(Model):
     group_id: GroupId | None = None
     user_ids: list[UserId] | None = None
     tag_ids: list[TagId] | None = None
+    minutes_before: int = 60
 
 
 class EventUpdateRequest(Model):

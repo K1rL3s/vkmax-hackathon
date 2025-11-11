@@ -4,7 +4,7 @@ from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRight
 from maxhack.core.group.service import GroupService
 from maxhack.core.ids import EventId, GroupId, TagId, UserId
 from maxhack.core.responds.service import RespondService
-from maxhack.core.role.ids import CREATOR_ROLE_ID, EDITOR_ROLE_ID
+from maxhack.core.role.ids import CREATOR_ROLE_ID, EDITOR_ROLE_ID, MEMBER_ROLE_ID
 from maxhack.infra.database.models import EventModel, TagModel, UsersToGroupsModel
 from maxhack.infra.database.repos.event import EventRepo
 from maxhack.infra.database.repos.group import GroupRepo
@@ -21,6 +21,7 @@ class EventService:
         tag_repo: TagRepo,
         group_repo: GroupRepo,
         user_repo: UserRepo,
+        events_repo: EventRepo,
         users_to_group_repo: UsersToGroupsRepo,
         respond_service: RespondService,
         group_service: GroupService,
@@ -32,6 +33,7 @@ class EventService:
         self._users_to_group_repo = users_to_group_repo
         self._respond_service = respond_service
         self._group_service = group_service
+        self._events_repo = events_repo
 
     async def _ensure_group_exists(self, group_id: GroupId | None) -> None:
         if group_id is None:
@@ -113,6 +115,7 @@ class EventService:
         user_ids: list[UserId] | None = None,
         tag_ids: list[TagId] | None = None,
         timezone: int | None = None,
+        minutes_before: int = 60
     ) -> EventModel:
         await self._ensure_user_exists(creator_id)
         group, _ = await self._group_service.get_group(creator_id, group_id)
@@ -155,6 +158,7 @@ class EventService:
                 event.id,
                 status="mb",
             )
+        await self._event_repo.create_notify(event_id=event.id, minutes_before=minutes_before)
 
         return event
 
@@ -362,3 +366,25 @@ class EventService:
 
         all_events = await self._event_repo.get_created_by_user(target_user_id)
         return [event for event in all_events if event.group_id in common_groups]
+
+    async def list_user_events(
+            self,
+            group_id: GroupId,
+            user_id: UserId,
+            master_id: UserId,
+    ) -> list[EventModel]:
+        await self._ensure_group_exists(group_id)
+
+        await self._ensure_membership_role(
+            user_id=master_id,
+            group_id=group_id,
+            allowed_roles={CREATOR_ROLE_ID, EDITOR_ROLE_ID, MEMBER_ROLE_ID},
+        )
+
+        await self._ensure_membership_role(
+            user_id=user_id,
+            group_id=group_id,
+            allowed_roles={CREATOR_ROLE_ID, EDITOR_ROLE_ID, MEMBER_ROLE_ID},
+        )
+
+        return await self._events_repo.list_user_events(group_id, user_id)

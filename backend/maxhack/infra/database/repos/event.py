@@ -3,11 +3,11 @@ from typing import Any
 from sqlalchemy import and_, delete, func, select, update
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
-from maxhack.core.ids import EventId, GroupId, TagId, UserId
+from maxhack.core.ids import EventId, GroupId, TagId, UserId, EventNotifyId
 from maxhack.infra.database.models import (
     EventModel,
     TagsToEvents,
-    UsersToEvents,
+    UsersToEvents, EventNotifyModel,
 )
 from maxhack.infra.database.repos.base import BaseAlchemyRepo
 
@@ -249,3 +249,38 @@ class EventRepo(BaseAlchemyRepo):
         )
         result = await self._session.scalar(stmt)
         return result is not None
+
+    async def list_user_events(
+        self,
+        group_id: GroupId,
+        user_id: UserId,
+    ) -> list[EventModel]:
+        stmt = (
+            select(EventModel)
+            .join(UsersToEvents, EventModel.id == UsersToEvents.event_id)
+            .where(
+                EventModel.group_id == group_id,
+                UsersToEvents.user_id == user_id,
+            )
+        )
+
+        return list(await self._session.scalars(stmt))
+
+    async def create_notify(self, event_id: EventId, minutes_before: int = 60) -> EventNotifyModel:
+        notify = EventNotifyModel(event_id=event_id, minutes_before=minutes_before)
+        try:
+            self._session.add(notify)
+            await self._session.flush()
+            await self._session.refresh(notify)
+        except (ProgrammingError, IntegrityError) as e:
+            raise RuntimeError from e
+
+        return notify
+
+    async def get_notify_by_id(self, event_notify_id: EventNotifyId) -> EventNotifyModel | None:
+        stmt = select(EventNotifyModel).where(
+            EventNotifyModel.id == event_notify_id,
+            EventNotifyModel.deleted_at.is_(None),
+        )
+        return await self._session.scalar(stmt)
+
