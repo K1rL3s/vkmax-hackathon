@@ -7,7 +7,7 @@ from maxhack.bot.states import Errors
 from maxhack.core.exceptions import MaxHackError
 from maxhack.core.max import MaxSender
 from maxhack.logger import get_logger
-from maxo import Router
+from maxo import Bot, Router
 from maxo.dialogs import DialogManager, ShowMode, StartMode
 from maxo.dialogs.api.exceptions import (
     InvalidStackIdError,
@@ -19,6 +19,7 @@ from maxo.integrations.magic_filter import MagicData
 from maxo.routing.filters import AndFilter
 from maxo.routing.filters.exception import ExceptionTypeFilter
 from maxo.routing.signals.exception import ErrorEvent
+from maxo.routing.updates import MessageCallback
 from maxo.types.update_context import UpdateContext
 
 logger = get_logger(__name__, groups=("aiogd", "errors"))
@@ -35,27 +36,21 @@ errors_router = Router(name=__name__)
     ),
 )
 async def on_unknown_intent(
-    event: ErrorEvent[Any],
+    update: ErrorEvent[Any, Any],
     dialog_manager: DialogManager,
+    bot: Bot,
     max_sender: FromDishka[MaxSender],
 ) -> None:
-    logger.error("Перезапускаю диалог: %s", event.error, exc_info=event.error)
+    logger.error("Перезапускаю диалог: %s", update.error, exc_info=update.error)
 
-    if event.update.callback_query:
-        callback = event.update.callback_query
+    if isinstance(update.event, MessageCallback):
+        callback = update.event
         await max_sender.callback_answer(
-            query_id=callback.id,
+            query_id=callback.callback_id,
             text="😵‍💫 Кажется, возникла какая-то ошибка...",
         )
-        if callback.message:
-            await callback.message.delete()
-
-    elif event.update.message:
-        message = event.update.message
-        await max_sender.send_message(
-            text="😵‍💫 Кажется, возникла какая то ошибка...",
-            chat_id=message.chat.id,
-        )
+        if callback.message and callback.message.body:
+            await bot.delete_message(message_id=callback.message.body.id)
 
     await dialog_manager.start(
         Errors.error_intent,
@@ -109,7 +104,7 @@ async def on_unknown_error(
     logger.error("Неизвестная ошибка", exc_info=update.exception)
 
     await max_sender.send_message(
-        text="😵‍💫 Неизвестная ошибка",
+        text="😵‍💫 Неизвестная ошибка\nНапиши /start, чтобы всё починилось",
         chat_id=update_context.chat_id,
     )
 
