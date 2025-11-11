@@ -15,10 +15,7 @@ from maxhack.web.schemas.group import (
     GroupUpdateRequest,
     GroupUserItem,
 )
-from maxhack.web.schemas.invite import (
-    InviteCreateRequest,
-    InviteCreateResponse,
-)
+from maxhack.web.schemas.invite import InviteCreateResponse
 from maxhack.web.schemas.role import RoleResponse
 
 group_router = APIRouter(prefix="/groups", tags=["Groups"], route_class=DishkaRoute)
@@ -229,14 +226,12 @@ async def delete_group_route(
 )
 async def create_invite_route(
     group_id: GroupId,
-    body: InviteCreateRequest,
     invite_service: FromDishka[InviteService],
     master_id: UserId = Header(...),
 ) -> InviteCreateResponse:
-    invite_obj = await invite_service.create_invite_link(
+    invite_obj = await invite_service.recreate_invite(
         group_id=group_id,
         creator_id=master_id,
-        expires_at=body.expires_at,
     )
     return InviteCreateResponse(invite_key=InviteKey(invite_obj.key))
 

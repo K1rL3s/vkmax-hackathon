@@ -57,14 +57,15 @@ async def init_dispatcher(
     dp.update.middleware.outer(LoggingMiddleware())
     dp.update.middleware.inner(CurrentUserMiddleware())
     dp.message_created.middleware.inner(SaveUserMiddleware())
+    dp.bot_started.middleware.inner(SaveUserMiddleware())
     dp.message_created.middleware.outer(ThrottlingMiddleware())
     dp.message_callback.middleware.outer(ThrottlingMiddleware())
 
     dp.message_created.filter(MagicFilter(F.chat.type == ChatType.DIALOG))
     dp.include(
         errors_router,
-        start_router,
         commands_router,
+        start_router,
         errors_dialog,
         menu_dialog,
         profile_dialog,

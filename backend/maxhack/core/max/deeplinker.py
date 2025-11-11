@@ -5,7 +5,7 @@ from maxhack.core.ids import InviteKey
 InvitePrefix = "invite_"
 
 
-class Deeplinker:
+class QRCoder:
     def __init__(self, bot_name: str) -> None:
         self.bot_name = bot_name
 

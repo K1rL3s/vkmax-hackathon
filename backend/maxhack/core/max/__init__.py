@@ -1,9 +1,9 @@
-from .deeplinker import Deeplinker
+from .deeplinker import QRCoder
 from .mass_mailer import MaxMailer
 from .sender import MaxSender
 
 __all__ = (
-    "Deeplinker",
     "MaxMailer",
     "MaxSender",
+    "QRCoder",
 )

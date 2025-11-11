@@ -3,9 +3,11 @@ from dishka import Provider, Scope, provide
 from maxhack.core.event.service import EventService
 from maxhack.core.group.service import GroupService
 from maxhack.core.invite.service import InviteService
+from maxhack.core.max import QRCoder
 from maxhack.core.responds.service import RespondService
 from maxhack.core.tag.service import TagService
 from maxhack.core.user.service import UserService
+from maxo import Bot
 
 
 class ServicesProvider(Provider):
@@ -17,3 +19,7 @@ class ServicesProvider(Provider):
     event_service = provide(EventService)
     invite_service = provide(InviteService)
     respond_service = provide(RespondService)
+
+    @provide
+    async def qrcode(self, bot: Bot) -> QRCoder:
+        return QRCoder(bot_name=bot.state.info.username)

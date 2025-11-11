@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Any
 
 from sqlalchemy import select, update
@@ -14,13 +13,11 @@ class InviteRepo(BaseAlchemyRepo):
         key: InviteKey,
         group_id: GroupId,
         creator_id: UserId,
-        expires_at: datetime | None,
     ) -> InviteModel:
         invite = InviteModel(
             key=key,
             group_id=group_id,
             creator_id=creator_id,
-            expires_at=expires_at,
         )
         self._session.add(invite)
         await self._session.flush()
@@ -43,4 +40,12 @@ class InviteRepo(BaseAlchemyRepo):
 
     async def get_by_key(self, invite_key: InviteKey) -> InviteModel | None:
         stmt = select(InviteModel).where(InviteModel.key == invite_key)
+        return await self._session.scalar(stmt)
+
+    async def get_group_invite(self, group_id: GroupId) -> InviteModel | None:
+        stmt = (
+            select(InviteModel)
+            .where(InviteModel.group_id == group_id, InviteModel.deleted_at.is_(None))
+            .limit(1)
+        )
         return await self._session.scalar(stmt)

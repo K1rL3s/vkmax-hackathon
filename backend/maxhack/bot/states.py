@@ -17,7 +17,7 @@ class Profile(StatesGroup):
 class Groups(StatesGroup):
     all = State()
     one = State()
-    invite = State()
+    join = State()
     create = State()
     delete = State()
 
