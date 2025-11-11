@@ -1,15 +1,14 @@
 from collections.abc import Coroutine
 from typing import Any
 
+from maxhack.core.ids import MaxChatId, MaxId
+from maxhack.core.utils.rate_limiter import RateLimiter
+from maxhack.logger import get_logger
 from maxo import Bot
 from maxo.bot.method_results import SendMessageResult
 from maxo.dialogs import BgManagerFactory, ShowMode, StartMode
 from maxo.errors import MaxBotBadRequestError, MaxBotForbiddenError, MaxBotNotFoundError
 from maxo.fsm import State
-
-from maxhack.core.ids import MaxChatId, MaxId
-from maxhack.core.utils.rate_limiter import RateLimiter
-from maxhack.logger import get_logger
 
 logger = get_logger(__name__, groups=("maxo", "max"))
 
@@ -37,12 +36,10 @@ class MaxSender:
         self,
         query_id: str,
         text: str | None = None,
-        show_alert: bool = False,
     ) -> bool:
         task = self._bot.callback_answer(
-            callback_query_id=query_id,
-            text=text,
-            show_alert=show_alert,
+            callback_id=query_id,
+            notification=text,
         )
         return await self._exception_logger(task)
 

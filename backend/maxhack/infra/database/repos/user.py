@@ -33,7 +33,7 @@ class UserRepo(BaseAlchemyRepo):
             first_name=first_name,
             last_name=last_name,
             phone=phone,
-            timezone=timezone
+            timezone=timezone,
         )
         try:
             self._session.add(user)

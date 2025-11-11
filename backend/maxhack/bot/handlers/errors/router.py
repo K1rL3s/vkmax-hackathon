@@ -2,6 +2,11 @@ from typing import Any
 
 from dishka import FromDishka
 from magic_filter import F
+
+from maxhack.bot.states import Errors
+from maxhack.core.exceptions import MaxHackError
+from maxhack.core.max import MaxSender
+from maxhack.logger import get_logger
 from maxo import Router
 from maxo.dialogs import DialogManager, ShowMode, StartMode
 from maxo.dialogs.api.exceptions import (
@@ -15,11 +20,6 @@ from maxo.routing.filters import AndFilter
 from maxo.routing.filters.exception import ExceptionTypeFilter
 from maxo.routing.signals.exception import ErrorEvent
 from maxo.types.update_context import UpdateContext
-
-from maxhack.bot.states import Errors
-from maxhack.core.exceptions import MaxHackError
-from maxhack.core.max import MaxSender
-from maxhack.logger import get_logger
 
 logger = get_logger(__name__, groups=("aiogd", "errors"))
 
@@ -46,7 +46,6 @@ async def on_unknown_intent(
         await max_sender.callback_answer(
             query_id=callback.id,
             text="😵‍💫 Кажется, возникла какая-то ошибка...",
-            show_alert=False,
         )
         if callback.message:
             await callback.message.delete()

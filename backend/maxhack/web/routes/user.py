@@ -36,7 +36,7 @@ async def create_user_route(
             first_name=body.first_name,
             last_name=body.last_name,
             phone=body.phone,
-            timezone=body.timezone
+            timezone=body.timezone,
         )
         return await UserResponse.from_orm_async(user, session)
     except InvalidValue as e:

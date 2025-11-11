@@ -1,6 +1,5 @@
 import secrets
 from datetime import datetime
-from typing import Optional
 
 from maxhack.core.ids import InviteKey
 
@@ -27,10 +26,10 @@ def generate_invite_key() -> InviteKey:
 
 
 def create_cron_expression(
-        event_date: Optional[datetime],
-        every_day: bool,
-        every_week: bool,
-        every_month: bool,
+    event_date: datetime | None,
+    every_day: bool,
+    every_week: bool,
+    every_month: bool,
 ) -> str:
     """
     Создает cron выражение на основе параметров повторения.
@@ -59,12 +58,11 @@ def create_cron_expression(
     if every_day:
         return f"{minute} {hour} * * *"
 
-    elif every_week:
+    if every_week:
         return f"{minute} {hour} * * {day_of_week}"
 
-    elif every_month:
+    if every_month:
         return f"{minute} {hour} {day_of_month} * *"
 
-    else:
-        month = event_date.month
-        return f"{minute} {hour} {day_of_month} {month} *"
+    month = event_date.month
+    return f"{minute} {hour} {day_of_month} {month} *"

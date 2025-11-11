@@ -4,7 +4,7 @@ from sqlalchemy import and_, delete, select, update
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 from maxhack.core.exceptions import MaxHackError
-from maxhack.core.ids import GroupId, TagId, UserId, RoleId
+from maxhack.core.ids import GroupId, RoleId, TagId, UserId
 from maxhack.infra.database.models import (
     TagModel,
     UserModel,

@@ -39,7 +39,7 @@ class EventRepo(BaseAlchemyRepo):
             type=type,
             creator_id=creator_id,
             group_id=group_id,
-            timezone=timezone
+            timezone=timezone,
         )
         try:
             self._session.add(event)

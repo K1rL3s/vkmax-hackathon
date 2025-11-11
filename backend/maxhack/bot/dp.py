@@ -1,16 +1,10 @@
 from datetime import timedelta
 
 from magic_filter import F
-from maxo import Dispatcher
-from maxo.dialogs import BgManagerFactory, setup_dialogs
-from maxo.enums import ChatType
-from maxo.fsm.key_builder import DefaultKeyBuilder
-from maxo.fsm.storages.memory import DisabledEventIsolation
-from maxo.fsm.storages.redis import RedisStorage
-from maxo.integrations.magic_filter import MagicFilter
 
 from maxhack.bot.handlers import (
     commands_router,
+    create_group_dialog,
     errors_dialog,
     errors_router,
     groups_dialog,
@@ -28,6 +22,13 @@ from maxhack.bot.middlewares import (
     ThrottlingMiddleware,
 )
 from maxhack.config import RedisConfig
+from maxo import Dispatcher
+from maxo.dialogs import BgManagerFactory, setup_dialogs
+from maxo.enums import ChatType
+from maxo.fsm.key_builder import DefaultKeyBuilder
+from maxo.fsm.storages.memory import DisabledEventIsolation
+from maxo.fsm.storages.redis import RedisStorage
+from maxo.integrations.magic_filter import MagicFilter
 
 
 async def init_dispatcher(
@@ -68,6 +69,7 @@ async def init_dispatcher(
         menu_dialog,
         profile_dialog,
         groups_dialog,
+        create_group_dialog,
     )
 
     bg_factory = setup_dialogs(dp, events_isolation=DisabledEventIsolation())

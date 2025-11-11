@@ -1,5 +1,5 @@
 from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
-from maxhack.core.ids import GroupId, TagId, UserId, RoleId
+from maxhack.core.ids import GroupId, RoleId, TagId, UserId
 from maxhack.core.role.ids import CREATOR_ROLE_ID, EDITOR_ROLE_ID, MEMBER_ROLE_ID
 from maxhack.infra.database.models import (
     TagModel,

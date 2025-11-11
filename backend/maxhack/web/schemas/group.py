@@ -13,7 +13,7 @@ from .core import Model
 class GroupCreateRequest(Model):
     name: str
     description: str | None = None
-    timezone: int = 0
+    timezone: int | None = None
 
 
 class GroupUpdateRequest(Model):
@@ -26,6 +26,11 @@ class GroupResponse(Model):
     name: str
     description: str | None = None
     timezone: int = 0
+
+
+class GetGroupResponse(Model):
+    group: GroupResponse
+    role: RoleResponse
 
 
 class GroupMemberAddRequest(Model):

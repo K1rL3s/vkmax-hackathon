@@ -163,7 +163,6 @@ class EventService:
         description: str | None = None,
         type: str | None = None,
         timezone: int = 0,
-
     ) -> EventModel:
         event = await self._ensure_event_exists(event_id)
 
@@ -184,7 +183,12 @@ class EventService:
         if type is not None:
             values["type"] = type
         if event_date is not None:
-            cron = create_cron_expression(event_date, every_day, every_week, every_month)
+            cron = create_cron_expression(
+                event_date,
+                every_day,
+                every_week,
+                every_month,
+            )
             is_cycle = any([every_day, every_week, every_month])
             values["is_cycle"] = is_cycle
             values["cron"] = cron

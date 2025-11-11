@@ -7,10 +7,12 @@ from maxhack.core.role.ids import CREATOR_ROLE_ID, EDITOR_ROLE_ID
 from maxhack.core.utils.datehelp import datetime_now
 from maxhack.infra.database.models import (
     GroupModel,
+    RoleModel,
     UsersToGroupsModel,
 )
 from maxhack.infra.database.repos.group import GroupRepo
 from maxhack.infra.database.repos.invite import InviteRepo
+from maxhack.infra.database.repos.role import RoleRepo
 from maxhack.infra.database.repos.tag import TagRepo
 from maxhack.infra.database.repos.user import UserRepo
 from maxhack.infra.database.repos.users_to_groups import UsersToGroupsRepo
@@ -26,23 +28,28 @@ class GroupService:
         invite_repo: InviteRepo,
         tag_repo: TagRepo,
         users_to_groups_repo: UsersToGroupsRepo,
+        role_repo: RoleRepo,
     ) -> None:
         self._group_repo = group_repo
         self._users_to_groups_repo = users_to_groups_repo
         self._user_repo = user_repo
         self._invite_repo = invite_repo
         self._tag_repo = tag_repo
+        self._role_repo = role_repo
 
     async def create_group(
         self,
         creator_id: UserId,
         name: str,
         description: str | None,
-        timezone: int = 0
+        timezone: int | None = None,
     ) -> GroupModel:
         creator = await self._user_repo.get_by_id(creator_id)
         if creator is None:
             raise EntityNotFound("Пользователь не найден")
+
+        if timezone is None:
+            timezone = creator.timezone
 
         return await self._group_repo.create(
             name=name,
@@ -55,14 +62,18 @@ class GroupService:
         self,
         member_id: UserId,
         group_id: GroupId,
-    ) -> GroupModel:
-        if not await self.is_member(member_id, group_id):
+    ) -> tuple[GroupModel, RoleModel]:
+        membership = await self.is_member(member_id, group_id)
+        if membership is None:
             raise NotEnoughRights("Недостаточно прав для доступа к группе")
 
         group = await self._group_repo.get_by_id(group_id=group_id)
         if not group:
             raise EntityNotFound("Группа не найдена")
-        return group
+
+        role = cast(RoleModel, await self._role_repo.get_role(membership.role_id))
+
+        return group, role
 
     async def update_group(
         self,
@@ -256,12 +267,11 @@ class GroupService:
         self,
         user_id: UserId,
         group_id: GroupId,
-    ) -> bool:
-        membership = await self._users_to_groups_repo.get_membership(
+    ) -> UsersToGroupsModel:
+        return await self._users_to_groups_repo.get_membership(
             user_id=user_id,
             group_id=group_id,
         )
-        return membership is not None
 
     async def has_roles(
         self,

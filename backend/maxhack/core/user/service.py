@@ -30,7 +30,7 @@ class UserService:
         first_name: str,
         last_name: str | None = None,
         phone: str | None = None,
-        timezone: int = 0
+        timezone: int = 0,
     ) -> UserModel:
         exists = await self._user_repo.get_by_max_id(max_id)
         if exists is not None:
@@ -90,11 +90,7 @@ class UserService:
         if user is None:
             raise EntityNotFound("Пользователь не найден")
 
-        requester = await self._user_repo.get_by_id(master_id)
-        if requester is None:
-            raise EntityNotFound("Пользователь не найден")
-
-        if master_id != user_id:
+        if user_id != master_id:
             raise NotEnoughRights("Недостаточно прав для просмотра групп пользователя")
 
         return await self._users_to_groups_repo.user_groups(user_id)

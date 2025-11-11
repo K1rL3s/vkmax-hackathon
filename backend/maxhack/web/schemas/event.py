@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from maxhack.core.ids import EventId, GroupId, RespondId, TagId, UserId
 
@@ -25,8 +24,8 @@ class EventUpdateRequest(Model):
     description: str | None = None
     is_cycle: bool | None = None
     type: str | None = None
-    timezone: Optional[int]
-    event_date: Optional[datetime]
+    timezone: int | None
+    event_date: datetime | None
     every_day: bool
     every_week: bool
     every_month: bool

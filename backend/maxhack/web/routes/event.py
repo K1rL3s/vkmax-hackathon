@@ -20,7 +20,6 @@ from maxhack.web.schemas.event import (
 event_router = APIRouter(prefix="/events", tags=["Events"], route_class=DishkaRoute)
 
 
-
 @event_router.post(
     "",
     response_model=EventResponse,
@@ -46,13 +45,14 @@ async def create_event_route(
             group_id=body.group_id,
             user_ids=body.user_ids,
             tag_ids=body.tag_ids,
-            timezone=body.timezone
+            timezone=body.timezone,
         )
         return await EventResponse.from_orm_async(event, session)
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except NotEnoughRights as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+
 
 @event_router.post(
     "/{event_id}/tags",

@@ -5,13 +5,13 @@ from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRight
 from maxhack.core.group.service import GroupService
 from maxhack.core.ids import GroupId, InviteKey, UserId
 from maxhack.core.invite.service import InviteService
-from maxhack.core.role.ids import MEMBER_ROLE_ID
+from maxhack.core.role.ids import CREATOR_ROLE_ID, CREATOR_ROLE_NAME, MEMBER_ROLE_ID
 from maxhack.web.schemas.group import (
+    GetGroupResponse,
     GroupCreateRequest,
     GroupMemberAddRequest,
     GroupMemberResponse,
     GroupMemberUpdateRequest,
-    GroupResponse,
     GroupUpdateRequest,
     GroupUserItem,
 )
@@ -19,13 +19,13 @@ from maxhack.web.schemas.invite import (
     InviteCreateRequest,
     InviteCreateResponse,
 )
+from maxhack.web.schemas.role import RoleResponse
 
 group_router = APIRouter(prefix="/groups", tags=["Groups"], route_class=DishkaRoute)
 
 
 @group_router.post(
     "",
-    response_model=GroupResponse,
     status_code=status.HTTP_201_CREATED,
     description="Создание группы",
 )
@@ -33,7 +33,7 @@ async def create_group_route(
     body: GroupCreateRequest,
     group_service: FromDishka[GroupService],
     master_id: UserId = Header(...),
-) -> GroupResponse:
+) -> GetGroupResponse:
     try:
         group = await group_service.create_group(
             creator_id=master_id,
@@ -44,12 +44,13 @@ async def create_group_route(
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
-    return GroupResponse.model_validate(group)
+    return GetGroupResponse.model_validate(
+        {"group": group, "role": RoleResponse(id=CREATOR_ROLE_ID, name="Босс")},
+    )
 
 
 @group_router.patch(
     "/{group_id}",
-    response_model=GroupResponse,
     description="Редактирование группы (только создатель)",
 )
 async def update_group_route(
@@ -57,7 +58,7 @@ async def update_group_route(
     body: GroupUpdateRequest,
     group_service: FromDishka[GroupService],
     master_id: UserId = Header(...),
-) -> GroupResponse:
+) -> GetGroupResponse:
     try:
         group = await group_service.update_group(
             group_id=group_id,
@@ -70,7 +71,12 @@ async def update_group_route(
     except NotEnoughRights as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
 
-    return GroupResponse.model_validate(group)
+    return GetGroupResponse.model_validate(
+        {
+            "group": group,
+            "role": RoleResponse(id=CREATOR_ROLE_ID, name=CREATOR_ROLE_NAME),
+        },
+    )
 
 
 @group_router.patch(
@@ -113,12 +119,16 @@ async def get_group(
     group_id: GroupId,
     master_id: UserId = Header(...),
     group_service: FromDishka[GroupService],
-) -> GroupResponse:
+) -> GetGroupResponse:
     try:
-        group = await group_service.get_group(group_id=group_id, member_id=master_id)
-        return GroupResponse.model_validate(group)
+        group, role = await group_service.get_group(
+            group_id=group_id,
+            member_id=master_id,
+        )
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+    return GetGroupResponse.model_validate({"group": group, "role": role})
 
 
 @group_router.get(
