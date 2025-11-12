@@ -1,3 +1,5 @@
+from collections.abc import AsyncIterable
+
 from dishka import Provider, Scope, from_context, provide
 
 from maxhack.config import MaxConfig
@@ -14,8 +16,10 @@ class MaxBotProvider(Provider):
     bg_factory = from_context(BgManagerFactory)
 
     @provide
-    async def max_bot(self, max_config: MaxConfig) -> Bot:
-        return Bot(token=max_config.token, text_format=TextFormat.HTML)
+    async def max_bot(self, max_config: MaxConfig) -> AsyncIterable[Bot]:
+        bot = Bot(token=max_config.token, text_format=TextFormat.HTML)
+        async with bot:
+            yield bot
 
     max_sender = provide(MaxSender)
     max_mailer = provide(MaxMailer)
