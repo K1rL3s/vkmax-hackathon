@@ -1,4 +1,5 @@
 from dishka import Provider, Scope, provide
+from redis.asyncio import Redis
 from taskiq import (
     InMemoryBroker,
     SmartRetryMiddleware,
@@ -22,9 +23,9 @@ class SchedulerProvider(Provider):
 
     @provide
     def schedule_source(
-        self,
-        scheduler_config: SchedulerConfig,
-        redis_config: RedisConfig,
+            self,
+            scheduler_config: SchedulerConfig,
+            redis_config: RedisConfig,
     ) -> ScheduleSource:
         return ListRedisScheduleSource(
             url=redis_config.uri,
@@ -40,11 +41,26 @@ class SchedulerProvider(Provider):
 
     @provide
     def scheduler(
-        self,
-        broker: AsyncBroker,
-        schedule_source: ScheduleSource,
+            self,
+            broker: AsyncBroker,
+            schedule_source: ScheduleSource,
     ) -> TaskiqScheduler:
         return TaskiqScheduler(
             broker=broker,
             sources=[schedule_source, LabelScheduleSource(async_shared_broker)],
+        )
+
+    @provide()
+    def redis(
+            self,
+            redis_config: RedisConfig,
+    ) -> Redis:
+        return Redis(
+            host=redis_config.host,
+            port=redis_config.port,
+            password=redis_config.password,
+            db=redis_config.database,
+            socket_connect_timeout=15,
+            socket_timeout=5,
+            retry_on_timeout=True,
         )

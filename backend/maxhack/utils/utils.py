@@ -2,6 +2,7 @@ import secrets
 from datetime import datetime
 
 from maxhack.core.ids import InviteKey
+from maxhack.core.utils.datehelp import UTC_TIMEZONE
 
 
 def to_camel(string: str) -> str:
@@ -32,24 +33,10 @@ def create_cron_expression(
     every_week: bool,
     every_month: bool,
 ) -> str:
-    """
-    Создает cron выражение на основе параметров повторения.
 
-    Args:
-        event_date: Дата и время события (используется для извлечения минут и часов)
-        every_day: Ежедневное повторение
-        every_week: Еженедельное повторение
-        every_month: Ежемесячное повторение
-
-    Returns:
-        str: cron выражение в формате "минуты часы день_месяца месяц день_недели"
-
-    Raises:
-        ValueError: Если не указан event_date или конфликтующие параметры
-    """
     if event_date is None:
         raise ValueError("event_date обязателен для создания cron выражения")
-
+    event_date = event_date.astimezone(UTC_TIMEZONE)
     minute = event_date.minute
     hour = event_date.hour
 

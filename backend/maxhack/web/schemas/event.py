@@ -31,7 +31,7 @@ class EventCreateRequest(Model):
         default_factory=list[TagId],
         description="Привязанные теги",
     )
-    minutes_before: int = 60
+    minutes_before: list[int] = Field(default_factory=list)
 
 
 class EventUpdateRequest(Model):
@@ -52,6 +52,8 @@ class EventResponse(Model):
     creator_id: UserId
     group_id: GroupId | None = None
     timezone: int
+    # todo: сделать возврат notifies
+    # notifies: list[int]
 
 
 class EventAddTagRequest(Model):

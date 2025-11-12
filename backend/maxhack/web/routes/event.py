@@ -34,12 +34,12 @@ async def create_event_route(
     master_id: UserId = Header(...),
 ) -> EventResponse:
     try:
-        event = await event_service.create_event(
+        event, notifies = await event_service.create_event(
             EventCreate(
                 **body.model_dump(exclude={"cron"}),
                 cron=Cron(**body.cron.model_dump()),
                 creator_id=master_id,
-            ),
+            )
         )
         return await EventResponse.from_orm_async(event, session)
     except EntityNotFound as e:

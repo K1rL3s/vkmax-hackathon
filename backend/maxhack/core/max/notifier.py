@@ -1,6 +1,6 @@
 from maxhack.bot.filters.respond import RespondData
 from maxhack.core.enums.respond_action import RespondStatus
-from maxhack.core.max import MaxSender
+from maxhack.core.max.sender import MaxSender
 from maxhack.infra.database.models import EventModel, UserModel
 from maxo.types import InlineKeyboardAttachmentRequest
 from maxo.types.callback_keyboard_button import CallbackKeyboardButton

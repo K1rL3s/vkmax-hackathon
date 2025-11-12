@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime
 
-from maxhack.core.utils.datehelp import MOSCOW_TIMEZONE
+from maxhack.core.utils.datehelp import UTC_TIMEZONE
 
 DEFAULT_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
@@ -51,7 +51,7 @@ class JsonFormatter(logging.Formatter):
         )
 
     def format_time(self, record: logging.LogRecord, datefmt: str | None = None) -> str:
-        ct = datetime.fromtimestamp(record.created, tz=MOSCOW_TIMEZONE)
+        ct = datetime.fromtimestamp(record.created, tz=UTC_TIMEZONE)
         if datefmt:
             return ct.strftime(datefmt)
         return str(ct)

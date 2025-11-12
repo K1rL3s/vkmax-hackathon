@@ -1,9 +1,8 @@
 from dishka import FromDishka
 from dishka.integrations.taskiq import inject
 from taskiq import async_shared_broker
-
-from maxhack.core.max import MaxSender
-from maxhack.core.utils.datehelp import datetime_now
+from maxhack.core.event.service import EventService
+from maxhack.core.max import MaxMailer
 from maxhack.logger import get_logger
 
 logger = get_logger(__name__, groups="tasks")
@@ -15,8 +14,11 @@ logger = get_logger(__name__, groups="tasks")
 )
 @inject(patch_module=True)
 async def send_notifies(
-    *,
-    max_sender: FromDishka[MaxSender],
+        *,
+        max_mailer: FromDishka[MaxMailer],
+        events_service: FromDishka[EventService],
+
 ) -> None:
-    now = datetime_now()
-    # TODO: Логика проверки уведов
+    notifies = await events_service.get_notify_by_date_interval()
+    for users, event in notifies:
+        await max_mailer.notify_event(event, users)

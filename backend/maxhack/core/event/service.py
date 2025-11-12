@@ -1,3 +1,8 @@
+from datetime import datetime, timedelta
+
+import pycron
+from redis.asyncio import Redis
+
 from maxhack.core.event.models import EventCreate, EventUpdate
 from maxhack.core.exceptions import (
     EventNotFound,
@@ -10,7 +15,8 @@ from maxhack.core.ids import EventId, GroupId, TagId, UserId
 from maxhack.core.responds.service import RespondService
 from maxhack.core.role.ids import CREATOR_ROLE_ID, EDITOR_ROLE_ID, MEMBER_ROLE_ID
 from maxhack.core.service import BaseService
-from maxhack.infra.database.models import EventModel
+from maxhack.core.utils.datehelp import datetime_now
+from maxhack.infra.database.models import EventModel, EventNotifyModel, UserModel
 from maxhack.infra.database.repos.event import EventRepo
 from maxhack.infra.database.repos.group import GroupRepo
 from maxhack.infra.database.repos.invite import InviteRepo
@@ -22,16 +28,17 @@ from maxhack.infra.database.repos.users_to_groups import UsersToGroupsRepo
 
 class EventService(BaseService):
     def __init__(
-        self,
-        event_repo: EventRepo,
-        tag_repo: TagRepo,
-        group_repo: GroupRepo,
-        user_repo: UserRepo,
-        users_to_groups_repo: UsersToGroupsRepo,
-        respond_repo: RespondRepo,
-        invite_repo: InviteRepo,
-        respond_service: RespondService,
-        group_service: GroupService,
+            self,
+            event_repo: EventRepo,
+            tag_repo: TagRepo,
+            group_repo: GroupRepo,
+            user_repo: UserRepo,
+            users_to_groups_repo: UsersToGroupsRepo,
+            respond_repo: RespondRepo,
+            invite_repo: InviteRepo,
+            respond_service: RespondService,
+            group_service: GroupService,
+            redis: Redis,
     ) -> None:
         super().__init__(
             event_repo=event_repo,
@@ -44,6 +51,7 @@ class EventService(BaseService):
         )
         self._respond_service = respond_service
         self._group_service = group_service
+        self._redis = redis
 
     async def get_event(self, event_id: EventId, user_id: UserId) -> EventModel:
         event = await self._ensure_event_exists(event_id)
@@ -68,82 +76,66 @@ class EventService(BaseService):
         return event
 
     async def create_event(
-        self,
-        event_create_model: EventCreate,
-    ) -> EventModel:
-        creator = await self._ensure_user_exists(event_create_model.creator_id)
+            self,
+            event_create_scheme: EventCreate,
+    ) -> tuple[EventModel, list[EventNotifyModel]]:
+        creator = await self._ensure_user_exists(event_create_scheme.creator_id)
 
-        is_cycle = any(event_create_model.to_dict().values())
+        is_cycle = event_create_scheme.cron.is_cycle
 
-        if event_create_model.group_id:
+        if event_create_scheme.group_id:
             group, role = await self._group_service.get_group(
-                member_id=event_create_model.creator_id,
-                group_id=event_create_model.group_id,
+                member_id=event_create_scheme.creator_id,
+                group_id=event_create_scheme.group_id,
             )
 
             if role.id not in {CREATOR_ROLE_ID, EDITOR_ROLE_ID}:
                 raise NotEnoughRights("Недостаточно прав для создания события в группе")
 
-            event_create_model.timezone = group.timezone
+            event_create_scheme.timezone = group.timezone
 
         event = await self._event_repo.create(
-            title=event_create_model.title,
-            description=event_create_model.description,
-            cron=event_create_model.cron.expression,
+            title=event_create_scheme.title,
+            description=event_create_scheme.description,
+            cron=event_create_scheme.cron.expression,
             is_cycle=is_cycle,
-            type=event_create_model.type,
-            creator_id=event_create_model.creator_id,
-            group_id=event_create_model.group_id,
-            timezone=(
-                event_create_model.timezone
-                if event_create_model.timezone
-                else creator.timezone
-            ),
+            type=event_create_scheme.type,
+            creator_id=event_create_scheme.creator_id,
+            group_id=event_create_scheme.group_id,
         )
         await self.add_tag_to_event(
             event.id,
-            event_create_model.tags_ids,
+            event_create_scheme.tags_ids,
             user_id=creator.id,
         )
         await self.add_user_to_event(
             event.id,
-            event_create_model.participants_ids,
+            event_create_scheme.participants_ids,
             user_id=creator.id,
         )
 
-        match event_create_model.type:
-            case "event":
-                if event_create_model.group_id:
-                    for tid in event_create_model.tags_ids:
-                        users = await self._tag_repo.list_tag_users(
-                            group_id=event_create_model.group_id,
-                            tag_id=tid,
-                        )
+        if event_create_scheme.type == "event":
+            for tid in event_create_scheme.tags_ids:
+                users = await self._tag_repo.list_tag_users(
+                    group_id=event_create_scheme.group_id,
+                    tag_id=tid,
+                )
+                event_create_scheme.participants_ids.extend(
+                    [u.id for u, _ in users],
+                )
 
-                        event_create_model.participants_ids.extend(
-                            [u.id for u, _ in users],
-                        )
-
-                    await self._respond_service.create(
-                        user_ids=list(set(event_create_model.participants_ids)),
-                        event_id=event.id,
-                        status="mb",
-                    )
-            case _:
-                ...
-
-        await self._event_repo.create_notify(
+        notifies = await self._event_repo.create_notify(
             event_id=event.id,
-            minutes_before=event_create_model.minutes_before,
+            minutes_before=event_create_scheme.minutes_before,
         )
 
-        return event
+        return event, notifies
 
     async def update_event(
-        self,
-        event_id: EventId,
-        user_id: UserId,
-        event_update_model: EventUpdate,
+            self,
+            event_id: EventId,
+            user_id: UserId,
+            event_update_model: EventUpdate,
     ) -> EventModel:
         event = await self._ensure_event_exists(event_id)
 
@@ -187,10 +179,10 @@ class EventService(BaseService):
             raise GroupNotFound
 
     async def add_tag_to_event(
-        self,
-        event_id: EventId,
-        tag_ids: list[TagId],
-        user_id: UserId,
+            self,
+            event_id: EventId,
+            tag_ids: list[TagId],
+            user_id: UserId,
     ) -> None:
         event = await self._ensure_event_exists(event_id)
 
@@ -233,10 +225,10 @@ class EventService(BaseService):
             await self._respond_service.create(user_ids, event.id, status="mb")
 
     async def add_user_to_event(
-        self,
-        event_id: EventId,
-        target_user_ids: list[UserId],
-        user_id: UserId,
+            self,
+            event_id: EventId,
+            target_user_ids: list[UserId],
+            user_id: UserId,
     ) -> None:
         if not target_user_ids:
             return
@@ -286,9 +278,9 @@ class EventService(BaseService):
             await self._respond_service.create(target_user_ids, event.id, status="mb")
 
     async def get_group_events(
-        self,
-        group_id: GroupId,
-        user_id: UserId,
+            self,
+            group_id: GroupId,
+            user_id: UserId,
     ) -> list[EventModel]:
         await self._ensure_group_exists(group_id)
 
@@ -306,9 +298,9 @@ class EventService(BaseService):
         return await self._event_repo.get_created_by_user(user_id)
 
     async def get_other_user_events(
-        self,
-        target_user_id: UserId,
-        user_id: UserId,
+            self,
+            target_user_id: UserId,
+            user_id: UserId,
     ) -> list[EventModel]:
         await self._ensure_user_exists(target_user_id)
 
@@ -326,10 +318,10 @@ class EventService(BaseService):
         return [event for event in all_events if event.group_id in common_groups]
 
     async def list_user_events(
-        self,
-        group_id: GroupId,
-        user_id: UserId,
-        master_id: UserId,
+            self,
+            group_id: GroupId,
+            user_id: UserId,
+            master_id: UserId,
     ) -> list[EventModel]:
         await self._ensure_group_exists(group_id)
 
@@ -346,3 +338,35 @@ class EventService(BaseService):
         )
 
         return await self._event_repo.list_user_events(group_id, user_id)
+
+    async def get_notify_by_date_interval(
+            self,
+    ) -> list[tuple[list[UserModel], EventModel]]:
+        #todo: отправляется на минуту позже WTF OMG LMAOOOOOOO
+        time_now = datetime_now()
+        last_start_str = await self._redis.get("last_start")
+        if last_start_str:
+            last_start = datetime.fromisoformat(last_start_str.decode())
+        else:
+            last_start = time_now
+        await self._redis.set("last_start", time_now.isoformat())
+
+        events_with_notifies = await self._event_repo.get_notify_by_date_interval()
+        matching_notify: list[tuple[list[UserModel], EventModel]] = []
+
+        for event_notify, event in events_with_notifies:
+            try:
+                check_time = last_start - timedelta(minutes=event_notify.minutes_before)
+                if pycron.has_been(event.cron, since=check_time, dt=last_start):
+                    if not event.is_cycle and event_notify.minutes_before == 0:
+                        await self._event_repo.update(event.id, event_happened=True)
+
+                    users = await self._event_repo.get_event_users(event.id)
+
+                    matching_notify.append((users, event))
+
+            except Exception as e:
+                print(f"Error processing event {event.id} with cron '{event.cron}': {e}")
+                continue
+
+        return matching_notify

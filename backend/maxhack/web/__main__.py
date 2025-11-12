@@ -15,7 +15,7 @@ if __name__ == "__main__":
         address=config.app.host,
         port=config.app.port,
         interface=Interfaces.ASGI,
-        reload=True,
+        reload=False,
         log_access=True,
         workers=1,
     ).serve()

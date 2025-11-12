@@ -12,6 +12,7 @@ from maxhack.di.core.services import ServicesProvider
 from maxhack.di.database.repos import ReposProvider
 from maxhack.di.database.session import DBProvider
 from maxhack.di.max_bot import MaxBotProvider
+from maxhack.di.scheduler import SchedulerProvider
 
 
 def make_container[T](
@@ -34,6 +35,7 @@ def make_container[T](
         ReposProvider(),
         ServicesProvider(),
         MaxBotProvider(),
+        SchedulerProvider(),
         *extra_providers,
         context=context,
         **kwargs,
