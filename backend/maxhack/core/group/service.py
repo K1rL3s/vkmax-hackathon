@@ -25,12 +25,12 @@ logger = logging.getLogger(__name__)
 class GroupService(BaseService):
     async def create_group(
         self,
-        creator_id: UserId,
+        master_id: UserId,
         name: str,
         description: str | None,
         timezone: int | None = None,
     ) -> GroupModel:
-        creator = await self._user_repo.get_by_id(creator_id)
+        creator = await self._user_repo.get_by_id(master_id)
         if creator is None:
             raise UserNotFound
 
@@ -64,7 +64,7 @@ class GroupService(BaseService):
     async def update_group(
         self,
         group_id: GroupId,
-        editor_id: UserId,
+        master_id: UserId,
         name: str | None,
         description: str | None,
         timezone: int = 0,
@@ -76,7 +76,7 @@ class GroupService(BaseService):
         if not await self.has_roles(
             CREATOR_ROLE_ID,
             EDITOR_ROLE_ID,
-            user_id=editor_id,
+            user_id=master_id,
             group_id=group_id,
         ):
             raise NotEnoughRights("Недостаточно прав для редактирования группы")
@@ -259,6 +259,7 @@ class GroupService(BaseService):
             group_id=group_id,
         )
 
+    # TODO: Заменить на ensure_has_membership
     async def has_roles(
         self,
         *roles: RoleId,

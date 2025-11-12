@@ -1,11 +1,12 @@
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, HTTPException, Header, status
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from maxhack.core.event.models import Cron, EventCreate, EventUpdate
 from maxhack.core.event.service import EventService
 from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
-from maxhack.core.ids import EventId, GroupId, UserId
+from maxhack.core.ids import EventId, GroupId
+from maxhack.web.dependencies import CurrentUser
 from maxhack.web.schemas.event import (
     EventAddTagRequest,
     EventAddUserRequest,
@@ -15,7 +16,11 @@ from maxhack.web.schemas.event import (
     EventsResponse,
 )
 
-event_router = APIRouter(prefix="/events", tags=["Events"], route_class=DishkaRoute)
+event_router = APIRouter(
+    prefix="/events",
+    tags=["Events"],
+    route_class=DishkaRoute,
+)
 
 
 @event_router.post(
@@ -30,14 +35,14 @@ async def create_event_route(
     body: EventCreateRequest,
     event_service: FromDishka[EventService],
     session: FromDishka[AsyncSession],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> EventResponse:
     try:
         event, notifies = await event_service.create_event(
             EventCreate(
                 **body.model_dump(exclude={"cron"}),
                 cron=Cron(**body.cron.model_dump()),
-                creator_id=master_id,
+                creator_id=current_user.db_user.id,
             ),
         )
         return await EventResponse.from_orm_async(event, session)
@@ -56,13 +61,13 @@ async def add_tag_to_event_route(
     event_id: EventId,
     body: EventAddTagRequest,
     event_service: FromDishka[EventService],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> None:
     try:
         await event_service.add_tag_to_event(
             event_id=event_id,
             tag_ids=body.tag_ids,
-            user_id=master_id,
+            user_id=current_user.db_user.id,
         )
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -80,10 +85,13 @@ async def get_event_route(
     event_id: EventId,
     event_service: FromDishka[EventService],
     session: FromDishka[AsyncSession],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> EventResponse:
     try:
-        event = await event_service.get_event(event_id=event_id, user_id=master_id)
+        event = await event_service.get_event(
+            event_id=event_id,
+            user_id=current_user.db_user.id,
+        )
         return await EventResponse.from_orm_async(event, session)
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -100,12 +108,12 @@ async def update_event_route(
     body: EventUpdateRequest,
     event_service: FromDishka[EventService],
     session: FromDishka[AsyncSession],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> EventResponse:
     try:
         event = await event_service.update_event(
             event_id=event_id,
-            user_id=master_id,
+            user_id=current_user.db_user.id,
             event_update_model=EventUpdate(
                 **body.model_dump(exclude={"cron"}),
                 cron=(
@@ -132,10 +140,13 @@ async def update_event_route(
 async def delete_event_route(
     event_id: EventId,
     event_service: FromDishka[EventService],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> None:
     try:
-        await event_service.delete_event(event_id=event_id, user_id=master_id)
+        await event_service.delete_event(
+            event_id=event_id,
+            user_id=current_user.db_user.id,
+        )
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except NotEnoughRights as e:
@@ -154,13 +165,13 @@ async def add_user_to_event_route(
     event_id: EventId,
     body: EventAddUserRequest,
     event_service: FromDishka[EventService],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> None:
     try:
         await event_service.add_user_to_event(
             event_id=event_id,
             target_user_ids=body.user_ids,
-            user_id=master_id,
+            user_id=current_user.db_user.id,
         )
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -178,13 +189,13 @@ async def get_group_events_route(
     group_id: GroupId,
     event_service: FromDishka[EventService],
     session: FromDishka[AsyncSession],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> EventsResponse:
     # TODO: Только возврат событий, в которых участвует юзер
     try:
         events = await event_service.get_group_events(
             group_id=group_id,
-            user_id=master_id,
+            user_id=current_user.db_user.id,
         )
         response_events = [
             await EventResponse.from_orm_async(event, session) for event in events
@@ -203,10 +214,10 @@ async def get_group_events_route(
 async def get_user_events_route(
     event_service: FromDishka[EventService],
     session: FromDishka[AsyncSession],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> EventsResponse:
     try:
-        events = await event_service.get_user_events(user_id=master_id)
+        events = await event_service.get_user_events(user_id=current_user.db_user.id)
         response_events = [
             await EventResponse.from_orm_async(event, session) for event in events
         ]
@@ -224,12 +235,12 @@ async def get_user_events_route(
 #     slave_id: UserId,
 #     event_service: FromDishka[EventService],
 #     session: FromDishka[AsyncSession],
-#     master_id: UserId = Header(...),
+#     current_user: CurrentUser,
 # ) -> EventsResponse:
 #     try:
 #         events = await event_service.get_other_user_events(
 #             target_user_id=slave_id,
-#             user_id=master_id,
+#             user_id=current_user.db_user.id,
 #         )
 #         response_events = [
 #             await EventResponse.from_orm_async(event, session) for event in events

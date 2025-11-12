@@ -42,5 +42,5 @@ class TagUserItem(Model):
     max_id: int
     first_name: str
     last_name: str | None = None
-    phone: str
+    phone: str | None = None
     role_id: RoleId

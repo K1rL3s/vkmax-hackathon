@@ -1,5 +1,3 @@
-"""Эндпоинт для проверки работоспособности сервиса."""
-
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter
@@ -12,12 +10,12 @@ healthcheck_router = APIRouter(
     route_class=DishkaRoute,
 )
 
-
+# TODO: Чекать бд, редис, бота и шедулер
 @healthcheck_router.get(
     "",
     description="Проверка соединения",
 )
-async def check_db_connection(
+async def check_connection(
     session: FromDishka[AsyncSession],
 ) -> None:
     await session.execute(text("select 1"))

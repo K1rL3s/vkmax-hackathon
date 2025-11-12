@@ -1,11 +1,12 @@
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import APIRouter, HTTPException, Header, status
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
 from maxhack.core.ids import GroupId, TagId, UserId
 from maxhack.core.tag.service import TagService
+from maxhack.web.dependencies import CurrentUser
 from maxhack.web.schemas.tag import (
     TagAssignRequest,
     TagCreateRequest,
@@ -31,12 +32,12 @@ async def create_tag_route(
     body: TagCreateRequest,
     tag_service: FromDishka[TagService],
     session: FromDishka[AsyncSession],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> TagResponse:
     try:
         tag = await tag_service.create_tag(
             group_id=group_id,
-            master_id=master_id,
+            master_id=current_user.db_user.id,
             name=body.name,
             descriptions=body.descriptions,
             color=body.color,
@@ -58,13 +59,13 @@ async def update_tag_route(
     body: TagUpdateRequest,
     tag_service: FromDishka[TagService],
     session: FromDishka[AsyncSession],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> TagResponse:
     try:
         tag = await tag_service.update_tag(
             group_id=group_id,
             tag_id=tag_id,
-            master_id=master_id,
+            master_id=current_user.db_user.id,
             name=body.name,
             descriptions=body.descriptions,
             color=body.color,
@@ -85,13 +86,13 @@ async def delete_tag_route(
     group_id: GroupId,
     tag_id: TagId,
     tag_service: FromDishka[TagService],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> None:
     try:
         await tag_service.delete_tag(
             group_id=group_id,
             tag_id=tag_id,
-            master_id=master_id,
+            master_id=current_user.db_user.id,
         )
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -111,14 +112,14 @@ async def assign_tag_to_user_route(
     group_id: GroupId,
     body: TagAssignRequest,
     tag_service: FromDishka[TagService],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> None:
     try:
         await tag_service.assign_tag_to_user(
             group_id=group_id,
             tag_id=body.tag_id,
             user_id=body.user_id,
-            master_id=master_id,
+            master_id=current_user.db_user.id,
         )
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -141,14 +142,14 @@ async def remove_tag_from_user_route(
     tag_id: TagId,
     user_id: UserId,
     tag_service: FromDishka[TagService],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> None:
     try:
         await tag_service.remove_tag_from_user(
             group_id=group_id,
             tag_id=tag_id,
             user_id=user_id,
-            master_id=master_id,
+            master_id=current_user.db_user.id,
         )
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -164,12 +165,12 @@ async def list_group_tags_route(
     group_id: GroupId,
     tag_service: FromDishka[TagService],
     session: FromDishka[AsyncSession],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> list[TagResponse]:
     try:
         tags = await tag_service.list_group_tags(
             group_id=group_id,
-            master_id=master_id,
+            master_id=current_user.db_user.id,
         )
         response_tags = [await TagResponse.from_orm_async(tag, session) for tag in tags]
         return response_tags
@@ -190,13 +191,13 @@ async def list_tag_users_route(
     group_id: GroupId,
     tag_id: TagId,
     tag_service: FromDishka[TagService],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> list[TagUserItem]:
     try:
         result = await tag_service.list_tag_users(
             group_id=group_id,
             tag_id=tag_id,
-            master_id=master_id,
+            master_id=current_user.db_user.id,
         )
         users: list[TagUserItem] = []
         for user, role_id in result:

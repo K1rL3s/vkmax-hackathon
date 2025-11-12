@@ -22,7 +22,7 @@ class UserRepo(BaseAlchemyRepo):
         self,
         max_id: MaxId,
         max_chat_id: MaxChatId,
-        first_name: str | None,
+        first_name: str,
         last_name: str | None,
         phone: str | None,
         timezone: int = 0,

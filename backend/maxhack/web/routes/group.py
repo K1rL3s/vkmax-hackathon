@@ -1,11 +1,12 @@
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, HTTPException, Header, status
+from fastapi import APIRouter, HTTPException, status
 
 from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
 from maxhack.core.group.service import GroupService
 from maxhack.core.ids import GroupId, InviteKey, UserId
 from maxhack.core.invite.service import InviteService
 from maxhack.core.role.ids import CREATOR_ROLE_ID, CREATOR_ROLE_NAME, MEMBER_ROLE_ID
+from maxhack.web.dependencies import CurrentUser
 from maxhack.web.schemas.group import (
     GetGroupResponse,
     GroupCreateRequest,
@@ -18,7 +19,11 @@ from maxhack.web.schemas.group import (
 from maxhack.web.schemas.invite import InviteCreateResponse
 from maxhack.web.schemas.role import RoleResponse
 
-group_router = APIRouter(prefix="/groups", tags=["Groups"], route_class=DishkaRoute)
+group_router = APIRouter(
+    prefix="/groups",
+    tags=["Groups"],
+    route_class=DishkaRoute,
+)
 
 
 @group_router.post(
@@ -29,11 +34,11 @@ group_router = APIRouter(prefix="/groups", tags=["Groups"], route_class=DishkaRo
 async def create_group_route(
     body: GroupCreateRequest,
     group_service: FromDishka[GroupService],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> GetGroupResponse:
     try:
         group = await group_service.create_group(
-            creator_id=master_id,
+            master_id=current_user.db_user.id,
             name=body.name,
             description=body.description,
             timezone=body.timezone,
@@ -54,12 +59,12 @@ async def update_group_route(
     group_id: GroupId,
     body: GroupUpdateRequest,
     group_service: FromDishka[GroupService],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> GetGroupResponse:
     try:
         group = await group_service.update_group(
             group_id=group_id,
-            editor_id=master_id,
+            master_id=current_user.db_user.id,
             **body.model_dump(exclude_none=True),
         )
     except EntityNotFound as e:
@@ -84,7 +89,7 @@ async def update_group_membership(
     slave_id: UserId,
     body: GroupMemberUpdateRequest,
     group_service: FromDishka[GroupService],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> GroupMemberResponse:
     try:
         membership = await group_service.update_membership(
@@ -92,7 +97,7 @@ async def update_group_membership(
             role_id=body.role_id,
             slave_id=slave_id,
             tags=body.tags,
-            master_id=master_id,
+            master_id=current_user.db_user.id,
         )
 
         return GroupMemberResponse(
@@ -115,13 +120,13 @@ async def update_group_membership(
 async def get_group(
     *,
     group_id: GroupId,
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
     group_service: FromDishka[GroupService],
 ) -> GetGroupResponse:
     try:
         group, role = await group_service.get_group(
             group_id=group_id,
-            member_id=master_id,
+            member_id=current_user.db_user.id,
         )
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -137,13 +142,13 @@ async def get_group_user_route(
     group_id: GroupId,
     member_id: UserId,
     group_service: FromDishka[GroupService],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> GroupUserItem:
     try:
         user = await group_service.get_member(
             group_id=group_id,
             user_id=member_id,
-            master_id=master_id,
+            master_id=current_user.db_user.id,
         )
         return GroupUserItem.model_validate(user)
     except EntityNotFound as e:
@@ -159,12 +164,12 @@ async def get_group_user_route(
 async def list_group_users_route(
     group_id: GroupId,
     group_service: FromDishka[GroupService],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> list[GroupUserItem]:
     try:
         group_users = await group_service.get_group_users(
             group_id=group_id,
-            user_id=master_id,
+            user_id=current_user.db_user.id,
         )
         return [GroupUserItem.model_validate(u) for u in group_users]
     except EntityNotFound as e:
@@ -185,13 +190,13 @@ async def remove_group_member_route(
     group_id: GroupId,
     slave_id: UserId,
     group_service: FromDishka[GroupService],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> None:
     try:
         await group_service.remove_user_from_group(
             group_id=group_id,
             slave_id=slave_id,
-            master_id=master_id,
+            master_id=current_user.db_user.id,
         )
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -209,12 +214,12 @@ async def remove_group_member_route(
 async def delete_group_route(
     group_id: GroupId,
     group_service: FromDishka[GroupService],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> None:
     try:
         await group_service.delete_group(
             group_id=group_id,
-            editor_id=master_id,
+            editor_id=current_user.db_user.id,
         )
     except EntityNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -233,11 +238,11 @@ async def delete_group_route(
 async def create_invite_route(
     group_id: GroupId,
     invite_service: FromDishka[InviteService],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> InviteCreateResponse:
     invite_obj = await invite_service.recreate_invite(
         group_id=group_id,
-        creator_id=master_id,
+        creator_id=current_user.db_user.id,
     )
     return InviteCreateResponse(invite_key=InviteKey(invite_obj.key))
 
@@ -245,18 +250,17 @@ async def create_invite_route(
 # TODO: Удалить на проде
 @group_router.post(
     "/join",
-    response_model=GroupMemberResponse,
     status_code=status.HTTP_201_CREATED,
     description="Добавление пользователя в группу",
 )
 async def join_group(
     body: GroupMemberAddRequest,
     group_service: FromDishka[GroupService],
-    master_id: UserId = Header(...),
+    current_user: CurrentUser,
 ) -> GroupMemberResponse:
     try:
         group = await group_service.join_group(
-            user_id=master_id,
+            user_id=current_user.db_user.id,
             invite_key=body.invite_key,
         )
     except EntityNotFound as e:
@@ -267,7 +271,7 @@ async def join_group(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
 
     return GroupMemberResponse(
-        user_id=master_id,
+        user_id=current_user.db_user.id,
         group_id=group.id,
         role_id=MEMBER_ROLE_ID,
     )

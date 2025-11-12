@@ -13,7 +13,7 @@ class UserModel(BaseAlchemyModel, IdMixin[UserId]):
     max_id: Mapped[MaxId] = mapped_column(Integer, nullable=False, unique=True)
     max_chat_id: Mapped[MaxChatId] = mapped_column(Integer, nullable=False, unique=True)
     # username: Mapped[str | None] = mapped_column(String(32), nullable=True)
-    first_name: Mapped[str | None] = mapped_column(String(64), nullable=False)
+    first_name: Mapped[str] = mapped_column(String(64), nullable=False)
     last_name: Mapped[str | None] = mapped_column(String(64), nullable=True)
     phone: Mapped[str | None] = mapped_column(String(16), nullable=True)
     timezone: Mapped[int] = mapped_column(Integer, nullable=False)

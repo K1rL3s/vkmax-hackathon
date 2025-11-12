@@ -59,6 +59,15 @@ class UserService:
             raise UserNotFound
         return user
 
+    async def get_user_by_max_id(
+        self,
+        max_id: MaxId,
+    ) -> UserModel:
+        user = await self._user_repo.get_by_max_id(max_id)
+        if user is None:
+            raise UserNotFound
+        return user
+
     async def update_user(
         self,
         user_id: UserId,
