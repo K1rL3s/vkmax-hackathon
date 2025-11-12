@@ -1,72 +1,15 @@
 from maxhack.core.exceptions import (
     EntityNotFound,
-    GroupNotFound,
     InvalidValue,
-    NotEnoughRights,
     TagNotFound,
-    UserNotFound,
 )
 from maxhack.core.ids import GroupId, RoleId, TagId, UserId
 from maxhack.core.role.ids import CREATOR_ROLE_ID, EDITOR_ROLE_ID, MEMBER_ROLE_ID
-from maxhack.infra.database.models import (
-    TagModel,
-    UserModel,
-    UsersToGroupsModel,
-)
-from maxhack.infra.database.repos.group import GroupRepo
-from maxhack.infra.database.repos.tag import TagRepo
-from maxhack.infra.database.repos.user import UserRepo
-from maxhack.infra.database.repos.users_to_groups import UsersToGroupsRepo
+from maxhack.core.service import BaseService
+from maxhack.infra.database.models import TagModel, UserModel
 
 
-class TagService:
-    def __init__(
-        self,
-        tag_repo: TagRepo,
-        group_repo: GroupRepo,
-        user_repo: UserRepo,
-        users_to_group_repo: UsersToGroupsRepo,
-    ) -> None:
-        self._tag_repo = tag_repo
-        self._group_repo = group_repo
-        self._user_repo = user_repo
-        self._users_to_group_repo = users_to_group_repo
-
-    async def _ensure_group_exists(self, group_id: GroupId) -> None:
-        group = await self._group_repo.get_by_id(group_id)
-        if group is None:
-            raise GroupNotFound
-
-    async def _ensure_user_exists(self, user_id: UserId) -> None:
-        user = await self._user_repo.get_by_id(user_id)
-        if user is None:
-            raise UserNotFound
-
-    async def _ensure_tag_exists(
-        self,
-        tag_id: TagId,
-        group_id: GroupId,
-    ) -> TagModel:
-        tag = await self._tag_repo.get_by_id(tag_id)
-        if tag is None or tag.group_id != group_id:
-            raise TagNotFound
-        return tag
-
-    async def _ensure_membership_role(
-        self,
-        *,
-        user_id: UserId,
-        group_id: GroupId,
-        allowed_roles: set[int],
-    ) -> UsersToGroupsModel:
-        membership = await self._users_to_group_repo.get_membership(
-            user_id=user_id,
-            group_id=group_id,
-        )
-        if membership is None or membership.role_id not in allowed_roles:
-            raise NotEnoughRights("Недостаточно прав")
-        return membership
-
+class TagService(BaseService):
     async def create_tag(
         self,
         group_id: GroupId,
@@ -99,7 +42,7 @@ class TagService:
         color: str | None = None,
     ) -> TagModel:
         await self._ensure_group_exists(group_id)
-        tag = await self._ensure_tag_exists(tag_id, group_id)
+        await self._ensure_tag_exists(tag_id)
 
         await self._ensure_membership_role(
             user_id=master_id,
@@ -128,7 +71,7 @@ class TagService:
         master_id: UserId,
     ) -> None:
         await self._ensure_group_exists(group_id)
-        await self._ensure_tag_exists(tag_id, group_id)
+        await self._ensure_tag_exists(tag_id)
 
         await self._ensure_membership_role(
             user_id=master_id,
@@ -146,7 +89,7 @@ class TagService:
         master_id: UserId,
     ) -> None:
         await self._ensure_group_exists(group_id)
-        tag = await self._ensure_tag_exists(tag_id, group_id)
+        tag = await self._ensure_tag_exists(tag_id)
 
         await self._ensure_membership_role(
             user_id=master_id,
@@ -169,10 +112,7 @@ class TagService:
         if existing is not None:
             raise InvalidValue("Тег уже назначен пользователю")
 
-        await self._tag_repo.assign_tags_to_user(
-            user_id,
-            tag.id,
-        )
+        await self._tag_repo.assign_tags_to_user(user_id, tag.id)
 
     async def remove_tag_from_user(
         self,
@@ -182,7 +122,7 @@ class TagService:
         master_id: UserId,
     ) -> None:
         await self._ensure_group_exists(group_id)
-        await self._ensure_tag_exists(tag_id, group_id)
+        await self._ensure_tag_exists(tag_id)
 
         await self._ensure_membership_role(
             user_id=master_id,
@@ -242,7 +182,7 @@ class TagService:
         master_id: UserId,
     ) -> list[tuple[UserModel, RoleId]]:
         await self._ensure_group_exists(group_id)
-        await self._ensure_tag_exists(tag_id, group_id)
+        await self._ensure_tag_exists(tag_id)
 
         await self._ensure_membership_role(
             user_id=master_id,

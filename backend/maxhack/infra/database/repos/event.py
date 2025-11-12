@@ -13,7 +13,6 @@ from maxhack.infra.database.models import (
 )
 from maxhack.infra.database.repos.base import BaseAlchemyRepo
 
-
 logger = logging.getLogger(__name__)
 
 

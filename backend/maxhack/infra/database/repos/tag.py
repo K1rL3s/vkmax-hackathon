@@ -104,8 +104,7 @@ class TagRepo(BaseAlchemyRepo):
             .where(UsersToTagsModel.tag_id == tag_id)
         )
 
-        result = (await self._session.execute(stmt)).all()
-        return result
+        return list((await self._session.execute(stmt)).all())
 
     async def update_tag(self, tag_id: TagId, **values: Any) -> TagModel | None:
         stmt = (

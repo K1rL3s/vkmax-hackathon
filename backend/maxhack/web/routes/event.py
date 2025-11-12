@@ -111,11 +111,13 @@ async def update_event_route(
             user_id=master_id,
             event_update_model=EventUpdate(
                 **body.model_dump(exclude={"cron"}),
-                cron=Cron(
-                    **body.cron.model_dump(),
-                )
-                if body.cron
-                else None,
+                cron=(
+                    Cron(
+                        **body.cron.model_dump(),
+                    )
+                    if body.cron
+                    else None
+                ),
             ),
         )
         return await EventResponse.from_orm_async(event, session)
@@ -157,7 +159,7 @@ async def add_user_to_event_route(
     try:
         await event_service.add_user_to_event(
             event_id=event_id,
-            target_user_id=body.user_ids,
+            target_user_ids=body.user_ids,
             user_id=master_id,
         )
     except EntityNotFound as e:

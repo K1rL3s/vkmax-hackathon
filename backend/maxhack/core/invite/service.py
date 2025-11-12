@@ -1,62 +1,15 @@
 from typing import cast
 
-from maxhack.core.exceptions import (
-    GroupNotFound,
-    InviteNotFound,
-    NotEnoughRights,
-    UserNotFound,
-)
+from maxhack.core.exceptions import InviteNotFound
 from maxhack.core.ids import GroupId, InviteKey, UserId
 from maxhack.core.role.ids import CREATOR_ROLE_ID, EDITOR_ROLE_ID
+from maxhack.core.service import BaseService
 from maxhack.core.utils.datehelp import datetime_now
-from maxhack.infra.database.models import GroupModel, InviteModel, UsersToGroupsModel
-from maxhack.infra.database.repos.group import GroupRepo
-from maxhack.infra.database.repos.invite import InviteRepo
-from maxhack.infra.database.repos.user import UserRepo
-from maxhack.infra.database.repos.users_to_groups import UsersToGroupsRepo
+from maxhack.infra.database.models import GroupModel, InviteModel
 from maxhack.utils.utils import generate_invite_key
 
 
-class InviteService:
-    def __init__(
-        self,
-        invite_repo: InviteRepo,
-        group_repo: GroupRepo,
-        user_repo: UserRepo,
-        users_to_groups_repo: UsersToGroupsRepo,
-    ) -> None:
-        self._invite_repo = invite_repo
-        self._group_repo = group_repo
-        self._user_repo = user_repo
-        self._users_to_groups_repo = users_to_groups_repo
-
-    async def _ensure_group_exists(self, group_id: GroupId | None) -> None:
-        if group_id is None:
-            return
-        group = await self._group_repo.get_by_id(group_id)
-        if group is None:
-            raise GroupNotFound
-
-    async def _ensure_user_exists(self, user_id: UserId) -> None:
-        user = await self._user_repo.get_by_id(user_id)
-        if user is None:
-            raise UserNotFound
-
-    async def _ensure_membership_role(
-        self,
-        *,
-        user_id: UserId,
-        group_id: GroupId,
-        allowed_roles: set[int],
-    ) -> UsersToGroupsModel:
-        membership = await self._users_to_groups_repo.get_membership(
-            user_id=user_id,
-            group_id=group_id,
-        )
-        if membership is None or membership.role_id not in allowed_roles:
-            raise NotEnoughRights
-        return membership
-
+class InviteService(BaseService):
     async def recreate_invite(
         self,
         group_id: GroupId,
