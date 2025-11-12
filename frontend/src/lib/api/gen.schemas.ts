@@ -14,296 +14,293 @@
 
  * OpenAPI spec version: 0.1.0
  */
+export type CronSchemaDate = string | null;
+
+export interface CronSchema {
+  date?: CronSchemaDate;
+  everyDay?: boolean;
+  everyWeek?: boolean;
+  everyMonth?: boolean;
+}
+
 export interface EventAddTagRequest {
-  tagIds: Array<number>
+  tagIds: number[];
 }
 
 export interface EventAddUserRequest {
-  userIds: Array<number>
+  userIds: number[];
 }
 
-export type EventCreateRequestDescription = string | null
+export type EventCreateRequestDescription = string | null;
 
-export type EventCreateRequestTimezone = number | null
+export type EventCreateRequestTimezone = number | null;
 
-export type EventCreateRequestGroupId = number | null
-
-export type EventCreateRequestUserIds = Array<number> | null
-
-export type EventCreateRequestTagIds = Array<number> | null
+export type EventCreateRequestGroupId = number | null;
 
 export interface EventCreateRequest {
-  title: string
-  description?: EventCreateRequestDescription
-  eventDate: string
-  timezone?: EventCreateRequestTimezone
-  everyDay?: boolean
-  everyWeek?: boolean
-  everyMonth?: boolean
-  type: string
-  groupId?: EventCreateRequestGroupId
-  userIds?: EventCreateRequestUserIds
-  tagIds?: EventCreateRequestTagIds
+  title: string;
+  description?: EventCreateRequestDescription;
+  timezone?: EventCreateRequestTimezone;
+  /** Тип события */
+  type?: 'event';
+  cron: CronSchema;
+  groupId?: EventCreateRequestGroupId;
+  /** Упомянаемые пользователи */
+  participantsIds?: number[];
+  /** Привязанные теги */
+  tagsIds?: number[];
+  minutesBefore?: number;
 }
 
-export type EventResponseDescription = string | null
+export type EventResponseDescription = string | null;
 
-export type EventResponseGroupId = number | null
+export type EventResponseGroupId = number | null;
 
 export interface EventResponse {
-  id: number
-  title: string
-  description?: EventResponseDescription
-  cron: string
-  isCycle: boolean
-  type: string
-  creatorId: number
-  groupId?: EventResponseGroupId
-  timezone: number
+  id: number;
+  title: string;
+  description?: EventResponseDescription;
+  cron: string;
+  isCycle: boolean;
+  type: string;
+  creatorId: number;
+  groupId?: EventResponseGroupId;
+  timezone: number;
 }
 
-export type EventUpdateRequestTitle = string | null
+export type EventUpdateRequestTitle = string | null;
 
-export type EventUpdateRequestDescription = string | null
+export type EventUpdateRequestDescription = string | null;
 
-export type EventUpdateRequestIsCycle = boolean | null
+export type EventUpdateRequestType = string | null;
 
-export type EventUpdateRequestType = string | null
+export type EventUpdateRequestTimezone = number | null;
 
-export type EventUpdateRequestTimezone = number | null
-
-export type EventUpdateRequestEventDate = string | null
+export type EventUpdateRequestCron = CronSchema | null;
 
 export interface EventUpdateRequest {
-  title?: EventUpdateRequestTitle
-  description?: EventUpdateRequestDescription
-  isCycle?: EventUpdateRequestIsCycle
-  type?: EventUpdateRequestType
-  timezone: EventUpdateRequestTimezone
-  eventDate: EventUpdateRequestEventDate
-  everyDay: boolean
-  everyWeek: boolean
-  everyMonth: boolean
+  title?: EventUpdateRequestTitle;
+  description?: EventUpdateRequestDescription;
+  type?: EventUpdateRequestType;
+  timezone?: EventUpdateRequestTimezone;
+  cron?: EventUpdateRequestCron;
 }
 
 export interface EventsResponse {
-  events: Array<EventResponse>
+  events: EventResponse[];
 }
 
 export interface GetGroupResponse {
-  group: GroupResponse
-  role: RoleResponse
+  group: GroupResponse;
+  role: RoleResponse;
 }
 
-export type GroupCreateRequestDescription = string | null
+export type GroupCreateRequestDescription = string | null;
 
-export type GroupCreateRequestTimezone = number | null
+export type GroupCreateRequestTimezone = number | null;
 
 export interface GroupCreateRequest {
-  name: string
-  description?: GroupCreateRequestDescription
-  timezone?: GroupCreateRequestTimezone
+  name: string;
+  description?: GroupCreateRequestDescription;
+  timezone?: GroupCreateRequestTimezone;
 }
 
 export interface GroupMemberAddRequest {
-  inviteKey: string
+  inviteKey: string;
 }
 
 export interface GroupMemberResponse {
-  userId: number
-  groupId: number
-  roleId: number
+  userId: number;
+  groupId: number;
+  roleId: number;
 }
 
 /**
  * Идентификатор роли
  */
-export type GroupMemberUpdateRequestRoleId = number | null
+export type GroupMemberUpdateRequestRoleId = number | null;
 
 /**
  * Список идентификаторов тегов
  */
-export type GroupMemberUpdateRequestTags = Array<number> | null
+export type GroupMemberUpdateRequestTags = number[] | null;
 
 export interface GroupMemberUpdateRequest {
   /** Идентификатор роли */
-  roleId?: GroupMemberUpdateRequestRoleId
+  roleId?: GroupMemberUpdateRequestRoleId;
   /** Список идентификаторов тегов */
-  tags?: GroupMemberUpdateRequestTags
+  tags?: GroupMemberUpdateRequestTags;
 }
 
-export type GroupResponseDescription = string | null
+export type GroupResponseDescription = string | null;
 
 export interface GroupResponse {
-  id: number
-  name: string
-  description?: GroupResponseDescription
-  timezone?: number
+  id: number;
+  name: string;
+  description?: GroupResponseDescription;
+  timezone?: number;
 }
 
-export type GroupUpdateRequestDescription = string | null
+export type GroupUpdateRequestDescription = string | null;
 
-export type GroupUpdateRequestTimezone = number | null
+export type GroupUpdateRequestTimezone = number | null;
 
 export interface GroupUpdateRequest {
-  name: string
-  description?: GroupUpdateRequestDescription
-  timezone?: GroupUpdateRequestTimezone
+  name: string;
+  description?: GroupUpdateRequestDescription;
+  timezone?: GroupUpdateRequestTimezone;
 }
 
-export type GroupUserItemFirstName = string | null
+export type GroupUserItemFirstName = string | null;
 
-export type GroupUserItemLastName = string | null
+export type GroupUserItemLastName = string | null;
 
-export type GroupUserItemPhone = string | null
+export type GroupUserItemPhone = string | null;
 
 export interface GroupUserItem {
-  userId: number
-  groupId: number
-  role: RoleResponse
-  maxId: number
-  firstName?: GroupUserItemFirstName
-  lastName?: GroupUserItemLastName
-  phone?: GroupUserItemPhone
+  userId: number;
+  groupId: number;
+  role: RoleResponse;
+  maxId: number;
+  firstName?: GroupUserItemFirstName;
+  lastName?: GroupUserItemLastName;
+  phone?: GroupUserItemPhone;
 }
 
 export interface HTTPValidationError {
-  detail?: Array<ValidationError>
-}
-
-export interface InviteCreateRequest {
-  expiresAt: string
+  detail?: ValidationError[];
 }
 
 export interface InviteCreateResponse {
-  inviteKey: string
+  inviteKey: string;
 }
 
 export interface RespondChangeResponse {
-  status: string
+  status: string;
 }
 
 export interface RespondResponse {
-  id: number
-  userId: number
-  eventId: number
-  status: string
+  id: number;
+  userId: number;
+  eventId: number;
+  status: string;
 }
 
-export type RoleResponseName =
-  (typeof RoleResponseName)[keyof typeof RoleResponseName]
+export type RoleResponseName = typeof RoleResponseName[keyof typeof RoleResponseName];
 
- 
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const RoleResponseName = {
   Босс: 'Босс',
   Начальник: 'Начальник',
   Участник: 'Участник',
-} as const
+} as const;
 
 export interface RoleResponse {
-  id: number
-  name: RoleResponseName
+  id: number;
+  name: RoleResponseName;
 }
 
 export interface TagAssignRequest {
-  userId: number
-  tagId: number
+  userId: number;
+  tagId: number;
 }
 
-export type TagCreateRequestDescriptions = string | null
+export type TagCreateRequestDescriptions = string | null;
 
 export interface TagCreateRequest {
-  name: string
-  descriptions?: TagCreateRequestDescriptions
-  color: string
+  name: string;
+  descriptions?: TagCreateRequestDescriptions;
+  color: string;
 }
 
-export type TagResponseDescriptions = string | null
+export type TagResponseDescriptions = string | null;
 
 export interface TagResponse {
-  id: number
-  groupId: number
-  name: string
-  descriptions?: TagResponseDescriptions
-  color: string
+  id: number;
+  groupId: number;
+  name: string;
+  descriptions?: TagResponseDescriptions;
+  color: string;
 }
 
-export type TagUpdateRequestName = string | null
+export type TagUpdateRequestName = string | null;
 
-export type TagUpdateRequestDescriptions = string | null
+export type TagUpdateRequestDescriptions = string | null;
 
-export type TagUpdateRequestColor = string | null
+export type TagUpdateRequestColor = string | null;
 
 export interface TagUpdateRequest {
-  name?: TagUpdateRequestName
-  descriptions?: TagUpdateRequestDescriptions
-  color?: TagUpdateRequestColor
+  name?: TagUpdateRequestName;
+  descriptions?: TagUpdateRequestDescriptions;
+  color?: TagUpdateRequestColor;
 }
 
-export type TagUserItemLastName = string | null
+export type TagUserItemLastName = string | null;
 
 export interface TagUserItem {
-  userId: number
-  maxId: number
-  firstName: string
-  lastName?: TagUserItemLastName
-  phone: string
-  roleId: number
+  userId: number;
+  maxId: number;
+  firstName: string;
+  lastName?: TagUserItemLastName;
+  phone: string;
+  roleId: number;
 }
 
-export type UserCreateRequestLastName = string | null
+export type UserCreateRequestLastName = string | null;
 
-export type UserCreateRequestPhone = string | null
+export type UserCreateRequestPhone = string | null;
 
 export interface UserCreateRequest {
-  maxId: number
-  maxChatId: number
-  firstName: string
-  lastName?: UserCreateRequestLastName
-  phone?: UserCreateRequestPhone
-  timezone?: number
+  maxId: number;
+  maxChatId: number;
+  firstName: string;
+  lastName?: UserCreateRequestLastName;
+  phone?: UserCreateRequestPhone;
+  timezone?: number;
 }
 
-export type UserGroupItemDescription = string | null
+export type UserGroupItemDescription = string | null;
 
 export interface UserGroupItem {
-  groupId: number
-  name: string
-  description?: UserGroupItemDescription
-  roleId: number
+  groupId: number;
+  name: string;
+  description?: UserGroupItemDescription;
+  roleId: number;
 }
 
 export interface UserGroupsResponse {
-  groups: Array<UserGroupItem>
+  groups: UserGroupItem[];
 }
 
-export type UserResponseLastName = string | null
+export type UserResponseLastName = string | null;
 
 export interface UserResponse {
-  id: number
-  maxId: number
-  firstName: string
-  lastName?: UserResponseLastName
-  phone: string
-  timezone: number
+  id: number;
+  maxId: number;
+  firstName: string;
+  lastName?: UserResponseLastName;
+  phone: string;
+  timezone: number;
 }
 
-export type UserUpdateRequestFirstName = string | null
+export type UserUpdateRequestFirstName = string | null;
 
-export type UserUpdateRequestLastName = string | null
+export type UserUpdateRequestLastName = string | null;
 
-export type UserUpdateRequestPhone = string | null
+export type UserUpdateRequestPhone = string | null;
 
 export interface UserUpdateRequest {
-  firstName?: UserUpdateRequestFirstName
-  lastName?: UserUpdateRequestLastName
-  phone?: UserUpdateRequestPhone
+  firstName?: UserUpdateRequestFirstName;
+  lastName?: UserUpdateRequestLastName;
+  phone?: UserUpdateRequestPhone;
 }
 
-export type ValidationErrorLocItem = string | number
+export type ValidationErrorLocItem = string | number;
 
 export interface ValidationError {
-  loc: Array<ValidationErrorLocItem>
-  msg: string
-  type: string
+  loc: ValidationErrorLocItem[];
+  msg: string;
+  type: string;
 }
+

@@ -1,3 +1,4 @@
+import { getGroupEventsRouteEventsGroupsGroupIdGet } from '@/lib/api/events/events'
 import { useQuery } from '@tanstack/react-query'
 
 const EVENTS_MOCK: Array<{
@@ -233,6 +234,13 @@ export function useEventsList() {
     > => {
       return Promise.resolve(EVENTS_MOCK)
     },
+  })
+}
+
+export function useGroupEvents(groupId: number) {
+  return useQuery({
+    queryKey: ['events', 'groups', groupId],
+    queryFn: () => getGroupEventsRouteEventsGroupsGroupIdGet(groupId),
   })
 }
 

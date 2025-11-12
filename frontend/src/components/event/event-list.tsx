@@ -3,21 +3,18 @@ import { forwardRef, useImperativeHandle, useMemo, useRef } from 'react'
 import { Devider } from '../ui/devider'
 import { EventCard } from './event-card'
 
+export type CalendarEvent = {
+  id: number
+  title: string
+  date: Date
+  type: 'message' | 'event'
+}
+
 export const EventList = forwardRef(function EventList(
   {
     events,
   }: {
-    events: Array<{
-      id: number
-      title: string
-      date: Date
-      type: 'message' | 'event'
-      group: {
-        id: number
-        name: string
-      }
-      creator: { firstName: string; lastName: string }
-    }>
+    events: Array<CalendarEvent>
   },
   ref,
 ) {
