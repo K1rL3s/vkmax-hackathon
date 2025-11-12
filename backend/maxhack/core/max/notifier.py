@@ -43,7 +43,7 @@ class MaxNotifier:
                 ),
             ],
         ]
-        attachments = InlineKeyboardAttachmentRequest.factory(keyboard)
+        attachments = [InlineKeyboardAttachmentRequest.factory(keyboard)]
 
         await self._max_sender.send_message(
             text=text,
