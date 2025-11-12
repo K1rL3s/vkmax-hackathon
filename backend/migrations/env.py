@@ -8,7 +8,7 @@ from sqlalchemy import Connection, pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from maxhack.config import load_config
-from maxhack.core.utils.datehelp import MOSCOW_TIMEZONE, datetime_now
+from maxhack.core.utils.datehelp import datetime_now
 from maxhack.infra.database.models.base import BaseAlchemyModel
 
 try:
@@ -32,7 +32,7 @@ def process_revision_directives(
 ) -> None:
     migration_script = directives[0]
     now = datetime_now()
-    migration_script.rev_id = now.astimezone(MOSCOW_TIMEZONE).strftime("%Y.%m.%d_%H.%M")
+    migration_script.rev_id = now.strftime("%Y.%m.%d_%H.%M")
 
 
 def run_migrations_offline() -> None:
