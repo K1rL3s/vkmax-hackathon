@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from sqlalchemy import and_, delete, func, select, update
@@ -11,6 +12,9 @@ from maxhack.infra.database.models import (
     UsersToEvents,
 )
 from maxhack.infra.database.repos.base import BaseAlchemyRepo
+
+
+logger = logging.getLogger(__name__)
 
 
 class EventRepo(BaseAlchemyRepo):
@@ -65,6 +69,7 @@ class EventRepo(BaseAlchemyRepo):
             event = await self._session.scalar(stmt)
             await self._session.flush()
         except (ProgrammingError, IntegrityError) as e:
+            logger.exception(str(e))
             raise RuntimeError from e
 
         return event

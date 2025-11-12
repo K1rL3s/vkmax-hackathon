@@ -2,6 +2,7 @@ from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, HTTPException, Header, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from maxhack.core.event.models import Cron, EventCreate, EventUpdate
 from maxhack.core.event.service import EventService
 from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
 from maxhack.core.ids import EventId, GroupId, RespondId, UserId
@@ -34,18 +35,11 @@ async def create_event_route(
 ) -> EventResponse:
     try:
         event = await event_service.create_event(
-            title=body.title,
-            description=body.description,
-            event_date=body.event_date,
-            every_day=body.every_day,
-            every_week=body.every_week,
-            every_month=body.every_month,
-            type=body.type,
-            creator_id=master_id,
-            group_id=body.group_id,
-            user_ids=body.user_ids,
-            tag_ids=body.tag_ids,
-            timezone=body.timezone,
+            EventCreate(
+                **body.model_dump(exclude={"cron"}),
+                cron=Cron(**body.cron.model_dump()),
+                creator_id=master_id,
+            ),
         )
         return await EventResponse.from_orm_async(event, session)
     except EntityNotFound as e:
@@ -115,14 +109,14 @@ async def update_event_route(
         event = await event_service.update_event(
             event_id=event_id,
             user_id=master_id,
-            title=body.title,
-            description=body.description,
-            type=body.type,
-            timezone=body.timezone,
-            event_date=body.event_date,
-            every_day=body.every_day,
-            every_week=body.every_week,
-            every_month=body.every_month,
+            event_update_model=EventUpdate(
+                **body.model_dump(exclude={"cron"}),
+                cron=Cron(
+                    **body.cron.model_dump(),
+                )
+                if body.cron
+                else None,
+            ),
         )
         return await EventResponse.from_orm_async(event, session)
     except EntityNotFound as e:

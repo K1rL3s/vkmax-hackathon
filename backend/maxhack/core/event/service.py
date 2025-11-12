@@ -1,11 +1,17 @@
 from datetime import datetime
 
+from maxhack.core.event.models import EventCreate, EventUpdate
 from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
 from maxhack.core.group.service import GroupService
 from maxhack.core.ids import EventId, GroupId, TagId, UserId
 from maxhack.core.responds.service import RespondService
 from maxhack.core.role.ids import CREATOR_ROLE_ID, EDITOR_ROLE_ID, MEMBER_ROLE_ID
-from maxhack.infra.database.models import EventModel, TagModel, UsersToGroupsModel
+from maxhack.infra.database.models import (
+    EventModel,
+    TagModel,
+    UserModel,
+    UsersToGroupsModel,
+)
 from maxhack.infra.database.repos.event import EventRepo
 from maxhack.infra.database.repos.group import GroupRepo
 from maxhack.infra.database.repos.tag import TagRepo
@@ -42,10 +48,11 @@ class EventService:
         if group is None:
             raise EntityNotFound("Группа не найдена")
 
-    async def _ensure_user_exists(self, user_id: UserId) -> None:
+    async def _ensure_user_exists(self, user_id: UserId) -> UserModel:
         user = await self._user_repo.get_by_id(user_id)
         if user is None:
             raise EntityNotFound("Пользователь не найден")
+        return user
 
     async def _ensure_event_exists(self, event_id: EventId) -> EventModel:
         event = await self._event_repo.get_by_id(event_id)
@@ -103,64 +110,70 @@ class EventService:
 
     async def create_event(
         self,
-        title: str,
-        description: str | None,
-        event_date: datetime | None,
-        every_day: bool,
-        every_week: bool,
-        every_month: bool,
-        type: str,
-        creator_id: UserId,
-        group_id: GroupId | None,
-        user_ids: list[UserId] | None = None,
-        tag_ids: list[TagId] | None = None,
-        timezone: int | None = None,
-        minutes_before: int = 60,
+        event_create_model: EventCreate,
     ) -> EventModel:
-        await self._ensure_user_exists(creator_id)
-        group, _ = await self._group_service.get_group(creator_id, group_id)
+        creator = await self._ensure_user_exists(event_create_model.creator_id)
 
-        cron = create_cron_expression(event_date, every_day, every_week, every_month)
-        is_cycle = any([every_day, every_week, every_month])
+        is_cycle = any(event_create_model.to_dict().values())
 
-        if timezone is None:
-            timezone = group.timezone
-
-        if group_id is not None:
-            await self._ensure_membership_role(
-                user_id=creator_id,
-                group_id=group_id,
-                allowed_roles={CREATOR_ROLE_ID, EDITOR_ROLE_ID},
+        if event_create_model.group_id:
+            group, role = await self._group_service.get_group(
+                member_id=event_create_model.creator_id,
+                group_id=event_create_model.group_id,
             )
+
+            if role.id not in {CREATOR_ROLE_ID, EDITOR_ROLE_ID}:
+                raise NotEnoughRights("Недостаточно прав для создания события в группе")
+
+            event_create_model.timezone = group.timezone
+
         event = await self._event_repo.create(
-            title=title,
-            description=description,
-            cron=cron,
+            title=event_create_model.title,
+            description=event_create_model.description,
+            cron=event_create_model.cron.expression,
             is_cycle=is_cycle,
-            type=type,
-            creator_id=creator_id,
-            group_id=group_id,
-            timezone=timezone,
+            type=event_create_model.type,
+            creator_id=event_create_model.creator_id,
+            group_id=event_create_model.group_id,
+            timezone=event_create_model.timezone
+            if event_create_model.timezone
+            else creator.timezone,
+        )
+        await self.add_tag_to_event(
+            event.id,
+            event_create_model.tags_ids,
+            user_id=creator.id,
+        )
+        await self.add_user_to_event(
+            event.id,
+            event_create_model.participants_ids,
+            user_id=creator.id,
         )
 
-        await self.add_tag_to_event(event.id, tag_ids, user_id=creator_id)
-        await self.add_user_to_event(event.id, user_ids, user_id=creator_id)
+        match event_create_model.type:
+            case "event":
+                if event_create_model.group_id:
+                    for tid in event_create_model.tags_ids:
+                        users = await self._tag_repo.list_tag_users(
+                            group_id=event_create_model.group_id,
+                            tag_id=tid,
+                        )
 
-        if type == "event":
-            for tag_id in tag_ids:
-                user, _ = await self._tag_repo.list_tag_users(
-                    group_id=event.group_id,
-                    tag_id=tag_id,
-                )
-                user_ids.append(user.id)
-            await self._respond_service.create(
-                list(set(user_ids)),
-                event.id,
-                status="mb",
-            )
+                        event_create_model.participants_ids.extend(
+                            [u.id for u, _ in users],
+                        )
+
+                    await self._respond_service.create(
+                        user_ids=list(set(event_create_model.participants_ids)),
+                        event_id=event.id,
+                        status="mb",
+                    )
+            case _:
+                ...
+
         await self._event_repo.create_notify(
             event_id=event.id,
-            minutes_before=minutes_before,
+            minutes_before=event_create_model.minutes_before,
         )
 
         return event
@@ -169,47 +182,28 @@ class EventService:
         self,
         event_id: EventId,
         user_id: UserId,
-        event_date: datetime | None,
-        every_day: bool,
-        every_week: bool,
-        every_month: bool,
-        title: str | None = None,
-        description: str | None = None,
-        type: str | None = None,
-        timezone: int = 0,
+        event_update_model: EventUpdate,
     ) -> EventModel:
         event = await self._ensure_event_exists(event_id)
 
-        if event.group_id is not None:
+        if event.group_id:
             await self._ensure_membership_role(
+                allowed_roles={CREATOR_ROLE_ID, EDITOR_ROLE_ID},
                 user_id=user_id,
                 group_id=event.group_id,
-                allowed_roles={CREATOR_ROLE_ID, EDITOR_ROLE_ID},
             )
         elif event.creator_id != user_id:
             raise NotEnoughRights("Недостаточно прав для редактирования события")
 
-        values = {}
-        if title is not None:
-            values["title"] = title
-        if description is not None:
-            values["description"] = description
-        if type is not None:
-            values["type"] = type
-        if event_date is not None:
-            cron = create_cron_expression(
-                event_date,
-                every_day,
-                every_week,
-                every_month,
-            )
-            is_cycle = any([every_day, every_week, every_month])
-            values["is_cycle"] = is_cycle
-            values["cron"] = cron
+        is_cycle = event.is_cycle
+        if event_update_model.cron:
+            is_cycle = any([event_update_model.cron.to_dict(exclude={"date"}).values()])
 
-        values["timezone"] = timezone
-
-        updated_event = await self._event_repo.update(event_id, **values)
+        updated_event = await self._event_repo.update(
+            event_id,
+            **event_update_model.to_dict(exclude_none=True),
+            is_cycle=is_cycle,
+        )
         if updated_event is None:
             raise EntityNotFound("Событие не найдено")
 
@@ -218,7 +212,6 @@ class EventService:
     async def delete_event(self, event_id: EventId, user_id: UserId) -> None:
         event = await self._ensure_event_exists(event_id)
 
-        # Проверяем права: только создатель или пользователь с ролью 1 или 2 в группе
         if event.group_id is not None:
             await self._ensure_membership_role(
                 user_id=user_id,
