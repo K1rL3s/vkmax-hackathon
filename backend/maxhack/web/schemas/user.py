@@ -19,6 +19,8 @@ class UserUpdateRequest(Model):
 class UserResponse(Model):
     id: int
     max_id: int
+    max_chat_id: int
+    max_photo: str | None = None
     first_name: str
     last_name: str | None = None
     phone: str
