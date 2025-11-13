@@ -31,14 +31,11 @@ def generate_invite_key() -> InviteKey:
 
 
 def create_cron_expression(
-    event_date: datetime | None,
+    event_date: datetime,
     every_day: bool,
     every_week: bool,
     every_month: bool,
 ) -> str:
-
-    if event_date is None:
-        raise ValueError("event_date обязателен для создания cron выражения")
     event_date = event_date.astimezone(UTC_TIMEZONE)
     minute = event_date.minute
     hour = event_date.hour

@@ -11,7 +11,7 @@ EventType = Literal["event"]
 
 @dataclass(kw_only=True)
 class Cron(DomainModel):
-    date: datetime | None = field(default=None)
+    date: datetime
     every_day: bool = field(default=False)
     every_week: bool = field(default=False)
     every_month: bool = field(default=False)

@@ -9,7 +9,7 @@ from maxhack.core.ids import EventId, GroupId, RespondId, TagId, UserId
 
 
 class CronSchema(Model):
-    date: datetime | None = None
+    date: datetime
     every_day: bool = False
     every_week: bool = False
     every_month: bool = False

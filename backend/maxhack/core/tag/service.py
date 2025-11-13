@@ -6,7 +6,10 @@ from maxhack.core.exceptions import (
 from maxhack.core.ids import GroupId, RoleId, TagId, UserId
 from maxhack.core.role.ids import CREATOR_ROLE_ID, EDITOR_ROLE_ID
 from maxhack.core.service import BaseService
-from maxhack.database.models import TagModel, UserModel
+from maxhack.infra.database.models import TagModel, UserModel
+from maxhack.logger.setup import get_logger
+
+logger = get_logger(__name__)
 
 
 class TagService(BaseService):
@@ -18,6 +21,9 @@ class TagService(BaseService):
         description: str | None,
         color: str | None,
     ) -> TagModel:
+        logger.debug(
+            f"Creating tag with name '{name}' in group {group_id} by user {master_id}",
+        )
         await self._ensure_group_exists(group_id)
         await self._ensure_membership_role(
             user_id=master_id,
@@ -25,12 +31,14 @@ class TagService(BaseService):
             allowed_roles=(CREATOR_ROLE_ID, EDITOR_ROLE_ID),
         )
 
-        return await self._tag_repo.create_tag(
+        tag = await self._tag_repo.create_tag(
             group_id=group_id,
             name=name,
             description=description,
             color=color,
         )
+        logger.info(f"Tag {tag.id} created successfully in group {group_id}")
+        return tag
 
     async def update_tag(
         self,
@@ -41,6 +49,9 @@ class TagService(BaseService):
         description: str | None = None,
         color: str | None = None,
     ) -> TagModel:
+        logger.debug(
+            f"Updating tag {tag_id} in group {group_id} by user {master_id} with name='{name}', description='{description}', color='{color}'",
+        )
         await self._ensure_group_exists(group_id)
         await self._ensure_tag_exists(tag_id)
 
@@ -60,8 +71,10 @@ class TagService(BaseService):
 
         tag = await self._tag_repo.update_tag(tag_id, **values)
         if tag is None:
+            logger.error(f"Tag {tag_id} not found for update")
             raise TagNotFound
 
+        logger.info(f"Tag {tag_id} updated successfully")
         return tag
 
     async def delete_tag(
@@ -70,6 +83,7 @@ class TagService(BaseService):
         tag_id: TagId,
         master_id: UserId,
     ) -> None:
+        logger.debug(f"Deleting tag {tag_id} in group {group_id} by user {master_id}")
         await self._ensure_group_exists(group_id)
         await self._ensure_tag_exists(tag_id)
 
@@ -80,6 +94,7 @@ class TagService(BaseService):
         )
 
         await self._tag_repo.delete_tag(tag_id, group_id)
+        logger.info(f"Tag {tag_id} in group {group_id} deleted successfully")
 
     async def assign_tag_to_user(
         self,
@@ -88,6 +103,9 @@ class TagService(BaseService):
         user_id: UserId,
         master_id: UserId,
     ) -> None:
+        logger.debug(
+            f"Assigning tag {tag_id} to user {user_id} in group {group_id} by user {master_id}",
+        )
         await self._ensure_group_exists(group_id)
         tag = await self._ensure_tag_exists(tag_id)
 
@@ -109,9 +127,11 @@ class TagService(BaseService):
             tag_id=tag.id,
         )
         if existing is not None:
+            logger.warning(f"Tag {tag_id} already assigned to user {user_id}")
             raise InvalidValue("Тег уже назначен пользователю")
 
         await self._tag_repo.assign_tags_to_user(user_id, tag.id)
+        logger.info(f"Tag {tag_id} assigned to user {user_id} successfully")
 
     async def remove_tag_from_user(
         self,
@@ -120,6 +140,9 @@ class TagService(BaseService):
         user_id: UserId,
         master_id: UserId,
     ) -> None:
+        logger.debug(
+            f"Removing tag {tag_id} from user {user_id} in group {group_id} by user {master_id}",
+        )
         await self._ensure_group_exists(group_id)
         await self._ensure_tag_exists(tag_id)
 
@@ -134,22 +157,27 @@ class TagService(BaseService):
             tag_id=tag_id,
         )
         if assignment is None:
+            logger.error(f"Tag {tag_id} is not assigned to user {user_id}")
             raise EntityNotFound("Назначение тега не найдено")
 
         await self._tag_repo.remove_tags_from_user(user_id, tag_id)
+        logger.info(f"Tag {tag_id} removed from user {user_id} successfully")
 
     async def list_group_tags(
         self,
         group_id: GroupId,
         master_id: UserId,
     ) -> list[TagModel]:
+        logger.debug(f"Listing tags for group {group_id} by user {master_id}")
         await self._ensure_group_exists(group_id)
         await self._ensure_membership_role(
             user_id=master_id,
             group_id=group_id,
         )
 
-        return await self._tag_repo.list_group_tags(group_id)
+        tags = await self._tag_repo.list_group_tags(group_id)
+        logger.info(f"Found {len(tags)} tags for group {group_id}")
+        return tags
 
     async def list_user_tags(
         self,
@@ -157,6 +185,9 @@ class TagService(BaseService):
         user_id: UserId,
         master_id: UserId,
     ) -> list[TagModel]:
+        logger.debug(
+            f"Listing tags for user {user_id} in group {group_id} by user {master_id}",
+        )
         await self._ensure_group_exists(group_id)
 
         await self._ensure_membership_role(
@@ -169,7 +200,9 @@ class TagService(BaseService):
             group_id=group_id,
         )
 
-        return await self._tag_repo.list_user_tags(group_id, user_id)
+        tags = await self._tag_repo.list_user_tags(group_id, user_id)
+        logger.info(f"Found {len(tags)} tags for user {user_id} in group {group_id}")
+        return tags
 
     async def list_tag_users(
         self,
@@ -177,6 +210,9 @@ class TagService(BaseService):
         tag_id: TagId,
         master_id: UserId,
     ) -> list[tuple[UserModel, RoleId]]:
+        logger.debug(
+            f"Listing users for tag {tag_id} in group {group_id} by user {master_id}",
+        )
         await self._ensure_group_exists(group_id)
         await self._ensure_tag_exists(tag_id)
 
@@ -185,4 +221,6 @@ class TagService(BaseService):
             group_id=group_id,
         )
 
-        return await self._tag_repo.list_tag_users(group_id, tag_id)
+        users = await self._tag_repo.list_tag_users(group_id, tag_id)
+        logger.info(f"Found {len(users)} users for tag {tag_id} in group {group_id}")
+        return users
