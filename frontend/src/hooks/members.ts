@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { GroupMemberUpdateRequest } from '@/lib/api/gen.schemas'
-import { useMaxUser } from '@/integrations/max-ui/hooks/max-user'
 import {
   getGroupUserRouteGroupsGroupIdUsersMemberIdGet,
   listGroupUsersRouteGroupsGroupIdUsersGet,
@@ -10,11 +9,9 @@ import {
 import { listUserTagsRouteUsersUserIdGroupsGroupIdTagsGet } from '@/lib/api/users/users'
 
 export function useMembers(groupId: number) {
-  const { id } = useMaxUser()
   return useQuery({
     queryKey: ['members', groupId],
-    queryFn: () =>
-      listGroupUsersRouteGroupsGroupIdUsersGet(groupId, { user_id: id }),
+    queryFn: () => listGroupUsersRouteGroupsGroupIdUsersGet(groupId),
   })
 }
 

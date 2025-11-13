@@ -1,6 +1,6 @@
 import axios from 'axios'
 import type { AxiosError, AxiosRequestConfig } from 'axios'
-import { useMaxUser } from '@/integrations/max-ui/hooks/max-user'
+import { useWebAppData } from '@/integrations/max-ui/hooks/max-user'
 
 export const api = axios.create({
   baseURL: import.meta.env.API_URL || 'http://localhost:7001/',
@@ -8,8 +8,9 @@ export const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const { id } = useMaxUser()
-  config.headers.set('master-id', id)
+  const initData = useWebAppData()
+  config.headers.set('WebAppData', initData)
+  console.log('WebAppData', initData)
   return config
 })
 

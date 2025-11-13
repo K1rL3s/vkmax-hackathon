@@ -10,6 +10,11 @@
 
  * OpenAPI spec version: 0.1.0
  */
+import type {
+  CheckInitDataAuthGetParams,
+  WebAppInitData
+} from '../gen.schemas';
+
 import { request } from '.././client';
 
 
@@ -17,15 +22,16 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
   /**
- * Проверка соединения
- * @summary Check Connection
+ * Валидация WebAppData из MAX
+ * @summary Check Init Data
  */
-export const checkConnectionHealthcheckGet = (
-    
- options?: SecondParameter<typeof request<unknown>>,) => {
-      return request<unknown>(
-      {url: `/healthcheck`, method: 'GET'
+export const checkInitDataAuthGet = (
+    params: CheckInitDataAuthGetParams,
+ options?: SecondParameter<typeof request<WebAppInitData>>,) => {
+      return request<WebAppInitData>(
+      {url: `/auth`, method: 'GET',
+        params
     },
       options);
     }
-  export type CheckConnectionHealthcheckGetResult = NonNullable<Awaited<ReturnType<typeof checkConnectionHealthcheckGet>>>
+  export type CheckInitDataAuthGetResult = NonNullable<Awaited<ReturnType<typeof checkInitDataAuthGet>>>

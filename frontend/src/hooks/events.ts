@@ -1,5 +1,5 @@
-import { getGroupEventsRouteEventsGroupsGroupIdGet } from '@/lib/api/events/events'
 import { useQuery } from '@tanstack/react-query'
+import { getGroupEventsRouteEventsGroupsGroupIdGet } from '@/lib/api/events/events'
 
 const EVENTS_MOCK: Array<{
   id: number

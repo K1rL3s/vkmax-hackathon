@@ -8,10 +8,6 @@
 Для каждой сущности предусмотрен определённый набор прав, которые, в зависимости от логики, могут назначаться различному
 набору ролей. Также, помимо основного набора прав, ограничения могут быть выставлены непосредственно на уровне определённых ролей.
 
-### Тестирование
-Для тестирования запросов к API существует служебный токен (обладающий правами суперадминистратора), который можно сконфигурировать в
-конфиг-переменной ``test_token``
-
  * OpenAPI spec version: 0.1.0
  */
 import type {
@@ -20,9 +16,7 @@ import type {
   EventCreateRequest,
   EventResponse,
   EventUpdateRequest,
-  EventsResponse,
-  RespondChangeResponse,
-  RespondResponse
+  EventsResponse
 } from '../gen.schemas';
 
 import { request } from '.././client';
@@ -33,7 +27,8 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
   /**
- * Создание события (может только 1 и 2 роль)
+ * Создать событие (встреча или сообщение) в группе.
+Могут только "Босс" и "Начальник".
  * @summary Create Event Route
  */
 export const createEventRouteEventsPost = (
@@ -47,7 +42,7 @@ export const createEventRouteEventsPost = (
       options);
     }
   /**
- * Добавить тег для события (может только 1 и 2 роль)
+ * Добавить тег для события. Могут только "Босс" и "Начальник".
  * @summary Add Tag To Event Route
  */
 export const addTagToEventRouteEventsEventIdTagsPost = (
@@ -62,7 +57,7 @@ export const addTagToEventRouteEventsEventIdTagsPost = (
       options);
     }
   /**
- * Получить событие
+ * Получить событие. Могут только участники события.
  * @summary Get Event Route
  */
 export const getEventRouteEventsEventIdGet = (
@@ -74,7 +69,7 @@ export const getEventRouteEventsEventIdGet = (
       options);
     }
   /**
- * Редактирование события (может только 1 и 2 роль)
+ * Редактировать событие. Могут только "Босс" и "Начальник".
  * @summary Update Event Route
  */
 export const updateEventRouteEventsEventIdPatch = (
@@ -89,7 +84,7 @@ export const updateEventRouteEventsEventIdPatch = (
       options);
     }
   /**
- * Удаление события (может только 1 и 2 роль)
+ * Удалить событие. Могут только "Босс" и "Начальник".
  * @summary Delete Event Route
  */
 export const deleteEventRouteEventsEventIdDelete = (
@@ -101,7 +96,8 @@ export const deleteEventRouteEventsEventIdDelete = (
       options);
     }
   /**
- * Добавить пользователя для события (может только 1 и 2 роль)
+ * Добавить (привязать) пользователя в событие.
+Могут только "Босс" и "Начальник".
  * @summary Add User To Event Route
  */
 export const addUserToEventRouteEventsEventIdUsersPost = (
@@ -116,7 +112,7 @@ export const addUserToEventRouteEventsEventIdUsersPost = (
       options);
     }
   /**
- * Просмотр всех событий группы (может только пользователь находящийся в этой группе)
+ * Просмотр всех событий группы, в которых пользователь принимает участие
  * @summary Get Group Events Route
  */
 export const getGroupEventsRouteEventsGroupsGroupIdGet = (
@@ -128,7 +124,7 @@ export const getGroupEventsRouteEventsGroupsGroupIdGet = (
       options);
     }
   /**
- * Просмотр всех своих событий
+ * Просмотр всех своих событий во всех группах.
  * @summary Get User Events Route
  */
 export const getUserEventsRouteEventsGet = (
@@ -136,22 +132,6 @@ export const getUserEventsRouteEventsGet = (
  options?: SecondParameter<typeof request<EventsResponse>>,) => {
       return request<EventsResponse>(
       {url: `/events/`, method: 'GET'
-    },
-      options);
-    }
-  /**
- * Изменить статус отклика
- * @summary Get User Events Route
- */
-export const getUserEventsRouteEventsRespondRespondIdEventIdPatch = (
-    respondId: number,
-    eventId: number,
-    respondChangeResponse: BodyType<RespondChangeResponse>,
- options?: SecondParameter<typeof request<RespondResponse>>,) => {
-      return request<RespondResponse>(
-      {url: `/events/respond/${respondId}/${eventId}`, method: 'PATCH',
-      headers: {'Content-Type': 'application/json', },
-      data: respondChangeResponse
     },
       options);
     }
@@ -163,4 +143,3 @@ export type DeleteEventRouteEventsEventIdDeleteResult = NonNullable<Awaited<Retu
 export type AddUserToEventRouteEventsEventIdUsersPostResult = NonNullable<Awaited<ReturnType<typeof addUserToEventRouteEventsEventIdUsersPost>>>
 export type GetGroupEventsRouteEventsGroupsGroupIdGetResult = NonNullable<Awaited<ReturnType<typeof getGroupEventsRouteEventsGroupsGroupIdGet>>>
 export type GetUserEventsRouteEventsGetResult = NonNullable<Awaited<ReturnType<typeof getUserEventsRouteEventsGet>>>
-export type GetUserEventsRouteEventsRespondRespondIdEventIdPatchResult = NonNullable<Awaited<ReturnType<typeof getUserEventsRouteEventsRespondRespondIdEventIdPatch>>>

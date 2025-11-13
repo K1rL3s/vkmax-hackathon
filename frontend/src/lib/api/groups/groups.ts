@@ -8,10 +8,6 @@
 Для каждой сущности предусмотрен определённый набор прав, которые, в зависимости от логики, могут назначаться различному
 набору ролей. Также, помимо основного набора прав, ограничения могут быть выставлены непосредственно на уровне определённых ролей.
 
-### Тестирование
-Для тестирования запросов к API существует служебный токен (обладающий правами суперадминистратора), который можно сконфигурировать в
-конфиг-переменной ``test_token``
-
  * OpenAPI spec version: 0.1.0
  */
 import type {
@@ -33,7 +29,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
   /**
- * Создание группы
+ * Создание группы. Может кто угодно.
  * @summary Create Group Route
  */
 export const createGroupRouteGroupsPost = (
@@ -47,7 +43,7 @@ export const createGroupRouteGroupsPost = (
       options);
     }
   /**
- * Редактирование группы (только создатель)
+ * Редактирование группы. Может только "Босс".
  * @summary Update Group Route
  */
 export const updateGroupRouteGroupsGroupIdPatch = (
@@ -62,7 +58,7 @@ export const updateGroupRouteGroupsGroupIdPatch = (
       options);
     }
   /**
- * Получить группу по идентификатору
+ * Получить группу. Могут только участники группы.
  * @summary Get Group
  */
 export const getGroupGroupsGroupIdGet = (
@@ -74,7 +70,7 @@ export const getGroupGroupsGroupIdGet = (
       options);
     }
   /**
- * Удаление группы (только администратор)
+ * Удалить группы. Может только "Босс".
  * @summary Delete Group Route
  */
 export const deleteGroupRouteGroupsGroupIdDelete = (
@@ -86,7 +82,7 @@ export const deleteGroupRouteGroupsGroupIdDelete = (
       options);
     }
   /**
- * Редактирование связи пользователя и группы
+ * Смена роли юзера в группе. Может только "Босс".
  * @summary Update Group Membership
  */
 export const updateGroupMembershipGroupsGroupIdUsersSlaveIdPatch = (
@@ -102,7 +98,8 @@ export const updateGroupMembershipGroupsGroupIdUsersSlaveIdPatch = (
       options);
     }
   /**
- * Удаление участника из группы
+ * Удаление участника из группы.
+"Босс" может удалить всех, "Начальник" не может удалить "Босса"
  * @summary Remove Group Member Route
  */
 export const removeGroupMemberRouteGroupsGroupIdUsersSlaveIdDelete = (
@@ -115,7 +112,7 @@ export const removeGroupMemberRouteGroupsGroupIdUsersSlaveIdDelete = (
       options);
     }
   /**
- * Получить участника группы по идентификатору
+ * Получить участника группы. Могут только участники группы.
  * @summary Get Group User Route
  */
 export const getGroupUserRouteGroupsGroupIdUsersMemberIdGet = (
@@ -128,7 +125,7 @@ export const getGroupUserRouteGroupsGroupIdUsersMemberIdGet = (
       options);
     }
   /**
- * Получить список всех пользователей группы
+ * Получить всех пользователей группы. Могут только участники группы.
  * @summary List Group Users Route
  */
 export const listGroupUsersRouteGroupsGroupIdUsersGet = (
@@ -140,7 +137,8 @@ export const listGroupUsersRouteGroupsGroupIdUsersGet = (
       options);
     }
   /**
- * Создание приглашения в группу
+ * Создать (перевыпустить) приглашение в группу.
+В группе может быть только одно активное приглашение.
  * @summary Create Invite Route
  */
 export const createInviteRouteGroupsGroupIdInvitePost = (

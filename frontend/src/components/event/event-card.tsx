@@ -1,22 +1,9 @@
 import { Container, Flex, Typography } from '@maxhub/max-ui'
 import { Link } from '@tanstack/react-router'
 import { CalendarIcon, MessageCircleMoreIcon } from 'lucide-react'
+import type { CalendarEvent } from './event-list'
 
-export function EventCard({
-  event,
-}: {
-  event: {
-    id: number
-    title: string
-    date: Date
-    type: 'event' | 'message'
-    creator: { firstName: string; lastName: string }
-    group: {
-      id: number
-      name: string
-    }
-  }
-}) {
+export function EventCard({ event }: { event: CalendarEvent }) {
   const beforeIcon = {
     event: <CalendarIcon size={18} />,
     message: <MessageCircleMoreIcon size={18} />,

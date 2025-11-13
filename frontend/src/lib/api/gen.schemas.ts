@@ -8,10 +8,6 @@
 Для каждой сущности предусмотрен определённый набор прав, которые, в зависимости от логики, могут назначаться различному
 набору ролей. Также, помимо основного набора прав, ограничения могут быть выставлены непосредственно на уровне определённых ролей.
 
-### Тестирование
-Для тестирования запросов к API существует служебный токен (обладающий правами суперадминистратора), который можно сконфигурировать в
-конфиг-переменной ``test_token``
-
  * OpenAPI spec version: 0.1.0
  */
 export type CronSchemaDate = string | null;
@@ -35,8 +31,6 @@ export type EventCreateRequestDescription = string | null;
 
 export type EventCreateRequestTimezone = number | null;
 
-export type EventCreateRequestGroupId = number | null;
-
 export interface EventCreateRequest {
   title: string;
   description?: EventCreateRequestDescription;
@@ -44,17 +38,15 @@ export interface EventCreateRequest {
   /** Тип события */
   type?: 'event';
   cron: CronSchema;
-  groupId?: EventCreateRequestGroupId;
+  groupId: number;
   /** Упомянаемые пользователи */
   participantsIds?: number[];
   /** Привязанные теги */
   tagsIds?: number[];
-  minutesBefore?: number;
+  minutesBefore?: number[];
 }
 
 export type EventResponseDescription = string | null;
-
-export type EventResponseGroupId = number | null;
 
 export interface EventResponse {
   id: number;
@@ -64,7 +56,7 @@ export interface EventResponse {
   isCycle: boolean;
   type: string;
   creatorId: number;
-  groupId?: EventResponseGroupId;
+  groupId: number;
   timezone: number;
 }
 
@@ -175,17 +167,6 @@ export interface InviteCreateResponse {
   inviteKey: string;
 }
 
-export interface RespondChangeResponse {
-  status: string;
-}
-
-export interface RespondResponse {
-  id: number;
-  userId: number;
-  eventId: number;
-  status: string;
-}
-
 export type RoleResponseName = typeof RoleResponseName[keyof typeof RoleResponseName];
 
 
@@ -206,44 +187,46 @@ export interface TagAssignRequest {
   tagId: number;
 }
 
-export type TagCreateRequestDescriptions = string | null;
+export type TagCreateRequestDescription = string | null;
 
 export interface TagCreateRequest {
   name: string;
-  descriptions?: TagCreateRequestDescriptions;
+  description?: TagCreateRequestDescription;
   color: string;
 }
 
-export type TagResponseDescriptions = string | null;
+export type TagResponseDescription = string | null;
 
 export interface TagResponse {
   id: number;
   groupId: number;
   name: string;
-  descriptions?: TagResponseDescriptions;
+  description?: TagResponseDescription;
   color: string;
 }
 
 export type TagUpdateRequestName = string | null;
 
-export type TagUpdateRequestDescriptions = string | null;
+export type TagUpdateRequestDescription = string | null;
 
 export type TagUpdateRequestColor = string | null;
 
 export interface TagUpdateRequest {
   name?: TagUpdateRequestName;
-  descriptions?: TagUpdateRequestDescriptions;
+  description?: TagUpdateRequestDescription;
   color?: TagUpdateRequestColor;
 }
 
 export type TagUserItemLastName = string | null;
+
+export type TagUserItemPhone = string | null;
 
 export interface TagUserItem {
   userId: number;
   maxId: number;
   firstName: string;
   lastName?: TagUserItemLastName;
-  phone: string;
+  phone?: TagUserItemPhone;
   roleId: number;
 }
 
@@ -303,4 +286,45 @@ export interface ValidationError {
   msg: string;
   type: string;
 }
+
+export interface WebAppChat {
+  id: number;
+  type: string;
+}
+
+export type WebAppInitDataIp = string | null;
+
+export type WebAppInitDataQueryId = string | null;
+
+export type WebAppInitDataAuthDate = string | null;
+
+export interface WebAppInitData {
+  ip?: WebAppInitDataIp;
+  query_id?: WebAppInitDataQueryId;
+  chat: WebAppChat;
+  user: WebAppUser;
+  auth_date?: WebAppInitDataAuthDate;
+  hash: string;
+}
+
+export type WebAppUserLastName = string | null;
+
+export type WebAppUserUsername = string | null;
+
+export type WebAppUserLanguageCode = string | null;
+
+export type WebAppUserPhotoUrl = string | null;
+
+export interface WebAppUser {
+  id: number;
+  first_name: string;
+  last_name?: WebAppUserLastName;
+  username?: WebAppUserUsername;
+  language_code?: WebAppUserLanguageCode;
+  photo_url?: WebAppUserPhotoUrl;
+}
+
+export type CheckInitDataAuthGetParams = {
+WebAppData: string;
+};
 

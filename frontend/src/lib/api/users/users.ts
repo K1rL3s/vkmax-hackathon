@@ -8,10 +8,6 @@
 Для каждой сущности предусмотрен определённый набор прав, которые, в зависимости от логики, могут назначаться различному
 набору ролей. Также, помимо основного набора прав, ограничения могут быть выставлены непосредственно на уровне определённых ролей.
 
-### Тестирование
-Для тестирования запросов к API существует служебный токен (обладающий правами суперадминистратора), который можно сконфигурировать в
-конфиг-переменной ``test_token``
-
  * OpenAPI spec version: 0.1.0
  */
 import type {
@@ -45,19 +41,19 @@ export const createUserRouteUsersPost = (
       options);
     }
   /**
- * Получить одного пользователя по идентификатору
+ * Получить пользователя. Можно только самого себя.
  * @summary Get User By Id Route
  */
-export const getUserByIdRouteUsersUserIdGet = (
-    userId: number,
+export const getUserByIdRouteUsersMeGet = (
+    
  options?: SecondParameter<typeof request<UserResponse>>,) => {
       return request<UserResponse>(
-      {url: `/users/${userId}`, method: 'GET'
+      {url: `/users/me`, method: 'GET'
     },
       options);
     }
   /**
- * Редактирование пользователя
+ * Редактировать пользователя. Можно только самого себя.
  * @summary Update User Route
  */
 export const updateUserRouteUsersPatch = (
@@ -71,14 +67,14 @@ export const updateUserRouteUsersPatch = (
       options);
     }
   /**
- * Получить список групп, в которых состоит пользователь
+ * Получить список групп, в которых состоит пользователь. Можно только свои группы.
  * @summary List User Groups Route
  */
-export const listUserGroupsRouteUsersUserIdGroupsGet = (
-    userId: number,
+export const listUserGroupsRouteUsersMeGroupsGet = (
+    
  options?: SecondParameter<typeof request<UserGroupsResponse>>,) => {
       return request<UserGroupsResponse>(
-      {url: `/users/${userId}/groups`, method: 'GET'
+      {url: `/users/me/groups`, method: 'GET'
     },
       options);
     }
@@ -96,10 +92,10 @@ export const listUserTagsRouteUsersUserIdGroupsGroupIdTagsGet = (
       options);
     }
   /**
- * Получить список тегов пользователя в рамках группы
- * @summary List User Tags Route
+ * Получить список событий пользователя в рамках группы
+ * @summary List User Events Route
  */
-export const listUserTagsRouteUsersUserIdGroupsGroupIdEventsGet = (
+export const listUserEventsRouteUsersUserIdGroupsGroupIdEventsGet = (
     userId: number,
     groupId: number,
  options?: SecondParameter<typeof request<EventResponse[]>>,) => {
@@ -109,8 +105,8 @@ export const listUserTagsRouteUsersUserIdGroupsGroupIdEventsGet = (
       options);
     }
   export type CreateUserRouteUsersPostResult = NonNullable<Awaited<ReturnType<typeof createUserRouteUsersPost>>>
-export type GetUserByIdRouteUsersUserIdGetResult = NonNullable<Awaited<ReturnType<typeof getUserByIdRouteUsersUserIdGet>>>
+export type GetUserByIdRouteUsersMeGetResult = NonNullable<Awaited<ReturnType<typeof getUserByIdRouteUsersMeGet>>>
 export type UpdateUserRouteUsersPatchResult = NonNullable<Awaited<ReturnType<typeof updateUserRouteUsersPatch>>>
-export type ListUserGroupsRouteUsersUserIdGroupsGetResult = NonNullable<Awaited<ReturnType<typeof listUserGroupsRouteUsersUserIdGroupsGet>>>
+export type ListUserGroupsRouteUsersMeGroupsGetResult = NonNullable<Awaited<ReturnType<typeof listUserGroupsRouteUsersMeGroupsGet>>>
 export type ListUserTagsRouteUsersUserIdGroupsGroupIdTagsGetResult = NonNullable<Awaited<ReturnType<typeof listUserTagsRouteUsersUserIdGroupsGroupIdTagsGet>>>
-export type ListUserTagsRouteUsersUserIdGroupsGroupIdEventsGetResult = NonNullable<Awaited<ReturnType<typeof listUserTagsRouteUsersUserIdGroupsGroupIdEventsGet>>>
+export type ListUserEventsRouteUsersUserIdGroupsGroupIdEventsGetResult = NonNullable<Awaited<ReturnType<typeof listUserEventsRouteUsersUserIdGroupsGroupIdEventsGet>>>

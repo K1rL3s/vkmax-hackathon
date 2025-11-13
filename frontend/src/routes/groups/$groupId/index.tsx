@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { createFileRoute, useParams } from '@tanstack/react-router'
+import { Search } from 'lucide-react'
+import { Flex, IconButton, Typography } from '@maxhub/max-ui'
 import { EventList } from '@/components/event/event-list'
 import { GroupPageLayout } from '@/components/layout/group-page-layout'
 import { Loader } from '@/components/ui/loader'
 import { useGroupEvents } from '@/hooks/events'
 import { expandCronEvents } from '@/lib/utils/cron'
-import { Flex, IconButton, Typography } from '@maxhub/max-ui'
-import { Search } from 'lucide-react'
 
 export const Route = createFileRoute('/groups/$groupId/')({
   component: GroupEventsPage,

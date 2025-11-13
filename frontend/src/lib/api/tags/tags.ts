@@ -8,10 +8,6 @@
 Для каждой сущности предусмотрен определённый набор прав, которые, в зависимости от логики, могут назначаться различному
 набору ролей. Также, помимо основного набора прав, ограничения могут быть выставлены непосредственно на уровне определённых ролей.
 
-### Тестирование
-Для тестирования запросов к API существует служебный токен (обладающий правами суперадминистратора), который можно сконфигурировать в
-конфиг-переменной ``test_token``
-
  * OpenAPI spec version: 0.1.0
  */
 import type {
@@ -30,7 +26,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
   /**
- * Создание тега
+ * Создать тег. Могут только "Босс" и "Начальник".
  * @summary Create Tag Route
  */
 export const createTagRouteGroupsGroupIdTagsPost = (
@@ -45,7 +41,7 @@ export const createTagRouteGroupsGroupIdTagsPost = (
       options);
     }
   /**
- * Получить список тегов группы
+ * Получить все теги группы. Могут только участники группы.
  * @summary List Group Tags Route
  */
 export const listGroupTagsRouteGroupsGroupIdTagsGet = (
@@ -57,7 +53,7 @@ export const listGroupTagsRouteGroupsGroupIdTagsGet = (
       options);
     }
   /**
- * Редактирование тега
+ * Редактировать тег. Могут только "Босс" и "Начальник".
  * @summary Update Tag Route
  */
 export const updateTagRouteGroupsGroupIdTagsTagIdPatch = (
@@ -73,7 +69,7 @@ export const updateTagRouteGroupsGroupIdTagsTagIdPatch = (
       options);
     }
   /**
- * Удаление тега
+ * Удалить тег. Могут только "Босс" и "Начальник".
  * @summary Delete Tag Route
  */
 export const deleteTagRouteGroupsGroupIdTagsTagIdDelete = (
@@ -86,7 +82,8 @@ export const deleteTagRouteGroupsGroupIdTagsTagIdDelete = (
       options);
     }
   /**
- * Назначить тег пользователю
+ * Добавить (назначить, привязать) тег пользователю.
+Могут только "Босс" и "Начальник".
  * @summary Assign Tag To User Route
  */
 export const assignTagToUserRouteGroupsGroupIdTagsUsersPost = (
@@ -101,7 +98,8 @@ export const assignTagToUserRouteGroupsGroupIdTagsUsersPost = (
       options);
     }
   /**
- * Удалить тег у пользователя
+ * Удалить (отвязать) тег у пользователя.
+Могут только "Босс" и "Начальник".
  * @summary Remove Tag From User Route
  */
 export const removeTagFromUserRouteGroupsGroupIdTagsUsersUserIdTagIdDelete = (
@@ -115,7 +113,8 @@ export const removeTagFromUserRouteGroupsGroupIdTagsUsersUserIdTagIdDelete = (
       options);
     }
   /**
- * Получить список пользователей, у которых назначен тег
+ * Получить список пользователей, у которых есть тег.
+Могут только участники группы.
  * @summary List Tag Users Route
  */
 export const listTagUsersRouteGroupsGroupIdTagsTagIdUsersGet = (

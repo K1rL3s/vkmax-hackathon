@@ -20,15 +20,25 @@ type AvatarProps = {
     | 96
   firstName?: string
   lastName?: string
+  image_url?: string
 }
 
-export function Avatar({ size = 24, firstName, lastName }: AvatarProps) {
+export function Avatar({
+  size = 24,
+  firstName,
+  lastName,
+  image_url,
+}: AvatarProps) {
   return (
     <MaxAvatar.Container size={size}>
-      <MaxAvatar.Text>
-        {firstName?.charAt(0).toUpperCase()}
-        {lastName?.charAt(0).toUpperCase()}
-      </MaxAvatar.Text>
+      {image_url ? (
+        <MaxAvatar.Image src={image_url} alt={`${firstName} ${lastName}`} />
+      ) : (
+        <MaxAvatar.Text>
+          {firstName?.charAt(0).toUpperCase()}
+          {lastName?.charAt(0).toUpperCase()}
+        </MaxAvatar.Text>
+      )}
     </MaxAvatar.Container>
   )
 }

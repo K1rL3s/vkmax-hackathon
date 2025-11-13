@@ -1,4 +1,4 @@
-import { CellHeader, CellList, Flex, Typography } from '@maxhub/max-ui'
+import { CellHeader, CellList } from '@maxhub/max-ui'
 import clsx from 'clsx'
 import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'

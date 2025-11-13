@@ -10,14 +10,13 @@ import {
   getGroupGroupsGroupIdGet,
   updateGroupRouteGroupsGroupIdPatch,
 } from '@/lib/api/groups/groups'
-import { listUserGroupsRouteUsersUserIdGroupsGet } from '@/lib/api/users/users'
 import { useMaxUser } from '@/integrations/max-ui/hooks/max-user'
+import { listUserGroupsRouteUsersMeGroupsGet } from '@/lib/api/users/users'
 
 export function useGroups() {
-  const { id } = useMaxUser()
   return useQuery({
     queryKey: ['groups'],
-    queryFn: () => listUserGroupsRouteUsersUserIdGroupsGet(id),
+    queryFn: () => listUserGroupsRouteUsersMeGroupsGet(),
   })
 }
 

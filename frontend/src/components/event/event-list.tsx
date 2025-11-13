@@ -25,17 +25,7 @@ export const EventList = forwardRef(function EventList(
       string,
       | Array<{
           time: string
-          event: {
-            id: number
-            title: string
-            date: Date
-            type: 'message' | 'event'
-            group: {
-              id: number
-              name: string
-            }
-            creator: { firstName: string; lastName: string }
-          }
+          event: CalendarEvent
         }>
       | undefined
     > = {

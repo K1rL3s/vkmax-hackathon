@@ -24,7 +24,7 @@ export function TimezoneInput({
   const [isSelecting, setIsSelecting] = useState(false)
 
   const modeStyles = {
-    primary: 'bg-blue-500 text-white',
+    primary: 'bg-(--background-surface-card) text-(--text-secondary)',
     secondary:
       'bg-(--background-accent-neutral-fade-secondary) text-(--text-secondary)',
   }

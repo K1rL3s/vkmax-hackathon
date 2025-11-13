@@ -1,12 +1,13 @@
 import parser from 'cron-parser'
 import type { EventResponse } from '../api/gen.schemas'
+import type { CalendarEvent } from '@/components/event/event-list'
 
 export function expandCronEvents(
   events: Array<EventResponse>,
   startDate: Date,
   endDate: Date,
-) {
-  const result = []
+): Array<CalendarEvent> {
+  const result: Array<CalendarEvent> = []
 
   for (const ev of events) {
     try {
