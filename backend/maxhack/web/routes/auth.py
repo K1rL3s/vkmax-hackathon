@@ -26,7 +26,7 @@ async def check_init_data(
     max_config: FromDishka[MaxConfig],
 ) -> WebAppInitData:
     try:
-        data = validate_web_app_data(web_app_data, max_config.token)
+        data = validate_web_app_data(max_config.token, web_app_data)
         response.set_cookie("WebAppData", web_app_data)
         return data
     except ValueError:

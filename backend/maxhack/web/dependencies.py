@@ -13,7 +13,8 @@ from maxhack.core.user.service import UserService
 from maxhack.web.schemas.user import UserResponse
 from maxo.utils.webapp import (
     WebAppChat,
-    WebAppInitData, WebAppUser,
+    WebAppInitData,
+    WebAppUser,
     safe_parse_webapp_init_data,
 )
 
@@ -27,8 +28,6 @@ class _CurrentUserData:
     chat: WebAppChat
     max_user: WebAppUser
     db_user: UserResponse
-
-
 
 
 def validate_web_app_data(token: str, web_app_data: str) -> WebAppInitData:

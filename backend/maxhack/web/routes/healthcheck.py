@@ -10,6 +10,7 @@ healthcheck_router = APIRouter(
     route_class=DishkaRoute,
 )
 
+
 # TODO: Чекать бд, редис, бота и шедулер
 @healthcheck_router.get(
     "",
