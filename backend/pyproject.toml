@@ -161,6 +161,7 @@ ignore = [
 [tool.ruff.lint.isort]
 case-sensitive = true
 combine-as-imports = true
+known-local-folder = ["maxhack"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -175,3 +176,18 @@ include = '\.py$'
 
 [tool.uv]
 package = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+testpaths = ["tests"]
+filterwarnings = [
+    "error",
+    "ignore::pytest.PytestUnraisableExceptionWarning",
+    "ignore::DeprecationWarning",
+]
