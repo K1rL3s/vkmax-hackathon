@@ -10,12 +10,9 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from maxhack.config import Config
-from maxhack.infra.database.transaction_manager import TransactionManager
 
 
 class DBProvider(Provider):
-    transaction_manager = provide(TransactionManager, scope=Scope.REQUEST)
-
     @provide(scope=Scope.APP)
     async def engine(self, config: Config) -> AsyncIterable[AsyncEngine]:
         db_url = config.db.uri

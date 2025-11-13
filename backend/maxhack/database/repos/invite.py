@@ -3,8 +3,8 @@ from typing import Any
 from sqlalchemy import select, update
 
 from maxhack.core.ids import GroupId, InviteId, InviteKey, UserId
-from maxhack.infra.database.models import InviteModel
-from maxhack.infra.database.repos.base import BaseAlchemyRepo
+from maxhack.database.models import InviteModel
+from maxhack.database.repos.base import BaseAlchemyRepo
 
 
 class InviteRepo(BaseAlchemyRepo):

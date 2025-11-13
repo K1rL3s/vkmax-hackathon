@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from maxhack.config import load_config
 from maxhack.core.utils.datehelp import datetime_now
-from maxhack.infra.database.models.base import BaseAlchemyModel
+from maxhack.database.models.base import BaseAlchemyModel
 
 try:
     db_config = load_config().db

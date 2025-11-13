@@ -5,7 +5,7 @@ from maxhack.bot.filters.respond import RespondData
 from maxhack.core.enums.notify_mode import NotifyMode
 from maxhack.core.enums.respond_action import RespondStatus
 from maxhack.core.max.sender import MaxSender
-from maxhack.infra.database.models import EventModel, UserModel, UsersToGroupsModel
+from maxhack.database.models import EventModel, UserModel, UsersToGroupsModel
 
 
 class MaxNotifier:

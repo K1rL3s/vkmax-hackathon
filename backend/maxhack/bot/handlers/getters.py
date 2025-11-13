@@ -3,7 +3,7 @@ from typing import Any
 from maxo.dialogs import DialogManager
 from maxo.dialogs.integrations.dishka import inject
 
-from maxhack.infra.database.models import UserModel
+from maxhack.database.models import UserModel
 
 
 @inject

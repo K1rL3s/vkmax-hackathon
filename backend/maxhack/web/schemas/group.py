@@ -6,7 +6,7 @@ from pydantic.config import ExtraValues
 from .core import Model
 from maxhack.core.enums.notify_mode import NotifyMode
 from maxhack.core.ids import GroupId, InviteKey, MaxId, RoleId, TagId, UserId
-from maxhack.infra.database.models.users_to_groups import UsersToGroupsModel
+from maxhack.database.models.users_to_groups import UsersToGroupsModel
 from maxhack.web.schemas.role import RoleResponse
 
 

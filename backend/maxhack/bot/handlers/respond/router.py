@@ -10,7 +10,7 @@ from maxhack.bot.filters.respond import RespondData
 from maxhack.core.exceptions import MaxHackError
 from maxhack.core.ids import EventId
 from maxhack.core.responds.service import RespondService
-from maxhack.infra.database.models import UserModel
+from maxhack.database.models import UserModel
 
 respond_router = Router(__name__)
 

@@ -1,8 +1,8 @@
 from sqlalchemy import select
 
 from maxhack.core.ids import RoleId
-from maxhack.infra.database.models import RoleModel
-from maxhack.infra.database.repos.base import BaseAlchemyRepo
+from maxhack.database.models import RoleModel
+from maxhack.database.repos.base import BaseAlchemyRepo
 
 
 class RoleRepo(BaseAlchemyRepo):

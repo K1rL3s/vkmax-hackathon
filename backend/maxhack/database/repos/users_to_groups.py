@@ -6,7 +6,7 @@ from maxhack.core.enums.notify_mode import NotifyMode
 from maxhack.core.exceptions import MaxHackError
 from maxhack.core.ids import GroupId, InviteId, RoleId, UserId
 from maxhack.core.role.ids import MEMBER_ROLE_ID
-from maxhack.infra.database.models import (
+from maxhack.database.models import (
     EventModel,
     GroupModel,
     RespondModel,
@@ -14,7 +14,7 @@ from maxhack.infra.database.models import (
     UsersToEvents,
     UsersToGroupsModel,
 )
-from maxhack.infra.database.repos.base import BaseAlchemyRepo
+from maxhack.database.repos.base import BaseAlchemyRepo
 
 
 class UsersToGroupsRepo(BaseAlchemyRepo):

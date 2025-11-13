@@ -11,7 +11,7 @@ from maxo.routing.updates.base import MaxUpdate
 from maxo.types import User as MaxUser
 
 from maxhack.core.ids import MaxId
-from maxhack.infra.database.repos.user import UserRepo
+from maxhack.database.repos.user import UserRepo
 from maxhack.logger import get_logger
 
 logger = get_logger(__name__, groups=("maxo", "max", "middlewares"))

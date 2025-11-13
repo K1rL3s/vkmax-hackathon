@@ -2,7 +2,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from maxhack.core.ids import TagId, UserId
-from maxhack.infra.database.models.base import BaseAlchemyModel
+from maxhack.database.models.base import BaseAlchemyModel
 
 
 class UsersToTagsModel(BaseAlchemyModel):

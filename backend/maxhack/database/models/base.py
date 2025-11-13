@@ -4,7 +4,7 @@ from sqlalchemy import MetaData
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm.exc import DetachedInstanceError
 
-from maxhack.infra.database.models._mixins import (
+from maxhack.database.models._mixins import (
     CreatedAtMixin,
     DeletedAtMixin,
     UpdatedAtMixin,

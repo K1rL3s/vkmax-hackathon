@@ -12,7 +12,7 @@ from maxo.types.update_context import UpdateContext
 
 from maxhack.core.ids import MaxChatId, MaxId
 from maxhack.core.user.service import UserService
-from maxhack.infra.database.models import UserModel
+from maxhack.database.models import UserModel
 from maxhack.logger import get_logger
 
 logger = get_logger(__name__, groups=("maxo", "max", "middlewares"))

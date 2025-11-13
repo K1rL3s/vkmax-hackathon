@@ -4,8 +4,8 @@ from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 from maxhack.core.ids import EventId, RespondId, UserId
-from maxhack.infra.database.models import RespondModel
-from maxhack.infra.database.repos.base import BaseAlchemyRepo
+from maxhack.database.models import RespondModel
+from maxhack.database.repos.base import BaseAlchemyRepo
 
 
 class RespondRepo(BaseAlchemyRepo):

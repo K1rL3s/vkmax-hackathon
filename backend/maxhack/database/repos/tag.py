@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 from maxhack.core.exceptions import MaxHackError
 from maxhack.core.ids import GroupId, RoleId, TagId, UserId
-from maxhack.infra.database.models import (
+from maxhack.database.models import (
     EventModel,
     TagModel,
     TagsToEvents,
@@ -13,7 +13,7 @@ from maxhack.infra.database.models import (
     UsersToGroupsModel,
     UsersToTagsModel,
 )
-from maxhack.infra.database.repos.base import BaseAlchemyRepo
+from maxhack.database.repos.base import BaseAlchemyRepo
 
 
 class TagRepo(BaseAlchemyRepo):

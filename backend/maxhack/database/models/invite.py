@@ -2,8 +2,8 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from maxhack.core.ids import GroupId, InviteId, InviteKey, UserId
-from maxhack.infra.database.models._mixins import IdMixin
-from maxhack.infra.database.models.base import BaseAlchemyModel
+from maxhack.database.models._mixins import IdMixin
+from maxhack.database.models.base import BaseAlchemyModel
 
 INVITE_KEY_LEN = 8
 

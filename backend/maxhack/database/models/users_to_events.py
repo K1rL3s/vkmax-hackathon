@@ -2,7 +2,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from maxhack.core.ids import EventId, UserId
-from maxhack.infra.database.models.base import BaseAlchemyModel
+from maxhack.database.models.base import BaseAlchemyModel
 
 
 # TODO: Добавить IdMixin и убрать pk с user_id event_id,

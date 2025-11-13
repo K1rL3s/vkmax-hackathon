@@ -3,8 +3,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from maxhack.core.enums.notify_mode import NotifyMode
 from maxhack.core.ids import MaxChatId, MaxId, UserId
-from maxhack.infra.database.models._mixins import IdMixin
-from maxhack.infra.database.models.base import BaseAlchemyModel
+from maxhack.database.models._mixins import IdMixin
+from maxhack.database.models.base import BaseAlchemyModel
 
 USER_FIRST_NAME_LEN = 64
 USER_LAST_NAME_LEN = 64

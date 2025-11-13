@@ -3,9 +3,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from maxhack.core.enums.notify_mode import NotifyMode
 from maxhack.core.ids import GroupId, InviteId, RoleId, UserId
-from maxhack.infra.database.models import UserModel
-from maxhack.infra.database.models.base import BaseAlchemyModel
-from maxhack.infra.database.models.role import RoleModel
+from maxhack.database.models import UserModel
+from maxhack.database.models.base import BaseAlchemyModel
+from maxhack.database.models.role import RoleModel
 
 
 class UsersToGroupsModel(BaseAlchemyModel):

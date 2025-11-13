@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 from maxhack.core.exceptions import MaxHackError
 from maxhack.core.ids import EventId, EventNotifyId, GroupId, TagId, UserId
-from maxhack.infra.database.models import (
+from maxhack.database.models import (
     EventModel,
     EventNotifyModel,
     RespondModel,
@@ -16,7 +16,7 @@ from maxhack.infra.database.models import (
     UsersToEvents,
     UsersToTagsModel,
 )
-from maxhack.infra.database.repos.base import BaseAlchemyRepo
+from maxhack.database.repos.base import BaseAlchemyRepo
 
 logger = logging.getLogger(__name__)
 

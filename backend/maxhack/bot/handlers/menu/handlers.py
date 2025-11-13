@@ -8,7 +8,7 @@ from maxo.dialogs.widgets.kbd import ManagedRadio
 
 from maxhack.core.enums.notify_mode import NotifyMode
 from maxhack.core.user.service import UserService
-from maxhack.infra.database.models import UserModel
+from maxhack.database.models import UserModel
 
 
 @inject

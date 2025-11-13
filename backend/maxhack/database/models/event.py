@@ -2,8 +2,8 @@ from sqlalchemy import Boolean, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from maxhack.core.ids import EventId, GroupId, UserId
-from maxhack.infra.database.models._mixins import IdMixin
-from maxhack.infra.database.models.base import BaseAlchemyModel
+from maxhack.database.models._mixins import IdMixin
+from maxhack.database.models.base import BaseAlchemyModel
 
 EVENT_TITLE_LEN = 128
 EVENT_DESCRIPTION_LEN = 1024

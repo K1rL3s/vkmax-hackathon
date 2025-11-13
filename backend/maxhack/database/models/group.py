@@ -2,8 +2,8 @@ from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from maxhack.core.ids import GroupId
-from maxhack.infra.database.models._mixins import IdMixin
-from maxhack.infra.database.models.base import BaseAlchemyModel
+from maxhack.database.models._mixins import IdMixin
+from maxhack.database.models.base import BaseAlchemyModel
 
 GROUP_NAME_LEN = 128
 GROUP_DESCRIPTION_LEN = 1024

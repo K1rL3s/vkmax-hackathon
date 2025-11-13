@@ -9,7 +9,7 @@ from maxhack.bot.states import Menu
 from maxhack.core.exceptions import MaxHackError
 from maxhack.core.group.service import GroupService
 from maxhack.core.ids import InviteKey
-from maxhack.infra.database.models import UserModel
+from maxhack.database.models import UserModel
 
 
 @inject

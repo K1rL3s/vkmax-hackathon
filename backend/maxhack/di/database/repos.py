@@ -1,13 +1,13 @@
 from dishka import Provider, Scope, provide
 
-from maxhack.infra.database.repos.event import EventRepo
-from maxhack.infra.database.repos.group import GroupRepo
-from maxhack.infra.database.repos.invite import InviteRepo
-from maxhack.infra.database.repos.respond import RespondRepo
-from maxhack.infra.database.repos.role import RoleRepo
-from maxhack.infra.database.repos.tag import TagRepo
-from maxhack.infra.database.repos.user import UserRepo
-from maxhack.infra.database.repos.users_to_groups import UsersToGroupsRepo
+from maxhack.database.repos.event import EventRepo
+from maxhack.database.repos.group import GroupRepo
+from maxhack.database.repos.invite import InviteRepo
+from maxhack.database.repos.respond import RespondRepo
+from maxhack.database.repos.role import RoleRepo
+from maxhack.database.repos.tag import TagRepo
+from maxhack.database.repos.user import UserRepo
+from maxhack.database.repos.users_to_groups import UsersToGroupsRepo
 
 
 class ReposProvider(Provider):

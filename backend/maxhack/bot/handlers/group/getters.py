@@ -13,8 +13,8 @@ from maxhack.core.invite.service import InviteService
 from maxhack.core.max import QRCoder
 from maxhack.core.role.ids import CREATOR_ROLE_ID, EDITOR_ROLE_ID
 from maxhack.core.user.service import UserService
-from maxhack.infra.database.models import UserModel
-from maxhack.infra.database.repos.group import GroupRepo
+from maxhack.database.models import UserModel
+from maxhack.database.repos.group import GroupRepo
 from maxhack.utils.utils import obj_to_base64
 
 

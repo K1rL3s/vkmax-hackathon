@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError, ProgrammingError
 from maxhack.core.exceptions import MaxHackError
 from maxhack.core.ids import GroupId, UserId
 from maxhack.core.role.ids import CREATOR_ROLE_ID
-from maxhack.infra.database.models import (
+from maxhack.database.models import (
     EventModel,
     EventNotifyModel,
     GroupModel,
@@ -16,7 +16,7 @@ from maxhack.infra.database.models import (
     UsersToEvents,
     UsersToGroupsModel,
 )
-from maxhack.infra.database.repos.base import BaseAlchemyRepo
+from maxhack.database.repos.base import BaseAlchemyRepo
 
 
 class GroupRepo(BaseAlchemyRepo):
