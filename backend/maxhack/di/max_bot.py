@@ -2,12 +2,13 @@ from collections.abc import AsyncIterable
 
 from dishka import Provider, Scope, from_context, provide
 
-from maxhack.config import MaxConfig
-from maxhack.core.max import MaxMailer, MaxSender
-from maxhack.core.max.notifier import MaxNotifier
 from maxo import Bot
 from maxo.dialogs import BgManagerFactory
 from maxo.enums.text_fromat import TextFormat
+
+from maxhack.config import MaxConfig
+from maxhack.core.max import MaxMailer, MaxSender
+from maxhack.core.max.notifier import MaxNotifier
 
 
 class MaxBotProvider(Provider):

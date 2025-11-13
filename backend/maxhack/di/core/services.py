@@ -1,5 +1,7 @@
 from dishka import Provider, Scope, provide
 
+from maxo import Bot
+
 from maxhack.core.event.service import EventService
 from maxhack.core.group.service import GroupService
 from maxhack.core.invite.service import InviteService
@@ -7,7 +9,6 @@ from maxhack.core.max import QRCoder
 from maxhack.core.responds.service import RespondService
 from maxhack.core.tag.service import TagService
 from maxhack.core.user.service import UserService
-from maxo import Bot
 
 
 class ServicesProvider(Provider):

@@ -3,10 +3,9 @@ from typing import Literal
 
 from pydantic import Field
 
+from .core import Model
 from maxhack.core.enums.respond_action import RespondStatus
 from maxhack.core.ids import EventId, GroupId, RespondId, TagId, UserId
-
-from .core import Model
 
 
 class CronSchema(Model):
@@ -52,7 +51,7 @@ class EventResponse(Model):
     creator_id: UserId
     group_id: GroupId
     timezone: int
-    # todo: сделать возврат notifies
+    # TODO: сделать возврат notifies
     # notifies: list[int]
 
 

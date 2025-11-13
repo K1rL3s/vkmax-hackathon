@@ -1,9 +1,10 @@
 from typing import Any
 
-from maxhack.bot.states import Menu
 from maxo import Router
 from maxo.dialogs import DialogManager, ShowMode, StartMode
 from maxo.routing.filters import CommandStart
+
+from maxhack.bot.states import Menu
 
 start_router = Router(name=__name__)
 

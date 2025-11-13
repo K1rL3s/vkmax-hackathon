@@ -1,9 +1,10 @@
-from maxhack.bot.handlers.getters import get_current_user
-from maxhack.bot.states import Menu
-from maxhack.bot.widgets.to_groups import TO_GROUPS_BUTTON
 from maxo.dialogs import Dialog, Window
 from maxo.dialogs.widgets.kbd import WebApp
 from maxo.dialogs.widgets.text import Const, Format
+
+from maxhack.bot.handlers.getters import get_current_user
+from maxhack.bot.states import Menu
+from maxhack.bot.widgets.to_groups import TO_GROUPS_BUTTON
 
 _menu = Window(
     Format("<b>👋 Привет, {first_name}!</b>"),

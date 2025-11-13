@@ -1,14 +1,14 @@
+from maxo.dialogs import Dialog, Window
+from maxo.dialogs.widgets.kbd import Button
+from maxo.dialogs.widgets.text import Const, Format
+
+from . import getters, handlers
 from maxhack.bot.handlers.utils import on_start_update_dialog_data
 from maxhack.bot.states import Groups
 from maxhack.bot.widgets.scrolling_group import CustomScrollingGroup
 from maxhack.bot.widgets.to_groups import TO_GROUPS_BUTTON
 from maxhack.bot.widgets.to_menu import TO_MENU_BUTTON, to_menu_button
 from maxhack.bot.widgets.url_select import UrlSelect
-from maxo.dialogs import Dialog, Window
-from maxo.dialogs.widgets.kbd import Button
-from maxo.dialogs.widgets.text import Const, Format
-
-from . import getters, handlers
 
 _groups = Window(
     Const("💤 Твои группы"),

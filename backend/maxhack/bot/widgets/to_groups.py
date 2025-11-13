@@ -1,9 +1,10 @@
 from typing import Final
 
-from maxhack.bot.states import Groups
 from maxo.dialogs import ShowMode, StartMode
 from maxo.dialogs.widgets.kbd import Start
 from maxo.dialogs.widgets.text import Const
+
+from maxhack.bot.states import Groups
 
 
 def to_groups_button(

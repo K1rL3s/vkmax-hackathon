@@ -8,15 +8,16 @@ from fastapi import Depends, HTTPException
 from fastapi.params import Header
 from starlette import status
 
-from maxhack.config import MaxConfig
-from maxhack.core.user.service import UserService
-from maxhack.web.schemas.user import UserResponse
 from maxo.utils.webapp import (
     WebAppChat,
     WebAppInitData,
     WebAppUser,
     safe_parse_webapp_init_data,
 )
+
+from maxhack.config import MaxConfig
+from maxhack.core.user.service import UserService
+from maxhack.web.schemas.user import UserResponse
 
 
 @dataclass(slots=True, frozen=True, kw_only=True)

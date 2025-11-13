@@ -2,6 +2,10 @@ from typing import Any
 
 from dishka import FromDishka
 
+from maxo import Bot
+from maxo.dialogs import DialogManager
+from maxo.dialogs.integrations.dishka import inject
+
 from maxhack.core.exceptions import GroupNotFound, InviteNotFound, MaxHackError
 from maxhack.core.group.service import GroupService
 from maxhack.core.ids import GroupId
@@ -12,9 +16,6 @@ from maxhack.core.user.service import UserService
 from maxhack.infra.database.models import UserModel
 from maxhack.infra.database.repos.group import GroupRepo
 from maxhack.utils.utils import obj_to_base64
-from maxo import Bot
-from maxo.dialogs import DialogManager
-from maxo.dialogs.integrations.dishka import inject
 
 
 @inject

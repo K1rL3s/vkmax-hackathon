@@ -4,9 +4,10 @@ from fastapi import APIRouter, HTTPException, Response
 from fastapi.params import Query
 from starlette import status
 
+from maxo.utils.webapp import WebAppInitData
+
 from maxhack.config import MaxConfig
 from maxhack.web.dependencies import validate_web_app_data
-from maxo.utils.webapp import WebAppInitData
 
 auth_router = APIRouter(
     prefix="/auth",

@@ -3,11 +3,10 @@ from typing import Any, Self
 from pydantic import Field
 from pydantic.config import ExtraValues
 
+from .core import Model
 from maxhack.core.ids import GroupId, InviteKey, MaxId, RoleId, TagId, UserId
 from maxhack.infra.database.models.users_to_groups import UsersToGroupsModel
 from maxhack.web.schemas.role import RoleResponse
-
-from .core import Model
 
 
 class GroupCreateRequest(Model):

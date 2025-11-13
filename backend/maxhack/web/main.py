@@ -73,7 +73,7 @@ default_errors = {
     410: {"description": "Already Expired"},
 }
 
-# Todo: Сделать обработтчики ошибок
+# TODO: Сделать обработтчики ошибок
 # add_exception_handlers(app)
 
 if config.app.cors:

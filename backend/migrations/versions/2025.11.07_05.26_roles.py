@@ -1,3 +1,5 @@
+# ruff: noqa: S608
+
 """roles
 
 Revision ID: 2025.11.07_05.26

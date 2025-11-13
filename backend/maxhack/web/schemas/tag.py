@@ -1,6 +1,5 @@
-from maxhack.core.ids import GroupId, RoleId, TagId, UserId
-
 from .core import Model
+from maxhack.core.ids import GroupId, RoleId, TagId, UserId
 
 
 class TagCreateRequest(Model):

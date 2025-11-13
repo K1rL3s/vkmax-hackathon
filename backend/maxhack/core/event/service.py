@@ -350,7 +350,7 @@ class EventService(BaseService):
     async def get_notify_by_date_interval(
         self,
     ) -> list[tuple[list[UserModel], EventModel]]:
-        # todo: отправляется на минуту позже WTF OMG LMAOOOOOOO
+        # TODO: отправляется на минуту позже WTF OMG LMAOOOOOOO
         time_now = datetime_now()
         last_start_str = await self._redis.get("last_start")
         if last_start_str:

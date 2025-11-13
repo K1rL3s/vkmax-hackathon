@@ -1,4 +1,5 @@
 from dishka import AsyncContainer, Provider
+
 from maxo import Dispatcher
 from maxo.dialogs import BgManagerFactory
 from maxo.integrations.dishka import setup_dishka

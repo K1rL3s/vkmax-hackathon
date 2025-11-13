@@ -2,6 +2,7 @@ from typing import Any, cast
 
 from dishka import AsyncContainer
 from dishka.integrations.taskiq import CONTAINER_NAME
+
 from maxo import Ctx
 from maxo.routing.interfaces import BaseMiddleware, NextMiddleware
 from maxo.routing.middlewares.event_context import EVENT_FROM_USER_KEY

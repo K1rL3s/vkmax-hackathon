@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 
-from maxhack.core.enums.respond_action import RespondStatus
 from maxo.routing.filters.payload import Payload
+
+from maxhack.core.enums.respond_action import RespondStatus
 
 
 @dataclass

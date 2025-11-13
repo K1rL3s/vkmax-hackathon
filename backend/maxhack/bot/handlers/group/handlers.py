@@ -2,13 +2,14 @@ from typing import Any
 
 from dishka import FromDishka
 
+from maxo.dialogs import DialogManager, ShowMode
+from maxo.dialogs.integrations.dishka import inject
+
 from maxhack.bot.states import Menu
 from maxhack.core.exceptions import MaxHackError
 from maxhack.core.group.service import GroupService
 from maxhack.core.ids import InviteKey
 from maxhack.infra.database.models import UserModel
-from maxo.dialogs import DialogManager, ShowMode
-from maxo.dialogs.integrations.dishka import inject
 
 
 @inject
