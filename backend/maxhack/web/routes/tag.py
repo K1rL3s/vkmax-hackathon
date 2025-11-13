@@ -39,7 +39,7 @@ async def create_tag_route(
             group_id=group_id,
             master_id=current_user.db_user.id,
             name=body.name,
-            descriptions=body.descriptions,
+            description=body.description,
             color=body.color,
         )
         return await TagResponse.from_orm_async(tag, session)
@@ -67,7 +67,7 @@ async def update_tag_route(
             tag_id=tag_id,
             master_id=current_user.db_user.id,
             name=body.name,
-            descriptions=body.descriptions,
+            description=body.description,
             color=body.color,
         )
         return await TagResponse.from_orm_async(tag, session)

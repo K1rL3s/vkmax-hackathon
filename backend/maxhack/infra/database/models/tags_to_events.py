@@ -5,6 +5,8 @@ from maxhack.core.ids import EventId, TagId
 from maxhack.infra.database.models.base import BaseAlchemyModel
 
 
+# TODO: Сделать IdMixin и убрать pk с tag_id, event_id,
+# сделать индекс на уникальную пару tag_id + event_id
 class TagsToEvents(BaseAlchemyModel):
     __tablename__ = "tags_to_events"
 

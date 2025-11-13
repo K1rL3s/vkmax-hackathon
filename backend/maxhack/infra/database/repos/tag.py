@@ -23,13 +23,13 @@ class TagRepo(BaseAlchemyRepo):
         self,
         group_id: GroupId,
         name: str,
-        descriptions: str | None,
+        description: str | None,
         color: str | None,
     ) -> TagModel:
         tag = TagModel(
             group_id=group_id,
             name=name,
-            descriptions=descriptions,
+            description=description,
             color=color,
         )
         self._session.add(tag)
@@ -107,7 +107,7 @@ class TagRepo(BaseAlchemyRepo):
             .where(UsersToTagsModel.tag_id == tag_id)
         )
 
-        return list((await self._session.execute(stmt)).all())
+        return list(await self._session.execute(stmt))
 
     async def update_tag(self, tag_id: TagId, **values: Any) -> TagModel | None:
         stmt = (

@@ -5,13 +5,13 @@ from .core import Model
 
 class TagCreateRequest(Model):
     name: str
-    descriptions: str | None = None
+    description: str | None = None
     color: str
 
 
 class TagUpdateRequest(Model):
     name: str | None = None
-    descriptions: str | None = None
+    description: str | None = None
     color: str | None = None
 
 
@@ -19,7 +19,7 @@ class TagResponse(Model):
     id: UserId
     group_id: GroupId
     name: str
-    descriptions: str | None = None
+    description: str | None = None
     color: str
 
 

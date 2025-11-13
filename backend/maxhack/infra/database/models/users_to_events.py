@@ -5,6 +5,8 @@ from maxhack.core.ids import EventId, UserId
 from maxhack.infra.database.models.base import BaseAlchemyModel
 
 
+# TODO: Добавить IdMixin и убрать pk с user_id event_id,
+# добавить индекс на уникальную пару
 class UsersToEvents(BaseAlchemyModel):
     __tablename__ = "users_to_events"
 

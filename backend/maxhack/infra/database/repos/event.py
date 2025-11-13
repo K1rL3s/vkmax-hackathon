@@ -137,8 +137,7 @@ class EventRepo(BaseAlchemyRepo):
             )
             .order_by(EventModel.created_at.desc())
         )
-        result = await self._session.execute(stmt)
-        return list(result.scalars().all())
+        return list(await self._session.execute(stmt))
 
     async def get_by_user(
             self,
@@ -162,8 +161,7 @@ class EventRepo(BaseAlchemyRepo):
             .limit(limit)
             .offset(offset)
         )
-        result = await self._session.execute(stmt)
-        return list(result.scalars().all())
+        return list(await self._session.execute(stmt))
 
     async def get_created_by_user(
             self,
@@ -181,8 +179,7 @@ class EventRepo(BaseAlchemyRepo):
             .limit(limit)
             .offset(offset)
         )
-        result = await self._session.execute(stmt)
-        return list(result.scalars().all())
+        return list(await self._session.execute(stmt))
 
     async def add_tag(
             self,
@@ -226,8 +223,7 @@ class EventRepo(BaseAlchemyRepo):
             TagsToEvents.event_id == event_id,
             TagsToEvents.is_not_deleted,
         )
-        result = await self._session.execute(stmt)
-        return list(result.scalars().all())
+        return list(await self._session.execute(stmt))
 
     async def add_user(
             self,
@@ -368,9 +364,9 @@ class EventRepo(BaseAlchemyRepo):
     async def get_notify_by_date_interval(
             self,
     ) -> list[tuple[EventNotifyModel, EventModel]]:
-        query = (
+        stmt = (
             select(EventNotifyModel, EventModel)
             .join(EventModel)
             .where(EventModel.event_happened == False)
         )
-        return list((await self._session.execute(query)).all())
+        return list(await self._session.execute(stmt))

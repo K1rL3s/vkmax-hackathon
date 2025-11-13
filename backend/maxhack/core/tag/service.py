@@ -15,7 +15,7 @@ class TagService(BaseService):
         group_id: GroupId,
         master_id: UserId,
         name: str,
-        descriptions: str | None,
+        description: str | None,
         color: str | None,
     ) -> TagModel:
         await self._ensure_group_exists(group_id)
@@ -28,7 +28,7 @@ class TagService(BaseService):
         return await self._tag_repo.create_tag(
             group_id=group_id,
             name=name,
-            descriptions=descriptions,
+            description=description,
             color=color,
         )
 
@@ -38,7 +38,7 @@ class TagService(BaseService):
         tag_id: TagId,
         master_id: UserId,
         name: str | None = None,
-        descriptions: str | None = None,
+        description: str | None = None,
         color: str | None = None,
     ) -> TagModel:
         await self._ensure_group_exists(group_id)
@@ -53,8 +53,8 @@ class TagService(BaseService):
         values: dict[str, str] = {}
         if name is not None:
             values["name"] = name
-        if descriptions is not None:
-            values["descriptions"] = descriptions
+        if description is not None:
+            values["description"] = description
         if color is not None:
             values["color"] = color
 
