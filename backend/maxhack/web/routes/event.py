@@ -1,10 +1,9 @@
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from maxhack.core.event.models import Cron, EventCreate, EventUpdate
 from maxhack.core.event.service import EventService
-from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
 from maxhack.core.ids import EventId, GroupId
 from maxhack.web.dependencies import CurrentUser
 from maxhack.web.schemas.event import (
@@ -37,19 +36,14 @@ async def create_event_route(
     session: FromDishka[AsyncSession],
     current_user: CurrentUser,
 ) -> EventResponse:
-    try:
-        event, notifies = await event_service.create_event(
-            EventCreate(
-                **body.model_dump(exclude={"cron"}),
-                cron=Cron(**body.cron.model_dump()),
-                creator_id=current_user.db_user.id,
-            ),
-        )
-        return await EventResponse.from_orm_async(event, session)
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    event, notifies = await event_service.create_event(
+        EventCreate(
+            **body.model_dump(exclude={"cron"}),
+            cron=Cron(**body.cron.model_dump()),
+            creator_id=current_user.db_user.id,
+        ),
+    )
+    return await EventResponse.from_orm_async(event, session)
 
 
 @event_router.post(
@@ -63,18 +57,11 @@ async def add_tag_to_event_route(
     event_service: FromDishka[EventService],
     current_user: CurrentUser,
 ) -> None:
-    try:
-        await event_service.add_tag_to_event(
-            event_id=event_id,
-            tag_ids=body.tag_ids,
-            user_id=current_user.db_user.id,
-        )
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
-    except InvalidValue as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    await event_service.add_tag_to_event(
+        event_id=event_id,
+        tag_ids=body.tag_ids,
+        user_id=current_user.db_user.id,
+    )
 
 
 @event_router.get(
@@ -87,16 +74,11 @@ async def get_event_route(
     session: FromDishka[AsyncSession],
     current_user: CurrentUser,
 ) -> EventResponse:
-    try:
-        event = await event_service.get_event(
-            event_id=event_id,
-            user_id=current_user.db_user.id,
-        )
-        return await EventResponse.from_orm_async(event, session)
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    event = await event_service.get_event(
+        event_id=event_id,
+        user_id=current_user.db_user.id,
+    )
+    return await EventResponse.from_orm_async(event, session)
 
 
 @event_router.patch(
@@ -110,26 +92,21 @@ async def update_event_route(
     session: FromDishka[AsyncSession],
     current_user: CurrentUser,
 ) -> EventResponse:
-    try:
-        event = await event_service.update_event(
-            event_id=event_id,
-            user_id=current_user.db_user.id,
-            event_update_model=EventUpdate(
-                **body.model_dump(exclude={"cron"}),
-                cron=(
-                    Cron(
-                        **body.cron.model_dump(),
-                    )
-                    if body.cron
-                    else None
-                ),
+    event = await event_service.update_event(
+        event_id=event_id,
+        user_id=current_user.db_user.id,
+        event_update_model=EventUpdate(
+            **body.model_dump(exclude={"cron"}),
+            cron=(
+                Cron(
+                    **body.cron.model_dump(),
+                )
+                if body.cron
+                else None
             ),
-        )
-        return await EventResponse.from_orm_async(event, session)
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+        ),
+    )
+    return await EventResponse.from_orm_async(event, session)
 
 
 @event_router.delete(
@@ -142,15 +119,10 @@ async def delete_event_route(
     event_service: FromDishka[EventService],
     current_user: CurrentUser,
 ) -> None:
-    try:
-        await event_service.delete_event(
-            event_id=event_id,
-            user_id=current_user.db_user.id,
-        )
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    await event_service.delete_event(
+        event_id=event_id,
+        user_id=current_user.db_user.id,
+    )
 
 
 @event_router.post(
@@ -167,18 +139,11 @@ async def add_user_to_event_route(
     event_service: FromDishka[EventService],
     current_user: CurrentUser,
 ) -> None:
-    try:
-        await event_service.add_user_to_event(
-            event_id=event_id,
-            target_user_ids=body.user_ids,
-            user_id=current_user.db_user.id,
-        )
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
-    except InvalidValue as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    await event_service.add_user_to_event(
+        event_id=event_id,
+        target_user_ids=body.user_ids,
+        user_id=current_user.db_user.id,
+    )
 
 
 @event_router.get(
@@ -191,19 +156,14 @@ async def get_group_events_route(
     session: FromDishka[AsyncSession],
     current_user: CurrentUser,
 ) -> EventsResponse:
-    try:
-        events = await event_service.get_group_events(
-            group_id=group_id,
-            user_id=current_user.db_user.id,
-        )
-        response_events = [
-            await EventResponse.from_orm_async(event, session) for event in events
-        ]
-        return EventsResponse(events=response_events)
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    events = await event_service.get_group_events(
+        group_id=group_id,
+        user_id=current_user.db_user.id,
+    )
+    response_events = [
+        await EventResponse.from_orm_async(event, session) for event in events
+    ]
+    return EventsResponse(events=response_events)
 
 
 @event_router.get(
@@ -215,14 +175,11 @@ async def get_user_events_route(
     session: FromDishka[AsyncSession],
     current_user: CurrentUser,
 ) -> EventsResponse:
-    try:
-        events = await event_service.get_user_events(user_id=current_user.db_user.id)
-        response_events = [
-            await EventResponse.from_orm_async(event, session) for event in events
-        ]
-        return EventsResponse(events=response_events)
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    events = await event_service.get_user_events(user_id=current_user.db_user.id)
+    response_events = [
+        await EventResponse.from_orm_async(event, session) for event in events
+    ]
+    return EventsResponse(events=response_events)
 
 
 # @event_router.get(
@@ -236,16 +193,11 @@ async def get_user_events_route(
 #     session: FromDishka[AsyncSession],
 #     current_user: CurrentUser,
 # ) -> EventsResponse:
-#     try:
-#         events = await event_service.get_other_user_events(
-#             target_user_id=slave_id,
-#             user_id=current_user.db_user.id,
-#         )
-#         response_events = [
-#             await EventResponse.from_orm_async(event, session) for event in events
-#         ]
-#         return EventsResponse(events=response_events)
-#     except EntityNotFound as e:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-#     except NotEnoughRights as e:
-#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+#     events = await event_service.get_other_user_events(
+#         target_user_id=slave_id,
+#         user_id=current_user.db_user.id,
+#     )
+#     response_events = [
+#         await EventResponse.from_orm_async(event, session) for event in events
+#     ]
+#     return EventsResponse(events=response_events)

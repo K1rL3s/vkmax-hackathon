@@ -1,9 +1,8 @@
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from maxhack.core.event.service import EventService
-from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
 from maxhack.core.ids import GroupId, MaxChatId, MaxId, UserId
 from maxhack.core.tag.service import TagService
 from maxhack.core.user.service import UserService
@@ -36,21 +35,15 @@ async def create_user_route(
     user_service: FromDishka[UserService],
     session: FromDishka[AsyncSession],
 ) -> UserResponse:
-    try:
-        user = await user_service.create_user(
-            max_id=MaxId(body.max_id),
-            max_chat_id=MaxChatId(body.max_chat_id),
-            first_name=body.first_name,
-            last_name=body.last_name,
-            phone=body.phone,
-            timezone=body.timezone,
-        )
-        return await UserResponse.from_orm_async(user, session)
-    except InvalidValue as e:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=str(e),
-        )
+    user = await user_service.create_user(
+        max_id=MaxId(body.max_id),
+        max_chat_id=MaxChatId(body.max_chat_id),
+        first_name=body.first_name,
+        last_name=body.last_name,
+        phone=body.phone,
+        timezone=body.timezone,
+    )
+    return await UserResponse.from_orm_async(user, session)
 
 
 @user_router.get(
@@ -62,16 +55,10 @@ async def get_user_by_id_route(
     user_service: FromDishka[UserService],
     session: FromDishka[AsyncSession],
 ) -> UserResponse:
-    try:
-        user = await user_service.get_user_by_max_id(
-            max_id=MaxId(current_user.db_user.max_id),
-        )
-        return await UserResponse.from_orm_async(user, session)
-    except EntityNotFound as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e),
-        )
+    user = await user_service.get_user_by_max_id(
+        max_id=MaxId(current_user.db_user.max_id),
+    )
+    return await UserResponse.from_orm_async(user, session)
 
 
 @user_router.patch(
@@ -84,21 +71,15 @@ async def update_user_route(
     session: FromDishka[AsyncSession],
     current_user: CurrentUser,
 ) -> UserResponse:
-    try:
-        user = await user_service.update_user(
-            user_id=current_user.db_user.id,
-            first_name=body.first_name,
-            last_name=body.last_name,
-            phone=body.phone,
-            timezone=body.timezone,
-            notify_mode=body.notify_mode,
-        )
-        return await UserResponse.from_orm_async(user, session)
-    except EntityNotFound as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e),
-        )
+    user = await user_service.update_user(
+        user_id=current_user.db_user.id,
+        first_name=body.first_name,
+        last_name=body.last_name,
+        phone=body.phone,
+        timezone=body.timezone,
+        notify_mode=body.notify_mode,
+    )
+    return await UserResponse.from_orm_async(user, session)
 
 
 @user_router.get(
@@ -111,27 +92,22 @@ async def list_user_groups_route(
     user_service: FromDishka[UserService],
     current_user: CurrentUser,
 ) -> UserGroupsResponse:
-    try:
-        result = await user_service.get_user_groups(
-            user_id=current_user.db_user.id,
-            master_id=current_user.db_user.id,
+    result = await user_service.get_user_groups(
+        user_id=current_user.db_user.id,
+        master_id=current_user.db_user.id,
+    )
+    items: list[UserGroupItem] = []
+    for group, role in result:
+        items.append(
+            UserGroupItem(
+                group_id=group.id,
+                name=group.name,
+                description=group.description,
+                role_id=role.id,
+            ),
         )
-        items: list[UserGroupItem] = []
-        for group, role in result:
-            items.append(
-                UserGroupItem(
-                    group_id=group.id,
-                    name=group.name,
-                    description=group.description,
-                    role_id=role.id,
-                ),
-            )
 
-        return UserGroupsResponse(groups=items)
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    return UserGroupsResponse(groups=items)
 
 
 @user_router.get(
@@ -145,18 +121,13 @@ async def list_user_tags_route(
     session: FromDishka[AsyncSession],
     current_user: CurrentUser,
 ) -> list[TagResponse]:
-    try:
-        tags = await tag_service.list_user_tags(
-            group_id=group_id,
-            user_id=user_id,
-            master_id=current_user.db_user.id,
-        )
-        response_tags = [await TagResponse.from_orm_async(tag, session) for tag in tags]
-        return response_tags
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    tags = await tag_service.list_user_tags(
+        group_id=group_id,
+        user_id=user_id,
+        master_id=current_user.db_user.id,
+    )
+    response_tags = [await TagResponse.from_orm_async(tag, session) for tag in tags]
+    return response_tags
 
 
 @user_router.get(
@@ -174,18 +145,13 @@ async def list_user_events_route(
         description="Список ID тегов через запятую для фильтрации",
     ),
 ) -> list[EventResponse]:
-    try:
-        events = await event_service.list_user_events(
-            group_id=group_id,
-            user_id=user_id,
-            master_id=current_user.db_user.id,
-            tag_ids=tag_ids,
-        )
-        response_events = [
-            await EventResponse.from_orm_async(event, session) for event in events
-        ]
-        return response_events
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    events = await event_service.list_user_events(
+        group_id=group_id,
+        user_id=user_id,
+        master_id=current_user.db_user.id,
+        tag_ids=tag_ids,
+    )
+    response_events = [
+        await EventResponse.from_orm_async(event, session) for event in events
+    ]
+    return response_events

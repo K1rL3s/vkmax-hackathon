@@ -1,8 +1,7 @@
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, status
 
 from maxhack.core.enums.notify_mode import NotifyMode
-from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
 from maxhack.core.group.service import GroupService
 from maxhack.core.ids import GroupId, InviteKey, UserId
 from maxhack.core.invite.service import InviteService
@@ -38,15 +37,12 @@ async def create_group_route(
     group_service: FromDishka[GroupService],
     current_user: CurrentUser,
 ) -> GetGroupResponse:
-    try:
-        group = await group_service.create_group(
-            master_id=current_user.db_user.id,
-            name=body.name,
-            description=body.description,
-            timezone=body.timezone,
-        )
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    group = await group_service.create_group(
+        master_id=current_user.db_user.id,
+        name=body.name,
+        description=body.description,
+        timezone=body.timezone,
+    )
 
     return GetGroupResponse.model_validate(
         {"group": group, "role": RoleResponse(id=CREATOR_ROLE_ID, name="Босс")},
@@ -63,16 +59,11 @@ async def update_group_route(
     group_service: FromDishka[GroupService],
     current_user: CurrentUser,
 ) -> GetGroupResponse:
-    try:
-        group = await group_service.update_group(
-            group_id=group_id,
-            master_id=current_user.db_user.id,
-            **body.model_dump(exclude_none=True),
-        )
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    group = await group_service.update_group(
+        group_id=group_id,
+        master_id=current_user.db_user.id,
+        **body.model_dump(exclude_none=True),
+    )
 
     return GetGroupResponse.model_validate(
         {
@@ -93,20 +84,15 @@ async def update_group_membership(
     group_service: FromDishka[GroupService],
     current_user: CurrentUser,
 ) -> GroupMemberResponse:
-    try:
-        membership = await group_service.update_membership(
-            group_id=group_id,
-            role_id=body.role_id,
-            slave_id=slave_id,
-            tags=body.tags,
-            master_id=current_user.db_user.id,
-        )
+    membership = await group_service.update_membership(
+        group_id=group_id,
+        role_id=body.role_id,
+        slave_id=slave_id,
+        tags=body.tags,
+        master_id=current_user.db_user.id,
+    )
 
-        return GroupMemberResponse.model_validate(membership)
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    return GroupMemberResponse.model_validate(membership)
 
     # TODO: Вернуть схему
 
@@ -121,13 +107,10 @@ async def get_group(
     current_user: CurrentUser,
     group_service: FromDishka[GroupService],
 ) -> GetGroupResponse:
-    try:
-        group, role = await group_service.get_group(
-            group_id=group_id,
-            member_id=current_user.db_user.id,
-        )
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    group, role = await group_service.get_group(
+        group_id=group_id,
+        member_id=current_user.db_user.id,
+    )
 
     return GetGroupResponse.model_validate({"group": group, "role": role})
 
@@ -142,17 +125,12 @@ async def get_group_user_route(
     group_service: FromDishka[GroupService],
     current_user: CurrentUser,
 ) -> GroupUserItem:
-    try:
-        user = await group_service.get_member(
-            group_id=group_id,
-            user_id=member_id,
-            master_id=current_user.db_user.id,
-        )
-        return GroupUserItem.model_validate(user)
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    user = await group_service.get_member(
+        group_id=group_id,
+        user_id=member_id,
+        master_id=current_user.db_user.id,
+    )
+    return GroupUserItem.model_validate(user)
 
 
 @group_router.get(
@@ -164,16 +142,11 @@ async def list_group_users_route(
     group_service: FromDishka[GroupService],
     current_user: CurrentUser,
 ) -> list[GroupUserItem]:
-    try:
-        group_users = await group_service.get_group_users(
-            group_id=group_id,
-            user_id=current_user.db_user.id,
-        )
-        return [GroupUserItem.model_validate(u) for u in group_users]
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    group_users = await group_service.get_group_users(
+        group_id=group_id,
+        user_id=current_user.db_user.id,
+    )
+    return [GroupUserItem.model_validate(u) for u in group_users]
 
 
 @group_router.delete(
@@ -190,18 +163,11 @@ async def remove_group_member_route(
     group_service: FromDishka[GroupService],
     current_user: CurrentUser,
 ) -> None:
-    try:
-        await group_service.remove_user_from_group(
-            group_id=group_id,
-            slave_id=slave_id,
-            master_id=current_user.db_user.id,
-        )
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
-    except InvalidValue as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    await group_service.remove_user_from_group(
+        group_id=group_id,
+        slave_id=slave_id,
+        master_id=current_user.db_user.id,
+    )
 
 
 @group_router.delete(
@@ -214,16 +180,10 @@ async def delete_group_route(
     group_service: FromDishka[GroupService],
     current_user: CurrentUser,
 ) -> None:
-
-    try:
-        await group_service.delete_group(
-            group_id=group_id,
-            editor_id=current_user.db_user.id,
-        )
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    await group_service.delete_group(
+        group_id=group_id,
+        editor_id=current_user.db_user.id,
+    )
 
 
 @group_router.post(
@@ -257,17 +217,10 @@ async def join_group(
     group_service: FromDishka[GroupService],
     current_user: CurrentUser,
 ) -> GroupMemberResponse:
-    try:
-        group = await group_service.join_group(
-            user_id=current_user.db_user.id,
-            invite_key=body.invite_key,
-        )
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
-    except InvalidValue as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    group = await group_service.join_group(
+        user_id=current_user.db_user.id,
+        invite_key=body.invite_key,
+    )
 
     return GroupMemberResponse(
         user_id=current_user.db_user.id,
@@ -288,20 +241,13 @@ async def update_group_notify_mode(
     group_service: FromDishka[GroupService],
     current_user: CurrentUser,
 ) -> GroupMemberResponse:
-    try:
-        membership = await group_service.update_membership(
-            group_id=group_id,
-            slave_id=current_user.db_user.id,
-            master_id=current_user.db_user.id,
-            role_id=None,
-            tags=None,
-            notify_mode=body.notify_mode,
-        )
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
-    except InvalidValue as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    membership = await group_service.update_membership(
+        group_id=group_id,
+        slave_id=current_user.db_user.id,
+        master_id=current_user.db_user.id,
+        role_id=None,
+        tags=None,
+        notify_mode=body.notify_mode,
+    )
 
     return GroupMemberResponse.model_validate(membership)

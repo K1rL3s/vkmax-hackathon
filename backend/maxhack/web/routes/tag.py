@@ -1,9 +1,8 @@
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from maxhack.core.exceptions import EntityNotFound, InvalidValue, NotEnoughRights
 from maxhack.core.ids import GroupId, TagId, UserId
 from maxhack.core.tag.service import TagService
 from maxhack.web.dependencies import CurrentUser
@@ -34,19 +33,14 @@ async def create_tag_route(
     session: FromDishka[AsyncSession],
     current_user: CurrentUser,
 ) -> TagResponse:
-    try:
-        tag = await tag_service.create_tag(
-            group_id=group_id,
-            master_id=current_user.db_user.id,
-            name=body.name,
-            description=body.description,
-            color=body.color,
-        )
-        return await TagResponse.from_orm_async(tag, session)
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    tag = await tag_service.create_tag(
+        group_id=group_id,
+        master_id=current_user.db_user.id,
+        name=body.name,
+        description=body.description,
+        color=body.color,
+    )
+    return await TagResponse.from_orm_async(tag, session)
 
 
 @tag_router.patch(
@@ -61,20 +55,15 @@ async def update_tag_route(
     session: FromDishka[AsyncSession],
     current_user: CurrentUser,
 ) -> TagResponse:
-    try:
-        tag = await tag_service.update_tag(
-            group_id=group_id,
-            tag_id=tag_id,
-            master_id=current_user.db_user.id,
-            name=body.name,
-            description=body.description,
-            color=body.color,
-        )
-        return await TagResponse.from_orm_async(tag, session)
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    tag = await tag_service.update_tag(
+        group_id=group_id,
+        tag_id=tag_id,
+        master_id=current_user.db_user.id,
+        name=body.name,
+        description=body.description,
+        color=body.color,
+    )
+    return await TagResponse.from_orm_async(tag, session)
 
 
 @tag_router.delete(
@@ -88,16 +77,11 @@ async def delete_tag_route(
     tag_service: FromDishka[TagService],
     current_user: CurrentUser,
 ) -> None:
-    try:
-        await tag_service.delete_tag(
-            group_id=group_id,
-            tag_id=tag_id,
-            master_id=current_user.db_user.id,
-        )
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    await tag_service.delete_tag(
+        group_id=group_id,
+        tag_id=tag_id,
+        master_id=current_user.db_user.id,
+    )
 
 
 @tag_router.post(
@@ -114,19 +98,12 @@ async def assign_tag_to_user_route(
     tag_service: FromDishka[TagService],
     current_user: CurrentUser,
 ) -> None:
-    try:
-        await tag_service.assign_tag_to_user(
-            group_id=group_id,
-            tag_id=body.tag_id,
-            user_id=body.user_id,
-            master_id=current_user.db_user.id,
-        )
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
-    except InvalidValue as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    await tag_service.assign_tag_to_user(
+        group_id=group_id,
+        tag_id=body.tag_id,
+        user_id=body.user_id,
+        master_id=current_user.db_user.id,
+    )
 
 
 @tag_router.delete(
@@ -144,17 +121,12 @@ async def remove_tag_from_user_route(
     tag_service: FromDishka[TagService],
     current_user: CurrentUser,
 ) -> None:
-    try:
-        await tag_service.remove_tag_from_user(
-            group_id=group_id,
-            tag_id=tag_id,
-            user_id=user_id,
-            master_id=current_user.db_user.id,
-        )
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    await tag_service.remove_tag_from_user(
+        group_id=group_id,
+        tag_id=tag_id,
+        user_id=user_id,
+        master_id=current_user.db_user.id,
+    )
 
 
 @tag_router.get(
@@ -167,17 +139,12 @@ async def list_group_tags_route(
     session: FromDishka[AsyncSession],
     current_user: CurrentUser,
 ) -> list[TagResponse]:
-    try:
-        tags = await tag_service.list_group_tags(
-            group_id=group_id,
-            master_id=current_user.db_user.id,
-        )
-        response_tags = [await TagResponse.from_orm_async(tag, session) for tag in tags]
-        return response_tags
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    tags = await tag_service.list_group_tags(
+        group_id=group_id,
+        master_id=current_user.db_user.id,
+    )
+    response_tags = [await TagResponse.from_orm_async(tag, session) for tag in tags]
+    return response_tags
 
 
 @tag_router.get(
@@ -193,27 +160,22 @@ async def list_tag_users_route(
     tag_service: FromDishka[TagService],
     current_user: CurrentUser,
 ) -> list[TagUserItem]:
-    try:
-        result = await tag_service.list_tag_users(
-            group_id=group_id,
-            tag_id=tag_id,
-            master_id=current_user.db_user.id,
+    result = await tag_service.list_tag_users(
+        group_id=group_id,
+        tag_id=tag_id,
+        master_id=current_user.db_user.id,
+    )
+    users: list[TagUserItem] = []
+    for user, role_id in result:
+        users.append(
+            TagUserItem(
+                user_id=user.id,
+                max_id=user.max_id,
+                first_name=user.first_name,
+                last_name=user.last_name,
+                phone=user.phone,
+                role_id=role_id,
+            ),
         )
-        users: list[TagUserItem] = []
-        for user, role_id in result:
-            users.append(
-                TagUserItem(
-                    user_id=user.id,
-                    max_id=user.max_id,
-                    first_name=user.first_name,
-                    last_name=user.last_name,
-                    phone=user.phone,
-                    role_id=role_id,
-                ),
-            )
 
-        return users
-    except EntityNotFound as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except NotEnoughRights as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    return users
