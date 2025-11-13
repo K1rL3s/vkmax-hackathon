@@ -27,6 +27,8 @@
         python -m maxhack.broker
         ```
 
+---
+
 ## Реализованные фичи
 
 - Блэ блэ
@@ -40,6 +42,8 @@
 - Lingang Guli Guli Guli Watcha
 - Lingang Gu Lingang Gu
 
+---
+
 ## Технологии
 
 - `Python` как связующее
@@ -51,6 +55,8 @@
 - `dishka` как DI фреймворк
 - `apscheduler` как планировщик
 - `black` `isort` `ruff` `mypy` как контроль качества кода
+
+---
 
 ## Структура
 
@@ -84,6 +90,14 @@ maxhack
     └───static - Пустая папка и одинокий __init__
 migrations - Миграции
 ```
+
+---
+
+## Взаимодействия
+
+![interaction.png](content/interaction.png)
+
+---
 
 ## Пример .env
 Смотрите в .env.example
