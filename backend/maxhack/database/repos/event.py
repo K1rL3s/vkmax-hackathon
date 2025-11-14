@@ -200,6 +200,7 @@ class EventRepo(BaseAlchemyRepo):
     ) -> list[EventModel]:
         stmt = (
             select(EventModel)
+            .options(selectinload(EventModel.notifies))
             .where(
                 EventModel.creator_id == user_id,
                 EventModel.is_not_deleted,
@@ -340,6 +341,7 @@ class EventRepo(BaseAlchemyRepo):
     ) -> list[EventModel]:
         stmt = (
             select(EventModel)
+            .options(selectinload(EventModel.notifies))
             .join(UsersToEvents, EventModel.id == UsersToEvents.event_id)
             .where(
                 EventModel.group_id == group_id,
