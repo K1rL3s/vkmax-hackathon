@@ -211,6 +211,25 @@ async def create_invite_route(
     )
 
 
+@group_router.delete(
+    "/{group_id}/invite",
+    status_code=status.HTTP_204_NO_CONTENT,
+    description="""
+Удалить приглашение в группу.
+В группе может быть только одно активное приглашение, поэтому удалится оно.
+""".strip(),
+)
+async def delete_invite_route(
+    group_id: GroupId,
+    invite_service: FromDishka[InviteService],
+    current_user: CurrentUser,
+) -> None:
+    await invite_service.delete_invite(
+        group_id=group_id,
+        user_id=current_user.db_user.id,
+    )
+
+
 # TODO: Удалить на проде
 @group_router.post(
     "/join",
