@@ -7,7 +7,6 @@ import { TimezoneInput } from '@/components/timezone-input'
 import { useDeleteGroup, useEditGroup, useGroup } from '@/hooks/groups'
 import { GroupTags } from '@/components/group/tag/group-tags'
 import { TIMEZONES } from '@/components/timezone-select-modal'
-import { useGroupTags } from '@/hooks/tags'
 
 export const Route = createFileRoute('/groups/$groupId/settings')({
   component: GroupSettingsPage,
@@ -17,7 +16,6 @@ function GroupSettingsPage() {
   const navigate = useNavigate()
   const { groupId } = useParams({ from: '/groups/$groupId/settings' })
   const groupQuery = useGroup(Number(groupId))
-  const tagsQuery = useGroupTags(Number(groupId))
   const editGroupMutation = useEditGroup()
   const deleteGroupMutation = useDeleteGroup()
   const [isEditing, setIsEditing] = useState(false)
@@ -119,10 +117,7 @@ function GroupSettingsPage() {
               <Typography.Title className="text-(--text-tertiary)">
                 Теги
               </Typography.Title>
-              <GroupTags
-                tags={tagsQuery.data ?? []}
-                groupId={Number(groupId)}
-              />
+              <GroupTags groupId={Number(groupId)} />
             </Flex>
           </Flex>
 

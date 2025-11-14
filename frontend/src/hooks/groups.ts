@@ -11,7 +11,12 @@ import {
   updateGroupRouteGroupsGroupIdPatch,
 } from '@/lib/api/groups/groups'
 import { useMaxUser } from '@/integrations/max-ui/hooks/max-user'
-import { listUserGroupsRouteUsersMeGroupsGet } from '@/lib/api/users/users'
+import {
+  getPersonalGroupUsersMeGroupsPersonalGet,
+  getUserByIdRouteUsersMeGet,
+  listUserGroupsRouteUsersMeGroupsGet,
+} from '@/lib/api/users/users'
+import { listGroupTagsRouteGroupsGroupIdTagsGet } from '@/lib/api/tags/tags'
 
 export function useGroups() {
   return useQuery({
@@ -24,6 +29,23 @@ export function useGroup(groupId: number) {
   return useQuery({
     queryKey: ['groups', groupId],
     queryFn: async () => getGroupGroupsGroupIdGet(groupId),
+  })
+}
+
+export function usePersonalGroup() {
+  return useQuery({
+    queryKey: ['me', 'groups', 'personal'],
+    queryFn: async () => {
+      const [group, user] = await Promise.all([
+        getPersonalGroupUsersMeGroupsPersonalGet(),
+        getUserByIdRouteUsersMeGet(),
+      ])
+
+      return {
+        ...user,
+        group: { ...group },
+      }
+    },
   })
 }
 

@@ -1,4 +1,4 @@
-import { Calendar, Plus, User } from 'lucide-react'
+import { Calendar, Plus, Settings, User } from 'lucide-react'
 
 export const routes: Record<
   string,
@@ -12,6 +12,11 @@ export const routes: Record<
   '/profile': {
     title: 'Профиль',
     icon: User,
+    sidebar: true,
+  },
+  '/settings': {
+    title: 'Настройки',
+    icon: Settings,
     sidebar: true,
   },
   '/groups/create': {

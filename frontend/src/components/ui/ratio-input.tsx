@@ -24,10 +24,11 @@ export function RatioInput({
   return (
     <div className={clsx('w-full', className)}>
       <Flex direction="column" gapY={12}>
-        <CellList header={<div className="pl-5 pb-3">{header}</div>}>
+        <CellList header={header && <div className="pl-5 pb-3">{header}</div>}>
           {options.map((opt, id) => (
             <>
               <CellAction
+                type="button"
                 mode="primary"
                 onClick={() => onChange(opt)}
                 innerClassNames={{ content: 'text-(--text-primary)' }}

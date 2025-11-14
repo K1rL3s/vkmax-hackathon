@@ -6,6 +6,7 @@ import { useEventsList } from '@/hooks/events'
 import { Header } from '@/components/header'
 import { EventList } from '@/components/event/event-list'
 import { FloatingIconButton } from '@/components/ui/floating-button'
+import { FallbackLoader } from '@/components/ui/fallback-loader'
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -21,14 +22,6 @@ function Home() {
       scrollRef.current.scrollToToday()
     }
   }, [data])
-
-  if (isPending || !data) {
-    return (
-      <div className="mt-12 w-full h-full">
-        <Loader size={38} />
-      </div>
-    )
-  }
 
   const today = new Date().getDate()
   return (
@@ -48,7 +41,9 @@ function Home() {
             </IconButton>
           </Flex>
         </Header>
-        <EventList events={data} ref={scrollRef} />
+        <FallbackLoader isLoading={isPending || !data}>
+          <EventList events={data!} ref={scrollRef} />
+        </FallbackLoader>
       </Flex>
       <FloatingIconButton onClick={() => navigate({ to: '/events/create' })}>
         <PlusIcon />

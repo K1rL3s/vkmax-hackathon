@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GroupsCreateRouteImport } from './routes/groups/create'
@@ -20,6 +21,11 @@ import { Route as GroupsGroupIdMembersIndexRouteImport } from './routes/groups/$
 import { Route as GroupsGroupIdTagsCreateRouteImport } from './routes/groups/$groupId/tags/create'
 import { Route as GroupsGroupIdMembersMemberIdRouteImport } from './routes/groups/$groupId/members/$memberId'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -76,6 +82,7 @@ const GroupsGroupIdMembersMemberIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
   '/events/$id': typeof EventsIdRoute
   '/events/create': typeof EventsCreateRoute
   '/groups/create': typeof GroupsCreateRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
   '/events/$id': typeof EventsIdRoute
   '/events/create': typeof EventsCreateRoute
   '/groups/create': typeof GroupsCreateRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
   '/events/$id': typeof EventsIdRoute
   '/events/create': typeof EventsCreateRoute
   '/groups/create': typeof GroupsCreateRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/profile'
+    | '/settings'
     | '/events/$id'
     | '/events/create'
     | '/groups/create'
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/profile'
+    | '/settings'
     | '/events/$id'
     | '/events/create'
     | '/groups/create'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/profile'
+    | '/settings'
     | '/events/$id'
     | '/events/create'
     | '/groups/create'
@@ -152,6 +164,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProfileRoute: typeof ProfileRoute
+  SettingsRoute: typeof SettingsRoute
   EventsIdRoute: typeof EventsIdRoute
   EventsCreateRoute: typeof EventsCreateRoute
   GroupsCreateRoute: typeof GroupsCreateRoute
@@ -164,6 +177,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -240,6 +260,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProfileRoute: ProfileRoute,
+  SettingsRoute: SettingsRoute,
   EventsIdRoute: EventsIdRoute,
   EventsCreateRoute: EventsCreateRoute,
   GroupsCreateRoute: GroupsCreateRoute,

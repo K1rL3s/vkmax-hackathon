@@ -16,8 +16,6 @@ import { clsx } from 'clsx'
 import { Header } from '@/components/header'
 import { Avatar } from '@/components/avatar'
 import { useEditMe, useMe } from '@/hooks/user'
-import { TimezoneInput } from '@/components/timezone-input'
-import { TIMEZONES } from '@/components/timezone-select-modal'
 import { FallbackLoader } from '@/components/ui/fallback-loader'
 
 export const Route = createFileRoute('/profile')({
@@ -34,18 +32,12 @@ function ProfilePage() {
       firstName: data?.firstName ?? '',
       lastName: data?.lastName ?? '',
       phone: data?.phone ?? '',
-      timezone:
-        TIMEZONES.find((tz) => tz.value === data?.timezone) ?? TIMEZONES[0],
     },
     validators: {
       onChange: z.object({
         firstName: z.string().min(1, { error: 'Имя не может быть пустым' }),
         lastName: z.string().min(1, { error: 'Фамилия не может быть пустой' }),
         phone: z.string().min(1, { error: 'Телефон не может быть пустым' }),
-        timezone: z.object({
-          label: z.string(),
-          value: z.number(),
-        }),
       }),
     },
     onSubmit: ({ value }) => {
@@ -151,33 +143,6 @@ function ProfilePage() {
                       />
                     </CellList>
                   </Flex>
-                  <CellList
-                    filled
-                    mode="island"
-                    header={<CellHeader className="mb-2">Настройки</CellHeader>}
-                  >
-                    <form.Field
-                      name="timezone"
-                      children={(field) => (
-                        <TimezoneInput
-                          disabled={!isEditing}
-                          value={field.state.value}
-                          before={
-                            <Typography.Title
-                              className={clsx('text-(--text-primary)', {
-                                'text-(--states-text-disabled-primary)!':
-                                  !isEditing,
-                              })}
-                            >
-                              Часовой пояс
-                            </Typography.Title>
-                          }
-                          mode="primary"
-                          onChange={field.handleChange}
-                        />
-                      )}
-                    />
-                  </CellList>
                 </Flex>
                 <Flex className="w-full" gapX={10}>
                   {!isEditing ? (
