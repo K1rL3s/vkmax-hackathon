@@ -2,6 +2,7 @@ from typing import Any
 
 from maxhack.core.enums.notify_mode import NotifyMode
 from maxhack.core.exceptions import (
+    GroupNotFound,
     InvalidValue,
     NotEnoughRights,
     UserNotFound,
@@ -149,3 +150,17 @@ class UserService:
         groups = await self._users_to_groups_repo.user_groups(user_id)
         logger.info(f"Found {len(groups)} groups for user {user_id}")
         return groups
+
+    async def get_personal_group(self, user_id: UserId) -> GroupModel:
+        logger.debug("Getting personal group for user %d", user_id)
+        user = await self._user_repo.get_by_id(user_id)
+        if user is None:
+            logger.error("User %d not found", user_id)
+            raise UserNotFound
+
+        group = await self._users_to_groups_repo.personal_group(user_id)
+        if not group:
+            logger.error("Personal group for user %d not found", user_id)
+            raise GroupNotFound(message="Что то пошло не так, личная группа не найдена")
+
+        return group

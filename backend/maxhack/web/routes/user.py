@@ -10,6 +10,7 @@ from maxhack.web.dependencies import CurrentUser
 from maxhack.web.schemas.event import EventResponse
 from maxhack.web.schemas.tag import TagResponse
 from maxhack.web.schemas.user import (
+    PersonalGroupResponse,
     UserCreateRequest,
     UserGroupItem,
     UserGroupsResponse,
@@ -80,6 +81,20 @@ async def update_user_route(
         notify_mode=body.notify_mode,
     )
     return await UserResponse.from_orm_async(user, session)
+
+
+@user_router.get(
+    "/me/groups/personal",
+    description="Получить персональную группу пользователя.",
+)
+async def get_personal_group(
+    user_service: FromDishka[UserService],
+    current_user: CurrentUser,
+) -> PersonalGroupResponse:
+    personal_group = await user_service.get_personal_group(
+        user_id=UserId(current_user.db_user.id),
+    )
+    return PersonalGroupResponse.model_validate(personal_group)
 
 
 @user_router.get(

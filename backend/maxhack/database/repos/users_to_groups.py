@@ -4,6 +4,7 @@ from sqlalchemy.orm.strategy_options import joinedload
 
 from maxhack.core.enums.notify_mode import NotifyMode
 from maxhack.core.exceptions import MaxHackError
+from maxhack.core.group.consts import PRIVATE_GROUP_NAME
 from maxhack.core.ids import GroupId, InviteId, RoleId, UserId
 from maxhack.core.role.ids import MEMBER_ROLE_ID
 from maxhack.database.models import (
@@ -44,6 +45,21 @@ class UsersToGroupsRepo(BaseAlchemyRepo):
             .offset(offset)
         )
         return list(await self._session.execute(stmt))
+
+    async def personal_group(
+        self,
+        user_id: UserId,
+    ) -> GroupModel | None:
+        stmt = (
+            select(GroupModel)
+            .join(UsersToGroupsModel, UsersToGroupsModel.group_id == GroupModel.id)
+            .where(
+                UsersToGroupsModel.user_id == user_id,
+                GroupModel.name == PRIVATE_GROUP_NAME,
+                GroupModel.is_not_deleted,
+            )
+        )
+        return await self._session.scalar(stmt)
 
     async def group_users(
         self,

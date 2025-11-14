@@ -1,3 +1,4 @@
+from typing import Literal
 from .core import Model
 from maxhack.core.enums.notify_mode import NotifyMode
 
@@ -37,6 +38,13 @@ class UserGroupItem(Model):
     name: str
     description: str | None = None
     role_id: int
+
+
+class PersonalGroupResponse(Model):
+    id: int
+    name: Literal["Личная"]
+    description: str | None = None
+    timezone: int
 
 
 class UserGroupsResponse(Model):
