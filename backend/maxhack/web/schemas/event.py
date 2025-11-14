@@ -6,7 +6,7 @@ from pydantic import Field
 from .core import Model
 from .group import GroupResponse
 from .tag import TagResponse
-from maxhack.core.ids import EventId, GroupId, TagId, UserId
+from maxhack.core.ids import EventId, GroupId, RespondId, TagId, UserId
 
 
 class CronSchema(Model):
@@ -42,6 +42,15 @@ class EventUpdateRequest(Model):
     cron: CronSchema | None = None
 
 
+class RespondResponse(Model):
+    id: RespondId
+    status: str
+
+
+class EventNotifyResponse(Model):
+    minutes_before: int
+
+
 class EventResponse(Model):
     id: EventId
     title: str
@@ -52,12 +61,8 @@ class EventResponse(Model):
     creator_id: UserId
     group_id: GroupId
     timezone: int
-    # TODO: сделать возврат notifies
-    # notifies: list[int]
-
-
-class EventNotifyResponse(Model):
-    minutes_before: int
+    respond: RespondResponse | None = None
+    notifies: list[int] = Field(default_factory=list)
 
 
 class EventDetailsResponse(Model):

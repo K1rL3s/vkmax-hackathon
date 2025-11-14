@@ -35,7 +35,6 @@ def validate_web_app_data(token: str, web_app_data: str) -> WebAppInitData:
     try:
         return safe_parse_webapp_init_data(token, web_app_data)
     except ValueError:
-        # Перепроверка даты, чтобы через unquote
         web_app_data = urllib.parse.unquote(web_app_data)
         return safe_parse_webapp_init_data(token, web_app_data)
 

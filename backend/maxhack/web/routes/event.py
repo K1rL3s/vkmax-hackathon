@@ -1,3 +1,5 @@
+from typing import Any
+
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,6 +17,7 @@ from maxhack.web.schemas.event import (
     EventResponse,
     EventUpdateRequest,
     EventsResponse,
+    RespondResponse,
 )
 from maxhack.web.schemas.group import GroupResponse
 from maxhack.web.schemas.tag import TagResponse
@@ -175,13 +178,32 @@ async def get_group_events_route(
     session: FromDishka[AsyncSession],
     current_user: CurrentUser,
 ) -> EventsResponse:
-    events = await event_service.get_group_events(
+    events_with_responds = await event_service.get_group_events(
         group_id=group_id,
         user_id=current_user.db_user.id,
     )
-    response_events = [
-        await EventResponse.from_orm_async(event, session) for event in events
-    ]
+    response_events = []
+    for event, respond in events_with_responds:
+        # Создаем EventResponse вручную, исключая notifies из автоматической конвертации
+        event_dict = {
+            "id": event.id,
+            "title": event.title,
+            "description": event.description,
+            "cron": event.cron,
+            "is_cycle": event.is_cycle,
+            "type": event.type,
+            "creator_id": event.creator_id,
+            "group_id": event.group_id,
+            "timezone": event.timezone,
+            "notifies": [notify.minutes_before for notify in event.notifies],
+        }
+        if respond is not None:
+            event_dict["respond"] = {
+                "id": respond.id,
+                "status": respond.status,
+            }
+        event_response = EventResponse.model_validate(event_dict)
+        response_events.append(event_response)
     return EventsResponse(events=response_events)
 
 

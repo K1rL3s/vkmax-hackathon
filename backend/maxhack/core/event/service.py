@@ -20,6 +20,7 @@ from maxhack.core.utils.datehelp import datetime_now
 from maxhack.database.models import (
     EventModel,
     EventNotifyModel,
+    RespondModel,
     UserModel,
     UsersToGroupsModel,
 )
@@ -352,7 +353,7 @@ class EventService(BaseService):
         self,
         group_id: GroupId,
         user_id: UserId,
-    ) -> list[EventModel]:
+    ) -> list[tuple[EventModel, RespondModel | None]]:
         logger.debug(f"Getting events for group {group_id} for user {user_id}")
         await self._ensure_group_exists(group_id)
 
@@ -364,11 +365,28 @@ class EventService(BaseService):
             logger.warning(f"User {user_id} is not in group {group_id}")
             raise NotEnoughRights
 
-        events = await self._event_repo.get_by_group(group_id, user_id)
-        logger.info(
-            f"Found {len(events)} events for group {group_id} for user {user_id}",
-        )
-        return events
+        if membership.role_id in {CREATOR_ROLE_ID, EDITOR_ROLE_ID}:
+            events = await self._event_repo.get_by_group_id(group_id)
+            logger.info(
+                f"Found {len(events)} events for group {group_id} (all events for role {membership.role_id})",
+            )
+        else:
+            # Для обычных участников показываем только свои события
+            events = await self._event_repo.get_by_group(group_id, user_id)
+            logger.info(
+                f"Found {len(events)} events for group {group_id} for user {user_id}",
+            )
+
+        # Получаем respond для каждого события
+        result: list[tuple[EventModel, RespondModel | None]] = []
+        for event in events:
+            respond = await self._respond_repo.get_user_respond(
+                event_id=event.id,
+                user_id=user_id,
+            )
+            result.append((event, respond))
+
+        return result
 
     async def get_user_events(self, user_id: UserId) -> list[EventModel]:
         logger.debug(f"Getting events for user {user_id}")

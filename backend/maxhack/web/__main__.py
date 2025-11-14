@@ -11,7 +11,7 @@ if __name__ == "__main__":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     config = load_config()
     granian.Granian(
-        "maxhack.web.main:app",
+        "maxhack.web.asgi:app",
         address=config.app.host,
         port=config.app.port,
         interface=Interfaces.ASGI,
