@@ -175,12 +175,11 @@ async def add_user_to_event_route(
 async def get_group_events_route(
     group_id: GroupId,
     event_service: FromDishka[EventService],
-    session: FromDishka[AsyncSession],
     current_user: CurrentUser,
 ) -> EventsResponse:
     events_with_responds = await event_service.get_group_events(
         group_id=group_id,
-        user_id=current_user.db_user.id,
+        user_id=UserId(current_user.db_user.id),
     )
     response_events = []
     for event, respond in events_with_responds:
@@ -213,14 +212,12 @@ async def get_group_events_route(
 )
 async def get_user_events_route(
     event_service: FromDishka[EventService],
-    session: FromDishka[AsyncSession],
     current_user: CurrentUser,
 ) -> EventsResponse:
-    events = await event_service.get_user_events(user_id=current_user.db_user.id)
-    response_events = [
-        await EventResponse.from_orm_async(event, session) for event in events
-    ]
-    return EventsResponse(events=response_events)
+    events = await event_service.get_user_events(
+        user_id=UserId(current_user.db_user.id),
+    )
+    return EventsResponse(events=[EventResponse.model_validate(e) for e in events])
 
 
 # @event_router.get(

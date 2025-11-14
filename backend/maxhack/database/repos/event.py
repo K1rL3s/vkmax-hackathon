@@ -208,7 +208,7 @@ class EventRepo(BaseAlchemyRepo):
             .limit(limit)
             .offset(offset)
         )
-        return list(await self._session.execute(stmt))
+        return list(await self._session.scalars(stmt))
 
     async def add_tag(
         self,
