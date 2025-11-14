@@ -1,4 +1,5 @@
 import { Avatar as MaxAvatar } from '@maxhub/max-ui'
+import clsx from 'clsx'
 
 type AvatarProps = {
   size:
@@ -21,6 +22,7 @@ type AvatarProps = {
   firstName?: string
   lastName?: string
   image_url?: string | undefined
+  className?: string
 }
 
 export function Avatar({
@@ -28,9 +30,10 @@ export function Avatar({
   firstName,
   lastName,
   image_url,
+  className,
 }: AvatarProps) {
   return (
-    <MaxAvatar.Container size={size}>
+    <MaxAvatar.Container className={clsx(className)} size={size}>
       {image_url ? (
         <MaxAvatar.Image src={image_url} alt={`${firstName} ${lastName}`} />
       ) : (

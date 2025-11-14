@@ -173,6 +173,7 @@ function CreateEventForm() {
                     />
                   )}
                 />
+                <div className="border-b border-gray-200/10" />
                 <form.Field
                   name="retry"
                   children={(field) => (
@@ -189,6 +190,7 @@ function CreateEventForm() {
                     />
                   )}
                 />
+                <div className="border-b border-gray-200/10" />
                 <form.Field
                   name="timezone"
                   children={(field) => (
@@ -220,7 +222,6 @@ function CreateEventForm() {
                     />
                   )}
                 />
-
                 <div className="border-b border-gray-200/10" />
                 <form.Field
                   name="tagsIds"

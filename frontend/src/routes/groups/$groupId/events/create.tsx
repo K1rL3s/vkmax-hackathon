@@ -1,6 +1,13 @@
 import { useForm } from '@tanstack/react-form'
 import { createFileRoute, useParams, useRouter } from '@tanstack/react-router'
-import { Bell, Clock3, Globe, Paperclip, RefreshCcw } from 'lucide-react'
+import {
+  Bell,
+  Clock3,
+  Globe,
+  Paperclip,
+  RefreshCcw,
+  Users2,
+} from 'lucide-react'
 import z from 'zod'
 import {
   Button,
@@ -23,6 +30,7 @@ import { useGroup } from '@/hooks/groups'
 import { toLocalDatetimeString } from '@/lib/utils/datetime'
 import { useGroupTags } from '@/hooks/tags'
 import { useMembers } from '@/hooks/members'
+import { ParticipantsInput } from '@/components/group/participants-input'
 
 export const Route = createFileRoute('/groups/$groupId/events/create')({
   component: CreateGroupEventForm,
@@ -51,6 +59,8 @@ function CreateGroupEventForm() {
       date: toLocalDatetimeString(new Date()),
       minutesBefore: 60,
       tagsIds: tagsQuery.data || [],
+      participantsIds:
+        groupMembersQuery.data?.map((member) => member.userId) || [],
     },
     validators: {
       onChange: z.object({
@@ -77,6 +87,7 @@ function CreateGroupEventForm() {
             groupId: z.number(),
           }),
         ),
+        participantsIds: z.array(z.number()),
       }),
     },
     onSubmit: ({ value }) => {
@@ -179,6 +190,7 @@ function CreateGroupEventForm() {
                     />
                   )}
                 />
+                <div className="border-b border-gray-200/10" />
                 <form.Field
                   name="retry"
                   children={(field) => (
@@ -195,6 +207,7 @@ function CreateGroupEventForm() {
                     />
                   )}
                 />
+                <div className="border-b border-gray-200/10" />
                 <form.Field
                   name="timezone"
                   children={(field) => (
@@ -223,6 +236,37 @@ function CreateGroupEventForm() {
                       }}
                       iconBefore={<Bell size={18} />}
                       placeholder="Напомнить за минут"
+                    />
+                  )}
+                />
+                <div className="border-b border-gray-200/10" />
+                <form.Field
+                  name="participantsIds"
+                  children={(field) => (
+                    <ParticipantsInput
+                      before={
+                        <Users2
+                          color="currentColor"
+                          className="text-(--icon-primary)"
+                          size={18}
+                        />
+                      }
+                      value={field.state.value}
+                      options={groupMembersQuery.data || []}
+                      onChange={(participantId) => {
+                        if (field.state.value.includes(participantId)) {
+                          field.handleChange(
+                            field.state.value.filter(
+                              (id) => id !== participantId,
+                            ),
+                          )
+                        } else {
+                          field.handleChange([
+                            ...field.state.value,
+                            participantId,
+                          ])
+                        }
+                      }}
                     />
                   )}
                 />
