@@ -1,12 +1,12 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from typing import TypedDict
 
-from icalendar import Calendar, Event as ICalEvent
 from croniter import croniter
+from icalendar import Calendar, Event as ICalEvent
 
 from maxhack.core.event.models import Cron, EventCreate
 from maxhack.core.event.service import EventService
-from maxhack.core.exceptions import NotEnoughRights
+from maxhack.core.exceptions import GroupNotFound
 from maxhack.core.ids import GroupId, UserId
 from maxhack.core.role.ids import CREATOR_ROLE_ID, EDITOR_ROLE_ID
 from maxhack.core.service import BaseService
@@ -92,7 +92,7 @@ class IcsService(BaseService):
         if end_date is None:
             end_date = start_date + timedelta(days=365)
 
-        current_time = datetime.now(timezone.utc)
+        current_time = datetime.now(UTC)
 
         for event in events:
             if event.event_happened and not event.is_cycle:
@@ -133,7 +133,7 @@ class IcsService(BaseService):
                     ical_event = ICalEvent()
                     ical_event.add("summary", event.title)
                     ical_event.add("dtstart", next_date)
-                    ical_event.add("dtstamp", datetime.now(timezone.utc))
+                    ical_event.add("dtstamp", datetime.now(UTC))
 
                     if event.duration:
                         end_datetime = next_date + timedelta(minutes=event.duration)
@@ -201,7 +201,9 @@ class IcsService(BaseService):
                     if start_dt.tzinfo:
                         utc_offset = start_dt.utcoffset()
                         if utc_offset:
-                            timezone_offset_minutes = int(utc_offset.total_seconds() / 60)
+                            timezone_offset_minutes = int(
+                                utc_offset.total_seconds() / 60,
+                            )
                         else:
                             timezone_offset_minutes = 0
                         start_dt = start_dt.astimezone(UTC_TIMEZONE)
@@ -408,7 +410,9 @@ class IcsService(BaseService):
         Returns:
             bytes: Содержимое .ics файла
         """
-        logger.debug(f"Exporting all group events for group {group_id} by user {user_id}")
+        logger.debug(
+            f"Exporting all group events for group {group_id} by user {user_id}",
+        )
         await self._ensure_group_exists(group_id)
 
         await self._ensure_membership_role(
@@ -424,4 +428,3 @@ class IcsService(BaseService):
 
         logger.info(f"Found {len(events)} events in group {group_id} for export")
         return self.generate_ics(events, groups_dict)
-

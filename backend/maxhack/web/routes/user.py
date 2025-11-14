@@ -139,7 +139,9 @@ async def list_personal_events_route(
     """
     parsed_tag_ids: list[TagId] | None = None
     if tag_ids:
-        parsed_tag_ids = [TagId(int(tid.strip())) for tid in tag_ids.split(",") if tid.strip()]
+        parsed_tag_ids = [
+            TagId(int(tid.strip())) for tid in tag_ids.split(",") if tid.strip()
+        ]
 
     events = await user_service.get_personal_events(
         user_id=UserId(current_user.db_user.id),
@@ -193,7 +195,6 @@ async def list_user_events_route(
     user_id: UserId,
     group_id: GroupId,
     event_service: FromDishka[EventService],
-    session: FromDishka[AsyncSession],
     current_user: CurrentUser,
     tag_ids: str | None = Query(
         None,
@@ -202,7 +203,9 @@ async def list_user_events_route(
 ) -> list[EventResponse]:
     parsed_tag_ids: list[TagId] | None = None
     if tag_ids:
-        parsed_tag_ids = [TagId(int(tid.strip())) for tid in tag_ids.split(",") if tid.strip()]
+        parsed_tag_ids = [
+            TagId(int(tid.strip())) for tid in tag_ids.split(",") if tid.strip()
+        ]
 
     events = await event_service.list_user_events(
         group_id=group_id,

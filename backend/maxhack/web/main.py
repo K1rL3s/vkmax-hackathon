@@ -5,7 +5,7 @@ from dishka.integrations.fastapi import setup_dishka
 from starlette.middleware.cors import CORSMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
-from maxhack.config import  Config
+from maxhack.config import Config
 from maxhack.di import make_container
 from maxhack.logger import get_logger
 from maxhack.utils.log_config import set_logging

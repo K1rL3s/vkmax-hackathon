@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import pycron
 from redis.asyncio import Redis
 
-from maxhack.core.event.models import Cron, EventCreate, EventUpdate
+from maxhack.core.event.models import EventCreate, EventUpdate
 from maxhack.core.exceptions import (
     EventNotFound,
     GroupNotFound,
@@ -20,7 +20,6 @@ from maxhack.core.utils.datehelp import datetime_now
 from maxhack.database.models import (
     EventModel,
     EventNotifyModel,
-    GroupModel,
     RespondModel,
     UserModel,
     UsersToGroupsModel,
@@ -194,7 +193,10 @@ class EventService(BaseService):
 
         updated_event = await self._event_repo.update(
             event_id,
-            **event_update_model.to_dict(exclude_none=True, exclude={"participants_ids", "tags_ids"}),
+            **event_update_model.to_dict(
+                exclude_none=True,
+                exclude={"participants_ids", "tags_ids"},
+            ),
             is_cycle=is_cycle,
         )
         if updated_event is None:
@@ -202,17 +204,29 @@ class EventService(BaseService):
             raise EventNotFound
 
         if event_update_model.tags_ids is not None:
-            logger.debug(f"Updating tags for event {event_id} to {event_update_model.tags_ids}")
+            logger.debug(
+                f"Updating tags for event {event_id} to {event_update_model.tags_ids}",
+            )
             if event_update_model.tags_ids:
-                tags = [await self._ensure_tag_exists(tag_id) for tag_id in event_update_model.tags_ids]
+                tags = [
+                    await self._ensure_tag_exists(tag_id)
+                    for tag_id in event_update_model.tags_ids
+                ]
                 if event.group_id is not None:
-                    invalid_tags = [tag.id for tag in tags if tag.group_id != event.group_id]
+                    invalid_tags = [
+                        tag.id for tag in tags if tag.group_id != event.group_id
+                    ]
                     if invalid_tags:
-                        logger.warning(f"Invalid tags {invalid_tags} for event {event_id}")
+                        logger.warning(
+                            f"Invalid tags {invalid_tags} for event {event_id}",
+                        )
                         raise InvalidValue(
                             f"Теги не принадлежат группе события: {invalid_tags}",
                         )
-            await self._event_repo.update_event_tags(event_id, event_update_model.tags_ids)
+            await self._event_repo.update_event_tags(
+                event_id,
+                event_update_model.tags_ids,
+            )
 
             if event.type == "event" and event.group_id is not None:
                 user_ids_from_tags = []
@@ -223,19 +237,32 @@ class EventService(BaseService):
                     )
                     for user, _ in users:
                         user_ids_from_tags.append(user.id)
-                current_user_ids = set(await self._event_repo.get_event_user_ids(event_id))
+                current_user_ids = set(
+                    await self._event_repo.get_event_user_ids(event_id),
+                )
                 if event_update_model.participants_ids is not None:
-                    all_user_ids = set(event_update_model.participants_ids) | set(user_ids_from_tags)
+                    all_user_ids = set(event_update_model.participants_ids) | set(
+                        user_ids_from_tags,
+                    )
                 else:
                     all_user_ids = current_user_ids | set(user_ids_from_tags)
                 if all_user_ids != current_user_ids:
-                    await self._event_repo.update_event_users(event_id, list(all_user_ids))
+                    await self._event_repo.update_event_users(
+                        event_id,
+                        list(all_user_ids),
+                    )
                     new_user_ids_from_tags = set(user_ids_from_tags) - current_user_ids
                     if new_user_ids_from_tags:
-                        await self._respond_service.create(list(new_user_ids_from_tags), event.id, status="mb")
+                        await self._respond_service.create(
+                            list(new_user_ids_from_tags),
+                            event.id,
+                            status="mb",
+                        )
 
         if event_update_model.participants_ids is not None:
-            logger.debug(f"Updating users for event {event_id} to {event_update_model.participants_ids}")
+            logger.debug(
+                f"Updating users for event {event_id} to {event_update_model.participants_ids}",
+            )
             for target_user_id in event_update_model.participants_ids:
                 await self._ensure_user_exists(target_user_id)
                 if event.group_id is not None:
@@ -250,7 +277,10 @@ class EventService(BaseService):
                         raise InvalidValue(
                             f"Пользователь {target_user_id} не состоит в группе события",
                         )
-            await self._event_repo.update_event_users(event_id, event_update_model.participants_ids)
+            await self._event_repo.update_event_users(
+                event_id,
+                event_update_model.participants_ids,
+            )
 
         logger.info(f"Event {event_id} updated successfully")
         return updated_event
@@ -575,7 +605,6 @@ class EventService(BaseService):
 
         logger.info(f"Found {len(matching_notify)} matching notifications")
         return matching_notify
-
 
     async def get_by_user(
         self,

@@ -174,7 +174,11 @@ class UserService:
         user_id: UserId,
         tag_ids: list[TagId] | None = None,
     ) -> list[EventModel]:
-        logger.debug("Getting personal events for user %d with tags %s", user_id, tag_ids)
+        logger.debug(
+            "Getting personal events for user %d with tags %s",
+            user_id,
+            tag_ids,
+        )
         personal_group = await self.get_personal_group(user_id)
         events = await self._event_repo.get_by_group_id(
             group_id=personal_group.id,
