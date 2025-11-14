@@ -1,9 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { EventCreateRequest } from '@/lib/api/gen.schemas'
+import type {
+  EventCreateRequest,
+  EventUpdateRequest,
+} from '@/lib/api/gen.schemas'
 import {
   createEventRouteEventsPost,
+  deleteEventRouteEventsEventIdDelete,
   getEventRouteEventsEventIdGet,
   getGroupEventsRouteEventsGroupsGroupIdGet,
+  updateEventRouteEventsEventIdPatch,
 } from '@/lib/api/events/events'
 import {
   getPersonalGroupRouteUsersMeGroupsPersonalGet,
@@ -51,6 +56,44 @@ export function useCreateEvent() {
       await queryClient.invalidateQueries({ queryKey: ['events', 'me'] })
       await queryClient.invalidateQueries({
         queryKey: ['events', 'groups', groupId],
+      })
+    },
+  })
+}
+
+export function useEditEvent() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: ['events', 'edit'],
+    mutationFn: ({
+      eventId,
+      input,
+    }: {
+      eventId: number
+      input: EventUpdateRequest
+    }) => updateEventRouteEventsEventIdPatch(eventId, input),
+    onSuccess: async ({ groupId, id }) => {
+      await queryClient.invalidateQueries({ queryKey: ['events', 'me'] })
+      await queryClient.invalidateQueries({
+        queryKey: ['events', 'groups', groupId],
+      })
+      await queryClient.invalidateQueries({
+        queryKey: ['events', id],
+      })
+    },
+  })
+}
+
+export function useDeleteEvent() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: ['events', 'delete'],
+    mutationFn: (eventId: number) => {
+      return deleteEventRouteEventsEventIdDelete(eventId)
+    },
+    onSuccess: async (_) => {
+      await queryClient.invalidateQueries({
+        queryKey: ['events'],
       })
     },
   })

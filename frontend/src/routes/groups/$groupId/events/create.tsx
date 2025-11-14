@@ -2,6 +2,7 @@ import { useForm } from '@tanstack/react-form'
 import { createFileRoute, useParams, useRouter } from '@tanstack/react-router'
 import {
   Bell,
+  Clock,
   Clock3,
   Globe,
   Paperclip,
@@ -61,6 +62,7 @@ function CreateGroupEventForm() {
       tagsIds: tagsQuery.data || [],
       participantsIds:
         groupMembersQuery.data?.map((member) => member.userId) || [],
+      duration: 60,
     },
     validators: {
       onChange: z.object({
@@ -88,6 +90,9 @@ function CreateGroupEventForm() {
           }),
         ),
         participantsIds: z.array(z.number()),
+        duration: z
+          .number()
+          .min(1, { error: 'Значение должно быть не меньше 1' }),
       }),
     },
     onSubmit: ({ value }) => {
@@ -102,6 +107,7 @@ function CreateGroupEventForm() {
           groupId: groupQuery.data!.group.id,
           participantsIds:
             groupMembersQuery.data?.map((member) => member.userId) || [],
+          duration: value.duration,
         },
         {
           onSuccess: () => {
@@ -229,16 +235,52 @@ function CreateGroupEventForm() {
                   name="minutesBefore"
                   children={(field) => (
                     <Input
+                      iconBefore={
+                        <Flex align="center" gapX={10}>
+                          <Bell size={18} />
+                          <span className="text-nowrap text-(--text-secondary)">
+                            Напомнить за
+                          </span>
+                        </Flex>
+                      }
                       value={field.state.value}
                       onChange={(e) => {
                         if (isNaN(Number(e.target.value))) return
                         field.handleChange(Number(e.target.value))
                       }}
-                      iconBefore={<Bell size={18} />}
+                      withClearButton={false}
                       placeholder="Напомнить за минут"
                     />
                   )}
                 />
+                <div className="border-b border-gray-200/10" />
+                <form.Field
+                  name="duration"
+                  children={(field) => (
+                    <Input
+                      className="w-full"
+                      iconBefore={
+                        <Flex align="center" gapX={10}>
+                          <Clock size={18} />
+                          <span className="text-nowrap text-(--text-secondary)">
+                            Длится минут
+                          </span>
+                        </Flex>
+                      }
+                      withClearButton={false}
+                      value={field.state.value}
+                      onChange={(e) => {
+                        if (
+                          isNaN(Number(e.target.value)) ||
+                          Number(e.target.value) < 0
+                        )
+                          return
+                        field.handleChange(Number(e.target.value))
+                      }}
+                    />
+                  )}
+                />
+
                 <div className="border-b border-gray-200/10" />
                 <form.Field
                   name="participantsIds"

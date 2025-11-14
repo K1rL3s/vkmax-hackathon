@@ -3,11 +3,11 @@
  * Do not edit manually.
  * Таск трекер для МАКС
  * 
-### Права доступа к сущностям
-
-Для каждой сущности предусмотрен определённый набор прав, которые, в зависимости от логики, могут назначаться различному
-набору ролей. Также, помимо основного набора прав, ограничения могут быть выставлены непосредственно на уровне определённых ролей.
-
+    ### Права доступа к сущностям
+    
+    Для каждой сущности предусмотрен определённый набор прав, которые, в зависимости от логики, могут назначаться различному
+    набору ролей. Также, помимо основного набора прав, ограничения могут быть выставлены непосредственно на уровне определённых ролей.
+    
  * OpenAPI spec version: 0.1.0
  */
 import type {
@@ -19,7 +19,8 @@ import type {
   GroupNotifyModeRequest,
   GroupUpdateRequest,
   GroupUserItem,
-  InviteCreateResponse
+  InviteCreateResponse,
+  InviteGetResponse
 } from '../gen.schemas';
 
 import { request } from '.././client';
@@ -84,9 +85,9 @@ export const deleteGroupRouteGroupsGroupIdDelete = (
     }
   /**
  * Смена роли юзера в группе. Может только "Босс".
- * @summary Update Group Membership
+ * @summary Update Group Membership Route
  */
-export const updateGroupMembershipGroupsGroupIdUsersSlaveIdPatch = (
+export const updateGroupMembershipRouteGroupsGroupIdUsersSlaveIdPatch = (
     groupId: number,
     slaveId: number,
     groupMemberUpdateRequest: BodyType<GroupMemberUpdateRequest>,
@@ -138,6 +139,19 @@ export const listGroupUsersRouteGroupsGroupIdUsersGet = (
       options);
     }
   /**
+ * Получит ссылку-приглашение в группу.
+В группе может быть только одно активное приглашение.
+ * @summary Get Invite Route
+ */
+export const getInviteRouteGroupsGroupIdInviteGet = (
+    groupId: number,
+ options?: SecondParameter<typeof request<InviteGetResponse>>,) => {
+      return request<InviteGetResponse>(
+      {url: `/groups/${groupId}/invite`, method: 'GET'
+    },
+      options);
+    }
+  /**
  * Создать (перевыпустить) приглашение в группу.
 В группе может быть только одно активное приглашение.
  * @summary Create Invite Route
@@ -147,6 +161,19 @@ export const createInviteRouteGroupsGroupIdInvitePost = (
  options?: SecondParameter<typeof request<InviteCreateResponse>>,) => {
       return request<InviteCreateResponse>(
       {url: `/groups/${groupId}/invite`, method: 'POST'
+    },
+      options);
+    }
+  /**
+ * Удалить приглашение в группу.
+В группе может быть только одно активное приглашение, поэтому удалится оно.
+ * @summary Delete Invite Route
+ */
+export const deleteInviteRouteGroupsGroupIdInviteDelete = (
+    groupId: number,
+ options?: SecondParameter<typeof request<void>>,) => {
+      return request<void>(
+      {url: `/groups/${groupId}/invite`, method: 'DELETE'
     },
       options);
     }
@@ -183,10 +210,12 @@ export const updateGroupNotifyModeGroupsGroupIdNotifyPatch = (
 export type UpdateGroupRouteGroupsGroupIdPatchResult = NonNullable<Awaited<ReturnType<typeof updateGroupRouteGroupsGroupIdPatch>>>
 export type GetGroupGroupsGroupIdGetResult = NonNullable<Awaited<ReturnType<typeof getGroupGroupsGroupIdGet>>>
 export type DeleteGroupRouteGroupsGroupIdDeleteResult = NonNullable<Awaited<ReturnType<typeof deleteGroupRouteGroupsGroupIdDelete>>>
-export type UpdateGroupMembershipGroupsGroupIdUsersSlaveIdPatchResult = NonNullable<Awaited<ReturnType<typeof updateGroupMembershipGroupsGroupIdUsersSlaveIdPatch>>>
+export type UpdateGroupMembershipRouteGroupsGroupIdUsersSlaveIdPatchResult = NonNullable<Awaited<ReturnType<typeof updateGroupMembershipRouteGroupsGroupIdUsersSlaveIdPatch>>>
 export type RemoveGroupMemberRouteGroupsGroupIdUsersSlaveIdDeleteResult = NonNullable<Awaited<ReturnType<typeof removeGroupMemberRouteGroupsGroupIdUsersSlaveIdDelete>>>
 export type GetGroupUserRouteGroupsGroupIdUsersMemberIdGetResult = NonNullable<Awaited<ReturnType<typeof getGroupUserRouteGroupsGroupIdUsersMemberIdGet>>>
 export type ListGroupUsersRouteGroupsGroupIdUsersGetResult = NonNullable<Awaited<ReturnType<typeof listGroupUsersRouteGroupsGroupIdUsersGet>>>
+export type GetInviteRouteGroupsGroupIdInviteGetResult = NonNullable<Awaited<ReturnType<typeof getInviteRouteGroupsGroupIdInviteGet>>>
 export type CreateInviteRouteGroupsGroupIdInvitePostResult = NonNullable<Awaited<ReturnType<typeof createInviteRouteGroupsGroupIdInvitePost>>>
+export type DeleteInviteRouteGroupsGroupIdInviteDeleteResult = NonNullable<Awaited<ReturnType<typeof deleteInviteRouteGroupsGroupIdInviteDelete>>>
 export type JoinGroupGroupsJoinPostResult = NonNullable<Awaited<ReturnType<typeof joinGroupGroupsJoinPost>>>
 export type UpdateGroupNotifyModeGroupsGroupIdNotifyPatchResult = NonNullable<Awaited<ReturnType<typeof updateGroupNotifyModeGroupsGroupIdNotifyPatch>>>

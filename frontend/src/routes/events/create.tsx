@@ -9,7 +9,7 @@ import {
   Textarea,
   Typography,
 } from '@maxhub/max-ui'
-import { Bell, Clock3, Globe, Paperclip, RefreshCcw } from 'lucide-react'
+import { Bell, Clock, Clock3, Globe, Paperclip, RefreshCcw } from 'lucide-react'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
 import type { TagResponse } from '@/lib/api/gen.schemas'
@@ -46,6 +46,7 @@ function CreateEventForm() {
       date: toLocalDatetimeString(new Date()),
       minutesBefore: 60,
       tagsIds: personalGroupQuery.data?.group.tags || [],
+      duration: 60,
     },
     validators: {
       onChange: z.object({
@@ -72,6 +73,9 @@ function CreateEventForm() {
             groupId: z.number(),
           }),
         ),
+        duration: z
+          .number()
+          .min(1, { error: 'Значение должно быть не меньше 1' }),
       }),
     },
     onSubmit: ({ value }) => {
@@ -85,6 +89,7 @@ function CreateEventForm() {
           tagsIds: value.tagsIds.map((tag) => tag.id),
           groupId: personalGroupQuery.data!.group.id,
           participantsIds: [personalGroupQuery.data!.id],
+          duration: value.duration,
         },
         {
           onSuccess: () => {
@@ -212,13 +217,48 @@ function CreateEventForm() {
                   name="minutesBefore"
                   children={(field) => (
                     <Input
+                      iconBefore={
+                        <Flex align="center" gapX={10}>
+                          <Bell size={18} />
+                          <span className="text-nowrap text-(--text-secondary)">
+                            Напомнить за
+                          </span>
+                        </Flex>
+                      }
                       value={field.state.value}
                       onChange={(e) => {
                         if (isNaN(Number(e.target.value))) return
                         field.handleChange(Number(e.target.value))
                       }}
-                      iconBefore={<Bell size={18} />}
+                      withClearButton={false}
                       placeholder="Напомнить за минут"
+                    />
+                  )}
+                />
+                <div className="border-b border-gray-200/10" />
+                <form.Field
+                  name="duration"
+                  children={(field) => (
+                    <Input
+                      className="w-full"
+                      iconBefore={
+                        <Flex align="center" gapX={10}>
+                          <Clock size={18} />
+                          <span className="text-nowrap text-(--text-secondary)">
+                            Длится минут
+                          </span>
+                        </Flex>
+                      }
+                      withClearButton={false}
+                      value={field.state.value}
+                      onChange={(e) => {
+                        if (
+                          isNaN(Number(e.target.value)) ||
+                          Number(e.target.value) < 0
+                        )
+                          return
+                        field.handleChange(Number(e.target.value))
+                      }}
                     />
                   )}
                 />

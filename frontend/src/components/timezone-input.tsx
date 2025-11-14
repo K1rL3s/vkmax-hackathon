@@ -46,6 +46,8 @@ export function TimezoneInput({
             {
               'bg-(--states-background-disabled-neutral-fade)!':
                 disabled && mode === 'secondary',
+              'bg-(--states-background-disabled-card)!':
+                disabled && mode === 'primary',
             },
           )}
         >

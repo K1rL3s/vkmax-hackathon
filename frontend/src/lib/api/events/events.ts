@@ -3,11 +3,11 @@
  * Do not edit manually.
  * Таск трекер для МАКС
  * 
-### Права доступа к сущностям
-
-Для каждой сущности предусмотрен определённый набор прав, которые, в зависимости от логики, могут назначаться различному
-набору ролей. Также, помимо основного набора прав, ограничения могут быть выставлены непосредственно на уровне определённых ролей.
-
+    ### Права доступа к сущностям
+    
+    Для каждой сущности предусмотрен определённый набор прав, которые, в зависимости от логики, могут назначаться различному
+    набору ролей. Также, помимо основного набора прав, ограничения могут быть выставлены непосредственно на уровне определённых ролей.
+    
  * OpenAPI spec version: 0.1.0
  */
 import type {
@@ -17,7 +17,9 @@ import type {
   EventDetailsResponse,
   EventResponse,
   EventUpdateRequest,
-  EventsResponse
+  EventsResponse,
+  GetGroupEventsRouteEventsGroupsGroupIdGetParams,
+  GetUserEventsRouteEventsGetParams
 } from '../gen.schemas';
 
 import { request } from '.././client';
@@ -118,9 +120,11 @@ export const addUserToEventRouteEventsEventIdUsersPost = (
  */
 export const getGroupEventsRouteEventsGroupsGroupIdGet = (
     groupId: number,
+    params?: GetGroupEventsRouteEventsGroupsGroupIdGetParams,
  options?: SecondParameter<typeof request<EventsResponse>>,) => {
       return request<EventsResponse>(
-      {url: `/events/groups/${groupId}`, method: 'GET'
+      {url: `/events/groups/${groupId}`, method: 'GET',
+        params
     },
       options);
     }
@@ -129,10 +133,47 @@ export const getGroupEventsRouteEventsGroupsGroupIdGet = (
  * @summary Get User Events Route
  */
 export const getUserEventsRouteEventsGet = (
-    
+    params?: GetUserEventsRouteEventsGetParams,
  options?: SecondParameter<typeof request<EventsResponse>>,) => {
       return request<EventsResponse>(
-      {url: `/events/`, method: 'GET'
+      {url: `/events/`, method: 'GET',
+        params
+    },
+      options);
+    }
+  /**
+ * Выгрузить все события группы, в которых участвует пользователь, во всех группах
+ * @summary Export User Events All Groups Route
+ */
+export const exportUserEventsAllGroupsRouteEventsExportAllGroupsGet = (
+    
+ options?: SecondParameter<typeof request<void>>,) => {
+      return request<void>(
+      {url: `/events/export/all-groups`, method: 'GET'
+    },
+      options);
+    }
+  /**
+ * Выгрузить все события пользователя в рамках одной группы
+ * @summary Export User Events In Group Route
+ */
+export const exportUserEventsInGroupRouteEventsExportGroupsGroupIdUserGet = (
+    groupId: number,
+ options?: SecondParameter<typeof request<void>>,) => {
+      return request<void>(
+      {url: `/events/export/groups/${groupId}/user`, method: 'GET'
+    },
+      options);
+    }
+  /**
+ * Выгрузить все события группы (только для ролей 1 и 2)
+ * @summary Export All Group Events Route
+ */
+export const exportAllGroupEventsRouteEventsExportGroupsGroupIdAllGet = (
+    groupId: number,
+ options?: SecondParameter<typeof request<void>>,) => {
+      return request<void>(
+      {url: `/events/export/groups/${groupId}/all`, method: 'GET'
     },
       options);
     }
@@ -144,3 +185,6 @@ export type DeleteEventRouteEventsEventIdDeleteResult = NonNullable<Awaited<Retu
 export type AddUserToEventRouteEventsEventIdUsersPostResult = NonNullable<Awaited<ReturnType<typeof addUserToEventRouteEventsEventIdUsersPost>>>
 export type GetGroupEventsRouteEventsGroupsGroupIdGetResult = NonNullable<Awaited<ReturnType<typeof getGroupEventsRouteEventsGroupsGroupIdGet>>>
 export type GetUserEventsRouteEventsGetResult = NonNullable<Awaited<ReturnType<typeof getUserEventsRouteEventsGet>>>
+export type ExportUserEventsAllGroupsRouteEventsExportAllGroupsGetResult = NonNullable<Awaited<ReturnType<typeof exportUserEventsAllGroupsRouteEventsExportAllGroupsGet>>>
+export type ExportUserEventsInGroupRouteEventsExportGroupsGroupIdUserGetResult = NonNullable<Awaited<ReturnType<typeof exportUserEventsInGroupRouteEventsExportGroupsGroupIdUserGet>>>
+export type ExportAllGroupEventsRouteEventsExportGroupsGroupIdAllGetResult = NonNullable<Awaited<ReturnType<typeof exportAllGroupEventsRouteEventsExportGroupsGroupIdAllGet>>>

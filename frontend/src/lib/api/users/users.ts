@@ -3,15 +3,16 @@
  * Do not edit manually.
  * Таск трекер для МАКС
  * 
-### Права доступа к сущностям
-
-Для каждой сущности предусмотрен определённый набор прав, которые, в зависимости от логики, могут назначаться различному
-набору ролей. Также, помимо основного набора прав, ограничения могут быть выставлены непосредственно на уровне определённых ролей.
-
+    ### Права доступа к сущностям
+    
+    Для каждой сущности предусмотрен определённый набор прав, которые, в зависимости от логики, могут назначаться различному
+    набору ролей. Также, помимо основного набора прав, ограничения могут быть выставлены непосредственно на уровне определённых ролей.
+    
  * OpenAPI spec version: 0.1.0
  */
 import type {
   EventResponse,
+  ListPersonalEventsRouteUsersMeEventsGetParams,
   ListUserEventsRouteUsersUserIdGroupsGroupIdEventsGetParams,
   PersonalGroupResponse,
   TagResponse,
@@ -96,10 +97,11 @@ export const listUserGroupsRouteUsersMeGroupsGet = (
  * @summary List Personal Events Route
  */
 export const listPersonalEventsRouteUsersMeEventsGet = (
-    
+    params?: ListPersonalEventsRouteUsersMeEventsGetParams,
  options?: SecondParameter<typeof request<EventResponse[]>>,) => {
       return request<EventResponse[]>(
-      {url: `/users/me/events`, method: 'GET'
+      {url: `/users/me/events`, method: 'GET',
+        params
     },
       options);
     }

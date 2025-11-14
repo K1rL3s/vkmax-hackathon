@@ -4,7 +4,7 @@ import {
   getGroupUserRouteGroupsGroupIdUsersMemberIdGet,
   listGroupUsersRouteGroupsGroupIdUsersGet,
   removeGroupMemberRouteGroupsGroupIdUsersSlaveIdDelete,
-  updateGroupMembershipGroupsGroupIdUsersSlaveIdPatch,
+  updateGroupMembershipRouteGroupsGroupIdUsersSlaveIdPatch,
 } from '@/lib/api/groups/groups'
 import { listUserTagsRouteUsersUserIdGroupsGroupIdTagsGet } from '@/lib/api/users/users'
 
@@ -41,7 +41,7 @@ export function useEditMember() {
       memberId: number
       input: GroupMemberUpdateRequest
     }) =>
-      updateGroupMembershipGroupsGroupIdUsersSlaveIdPatch(
+      updateGroupMembershipRouteGroupsGroupIdUsersSlaveIdPatch(
         groupId,
         memberId,
         input,

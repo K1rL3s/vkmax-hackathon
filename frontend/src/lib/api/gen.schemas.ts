@@ -3,11 +3,11 @@
  * Do not edit manually.
  * Таск трекер для МАКС
  * 
-### Права доступа к сущностям
-
-Для каждой сущности предусмотрен определённый набор прав, которые, в зависимости от логики, могут назначаться различному
-набору ролей. Также, помимо основного набора прав, ограничения могут быть выставлены непосредственно на уровне определённых ролей.
-
+    ### Права доступа к сущностям
+    
+    Для каждой сущности предусмотрен определённый набор прав, которые, в зависимости от логики, могут назначаться различному
+    набору ролей. Также, помимо основного набора прав, ограничения могут быть выставлены непосредственно на уровне определённых ролей.
+    
  * OpenAPI spec version: 0.1.0
  */
 export interface CronSchema {
@@ -37,6 +37,7 @@ export interface EventCreateRequest {
   type?: 'event';
   cron: CronSchema;
   groupId: number;
+  duration?: number;
   /** Упомянаемые пользователи */
   participantsIds?: number[];
   /** Привязанные теги */
@@ -67,6 +68,8 @@ export interface EventDetailsResponse {
   tags: TagResponse[];
   notifies: EventNotifyResponse[];
   timezone: number;
+  duration?: number;
+  eventHappened?: boolean;
 }
 
 export interface EventNotifyResponse {
@@ -74,6 +77,8 @@ export interface EventNotifyResponse {
 }
 
 export type EventResponseDescription = string | null;
+
+export type EventResponseRespond = RespondResponse | null;
 
 export interface EventResponse {
   id: number;
@@ -85,6 +90,10 @@ export interface EventResponse {
   creatorId: number;
   groupId: number;
   timezone: number;
+  duration?: number;
+  eventHappened?: boolean;
+  respond?: EventResponseRespond;
+  notifies?: number[];
 }
 
 export type EventUpdateRequestTitle = string | null;
@@ -97,12 +106,15 @@ export type EventUpdateRequestTimezone = number | null;
 
 export type EventUpdateRequestCron = CronSchema | null;
 
+export type EventUpdateRequestDuration = number | null;
+
 export interface EventUpdateRequest {
   title?: EventUpdateRequestTitle;
   description?: EventUpdateRequestDescription;
   type?: EventUpdateRequestType;
   timezone?: EventUpdateRequestTimezone;
   cron?: EventUpdateRequestCron;
+  duration?: EventUpdateRequestDuration;
 }
 
 export interface EventsResponse {
@@ -197,6 +209,12 @@ export interface HTTPValidationError {
 
 export interface InviteCreateResponse {
   inviteKey: string;
+  inviteLink: string;
+}
+
+export interface InviteGetResponse {
+  inviteKey: string;
+  inviteLink: string;
 }
 
 export type NotifyMode = typeof NotifyMode[keyof typeof NotifyMode];
@@ -216,6 +234,11 @@ export interface PersonalGroupResponse {
   name: 'Личная';
   description?: PersonalGroupResponseDescription;
   timezone: number;
+}
+
+export interface RespondResponse {
+  id: number;
+  status: string;
 }
 
 export type RoleResponseName = typeof RoleResponseName[keyof typeof RoleResponseName];
@@ -311,6 +334,8 @@ export type UserResponseMaxPhoto = string | null;
 
 export type UserResponseLastName = string | null;
 
+export type UserResponsePhone = string | null;
+
 export interface UserResponse {
   id: number;
   maxId: number;
@@ -318,7 +343,7 @@ export interface UserResponse {
   maxPhoto?: UserResponseMaxPhoto;
   firstName: string;
   lastName?: UserResponseLastName;
-  phone: string;
+  phone?: UserResponsePhone;
   timezone: number;
   notifyMode: NotifyMode;
 }
@@ -393,7 +418,28 @@ export type CheckInitDataAuthGetParams = {
 WebAppData: string;
 };
 
+export type ListPersonalEventsRouteUsersMeEventsGetParams = {
+/**
+ * Список ID тегов через запятую для фильтрации
+ */
+tag_ids?: string | null;
+};
+
 export type ListUserEventsRouteUsersUserIdGroupsGroupIdEventsGetParams = {
+/**
+ * Список ID тегов через запятую для фильтрации
+ */
+tag_ids?: string | null;
+};
+
+export type GetGroupEventsRouteEventsGroupsGroupIdGetParams = {
+/**
+ * Список ID тегов через запятую для фильтрации
+ */
+tag_ids?: string | null;
+};
+
+export type GetUserEventsRouteEventsGetParams = {
 /**
  * Список ID тегов через запятую для фильтрации
  */

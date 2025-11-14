@@ -8,6 +8,7 @@ import {
 } from '@maxhub/max-ui'
 import { createFileRoute } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
+import type { NotifyMode } from '@/lib/api/gen.schemas'
 import { Header } from '@/components/header'
 import { RatioInput } from '@/components/ui/ratio-input'
 import { TimezoneInput } from '@/components/timezone-input'
@@ -16,7 +17,6 @@ import { GroupTags } from '@/components/group/tag/group-tags'
 import { usePersonalGroup } from '@/hooks/groups'
 import { FallbackLoader } from '@/components/ui/fallback-loader'
 import { useEditMe } from '@/hooks/user'
-import type { NotifyMode } from '@/lib/api/gen.schemas'
 
 export const Route = createFileRoute('/settings')({
   component: SettingsPage,
