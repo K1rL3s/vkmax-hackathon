@@ -14,7 +14,7 @@ export const Route = createFileRoute('/')({
 })
 
 function Home() {
-  const { data, isPending } = usePersonalEvents()
+  const { data, isPending } = usePersonalEvents({})
   const navigate = useNavigate()
   const scrollRef = useRef<{ scrollToToday: () => void }>(null)
 

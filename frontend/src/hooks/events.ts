@@ -15,12 +15,16 @@ import {
   listPersonalEventsRouteUsersMeEventsGet,
 } from '@/lib/api/users/users'
 
-export function usePersonalEvents() {
+export function usePersonalEvents({
+  tag_ids = [],
+}: {
+  tag_ids?: Array<string>
+}) {
   return useQuery({
-    queryKey: ['events', 'me'],
+    queryKey: ['events', 'me', tag_ids.join(',')],
     queryFn: async () => {
       const [events, group] = await Promise.all([
-        listPersonalEventsRouteUsersMeEventsGet(),
+        listPersonalEventsRouteUsersMeEventsGet({ tag_ids: tag_ids.join(',') }),
         getPersonalGroupRouteUsersMeGroupsPersonalGet(),
       ])
 

@@ -7,7 +7,7 @@ import {
   Panel,
   Typography,
 } from '@maxhub/max-ui'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Calendar, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import type { CalendarEvent } from '@/components/event/event-list'
@@ -17,6 +17,7 @@ import { usePersonalGroupWithTags } from '@/hooks/groups'
 import { TagsInput } from '@/components/member/tags-input'
 import { usePersonalEvents } from '@/hooks/events'
 import { expandCronEvents } from '@/lib/utils/cron'
+import type { TagResponse } from '@/lib/api/gen.schemas'
 
 export const Route = createFileRoute('/search')({
   component: SearchPersonalEventsPage,
@@ -24,7 +25,11 @@ export const Route = createFileRoute('/search')({
 
 function SearchPersonalEventsPage() {
   const groupQuery = usePersonalGroupWithTags()
-  const eventsQuery = usePersonalEvents()
+  const [selectedTags, setSelectedTags] = useState<Array<TagResponse>>([])
+  const navigate = useNavigate()
+  const eventsQuery = usePersonalEvents({
+    tag_ids: selectedTags.map((tag) => tag.id.toString()),
+  })
   const [query, setQuery] = useState('')
 
   const expanded = expandCronEvents(
@@ -69,8 +74,15 @@ function SearchPersonalEventsPage() {
             />
             <TagsInput
               className="px-0!"
-              value={groupQuery.data?.group.tags}
+              value={selectedTags}
               options={groupQuery.data?.group.tags}
+              onChange={(tag) => {
+                if (selectedTags.map((t) => t.id).includes(tag.id)) {
+                  setSelectedTags(selectedTags.filter((t) => t.id !== tag.id))
+                } else {
+                  setSelectedTags([...selectedTags, tag])
+                }
+              }}
             />
             <Flex className="w-full" gapY={38} direction="column">
               {Object.entries(calendar)
@@ -95,6 +107,12 @@ function SearchPersonalEventsPage() {
                     {events?.map((event, index) => (
                       <>
                         <CellSimple
+                          onClick={() =>
+                            navigate({
+                              to: '/events/$id',
+                              params: { id: String(event.id) },
+                            })
+                          }
                           before={<Calendar size={18} />}
                           title={event.title}
                         />
