@@ -36,7 +36,7 @@ class MaxNotifier:
             ],
             [
                 CallbackKeyboardButton(
-                    text="❓ Не уверен",
+                    text="🤷 Не уверен",
                     payload=RespondData(
                         event_id=event.id,
                         status=RespondStatus.MAYBE,

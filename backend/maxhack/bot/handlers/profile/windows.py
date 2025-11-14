@@ -12,7 +12,7 @@ from maxhack.bot.widgets.to_menu import TO_MENU_BUTTON
 from maxhack.core.enums.notify_mode import NotifyMode
 
 _profile = Window(
-    Const("🪪 Профиль\n"),
+    Const("👤 Профиль\n"),
     Multi(
         Const("Я знаю тебя как"),
         HtmlSafeFormat("{first_name}"),

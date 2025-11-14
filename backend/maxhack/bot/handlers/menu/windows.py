@@ -7,10 +7,10 @@ from maxhack.bot.states import Menu, Profile
 from maxhack.bot.widgets.to_groups import TO_GROUPS_BUTTON
 
 _menu = Window(
-    HtmlSafeFormat("<b>👋 Привет, {first_name}!</b>\n"),
+    HtmlSafeFormat("<b>{user_greeting}, {first_name}</b>\n"),
     TO_GROUPS_BUTTON,
     Start(
-        Const("🪪 Профиль"),
+        Const("👤 Профиль"),
         state=Profile.my,
         mode=StartMode.RESET_STACK,
         show_mode=ShowMode.EDIT,
