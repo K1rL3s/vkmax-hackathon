@@ -41,33 +41,24 @@ class SchedulerConfig:
 
 
 @dataclass(slots=True, frozen=True, kw_only=True)
-class AppSettings:
-    test_token: str | None
-    token_alive_hours: int = 4
-    refresh_token_alive_hours: int = 24 * 7
-    reset_password_alive_hours: int = 2
-    reset_password_redirect_page: str | None
-
-
-@dataclass(slots=True, frozen=True, kw_only=True)
 class AppConfig:
     host: str = "localhost"
     port: int = 7001
-    portal_address: str | None
-    debug_mode: bool = False
+    portal_address: str | None  # TODO: Удалить или использовать
+    debug_mode: bool = False  # TODO: Удалить или использовать
     cors_policy_disabled: bool = True
     cors: list[str] = field(default_factory=list[str])
     secret: str = "Pepa the pig"
     file_directory: str | None
     additional_debug: bool = False
-    reload: bool | None
+    reload: bool | None  # TODO: Удалить или использовать
 
 
 @dataclass(slots=True, frozen=True, kw_only=True)
 class SwaggerConfig:
-    root_path: str = ""
-    testing_path: str = ""
-    testing_description: str = "Отсутствует"
+    root_path: str = ""  # TODO: Удалить или использовать
+    testing_path: str = ""  # TODO: Удалить или использовать
+    testing_description: str = "Отсутствует"  # TODO: Удалить или использовать
 
 
 @dataclass(slots=True, frozen=True, kw_only=True)
@@ -77,8 +68,7 @@ class Config:
     redis: RedisConfig
     scheduler: SchedulerConfig
     app: AppConfig
-    app_settings: AppSettings
-    swagger: SwaggerConfig
+    swagger: SwaggerConfig  # TODO: Удалить или использовать
     log_level: str
 
 
@@ -118,17 +108,6 @@ def load_config(env: str | Path | None = None) -> Config:
             file_directory=os.getenv("FILE_DIRECTORY", None),
             additional_debug=os.getenv("ADDITIONAL_DEBUG", "False").lower() == "true",
             reload=os.getenv("RELOAD", "False").lower() == "true",
-        ),
-        app_settings=AppSettings(
-            test_token=os.getenv("TEST_TOKEN", None),
-            token_alive_hours=int(os.getenv("TOKEN_ALIVE_HOURS") or 4),
-            refresh_token_alive_hours=int(
-                os.getenv("REFRESH_TOKEN_ALIVE_HOURS") or 24 * 7,
-            ),
-            reset_password_alive_hours=int(
-                os.getenv("RESET_PASSWORD_ALIVE_HOURS") or 2,
-            ),
-            reset_password_redirect_page=os.getenv("RESET_PASSWORD_REDIRECT_PAGE"),
         ),
         swagger=SwaggerConfig(
             root_path=os.getenv("ROOT_PATH", ""),

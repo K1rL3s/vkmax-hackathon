@@ -6,8 +6,7 @@ from pydantic import Field
 from .core import Model
 from .group import GroupResponse
 from .tag import TagResponse
-from maxhack.core.enums.respond_action import RespondStatus
-from maxhack.core.ids import EventId, GroupId, RespondId, TagId, UserId
+from maxhack.core.ids import EventId, GroupId, TagId, UserId
 
 
 class CronSchema(Model):
@@ -85,14 +84,3 @@ class EventAddUserRequest(Model):
 
 class EventsResponse(Model):
     events: list[EventResponse]
-
-
-class RespondChangeResponse(Model):
-    status: RespondStatus
-
-
-class RespondResponse(Model):
-    id: RespondId
-    user_id: UserId
-    event_id: EventId
-    status: str

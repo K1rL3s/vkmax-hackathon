@@ -16,7 +16,6 @@ from maxhack.core.responds.service import RespondService
 from maxhack.core.role.ids import CREATOR_ROLE_ID, EDITOR_ROLE_ID
 from maxhack.core.service import BaseService
 from maxhack.core.tag.service import TagService
-from maxhack.core.user.service import UserService
 from maxhack.core.utils.datehelp import datetime_now
 from maxhack.database.models import (
     EventModel,
@@ -52,7 +51,6 @@ class EventService(BaseService):
         role_repo: RoleRepo,
         redis: Redis,
         tag_service: TagService,
-        user_service: UserService,
     ) -> None:
         super().__init__(
             event_repo=event_repo,
@@ -68,7 +66,6 @@ class EventService(BaseService):
         self._group_service = group_service
         self._redis = redis
         self._tag_service = tag_service
-        self._user_service = user_service
 
     async def get_event(self, event_id: EventId, user_id: UserId) -> EventModel:
         logger.debug(f"Getting event {event_id} for user {user_id}")
@@ -385,6 +382,7 @@ class EventService(BaseService):
         target_user_id: UserId,
         user_id: UserId,
     ) -> list[EventModel]:
+        # TODO: Удалить или использовать
         logger.debug(
             f"Getting events for user {target_user_id} requested by user {user_id}",
         )
@@ -459,7 +457,7 @@ class EventService(BaseService):
         await self._redis.set("last_start", time_now.isoformat())
         logger.debug(f"New last start time set to redis: {time_now}")
 
-        events_with_notifies = await self._event_repo.get_notify_by_date_interval()
+        events_with_notifies = await self._event_repo.get_notifies()
         logger.debug(f"Found {len(events_with_notifies)} events with notifies")
         matching_notify: list[
             tuple[list[tuple[UserModel, UsersToGroupsModel | None]], EventModel]

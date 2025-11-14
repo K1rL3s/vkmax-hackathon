@@ -1,4 +1,4 @@
-from typing import Any, Self, TypeVar
+from typing import Any, Self
 
 import pydantic
 from pydantic import ConfigDict
@@ -6,8 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from maxhack.utils.utils import to_camel
-
-ModelT = TypeVar("ModelT", bound="Model")
 
 
 class Model(pydantic.BaseModel):

@@ -87,8 +87,8 @@ async def unknown_exception_handler(
 exception_handlers = {
     NotEnoughRights: not_enough_rights_exception_handler,
     EntityNotFound: entity_not_found_exception_handler,
+    InvalidValue: invalid_value_exception_handler,
     ValueError: value_error_exception_handler,
-    InvalidValue: value_error_exception_handler,
     RequestValidationError: validation_exception_handler,
     StarletteHTTPException: http_exception_handler,
     Exception: unknown_exception_handler,

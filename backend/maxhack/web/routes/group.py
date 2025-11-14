@@ -3,8 +3,9 @@ from fastapi import APIRouter, status
 
 from maxhack.core.enums.notify_mode import NotifyMode
 from maxhack.core.group.service import GroupService
-from maxhack.core.ids import GroupId, InviteKey, UserId
+from maxhack.core.ids import GroupId, UserId
 from maxhack.core.invite.service import InviteService
+from maxhack.core.max import QRCoder
 from maxhack.core.role.ids import CREATOR_ROLE_ID, CREATOR_ROLE_NAME, MEMBER_ROLE_ID
 from maxhack.web.dependencies import CurrentUser
 from maxhack.web.schemas.group import (
@@ -77,7 +78,7 @@ async def update_group_route(
     "/{group_id}/users/{slave_id}",
     description="""Смена роли юзера в группе. Может только "Босс".""",
 )
-async def update_group_membership(
+async def update_group_membership_route(
     group_id: GroupId,
     slave_id: UserId,
     body: GroupMemberUpdateRequest,
@@ -198,12 +199,16 @@ async def create_invite_route(
     group_id: GroupId,
     invite_service: FromDishka[InviteService],
     current_user: CurrentUser,
+    qrcoder: FromDishka[QRCoder],
 ) -> InviteCreateResponse:
     invite_obj = await invite_service.recreate_invite(
         group_id=group_id,
         creator_id=current_user.db_user.id,
     )
-    return InviteCreateResponse(invite_key=InviteKey(invite_obj.key))
+    return InviteCreateResponse(
+        invite_key=invite_obj.key,
+        invite_link=qrcoder.invite_deeplink(invite_obj.key),
+    )
 
 
 # TODO: Удалить на проде

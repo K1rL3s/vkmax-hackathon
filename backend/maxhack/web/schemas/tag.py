@@ -22,16 +22,7 @@ class TagResponse(Model):
     color: str
 
 
-class TagDeleteRequest(Model):
-    master_id: UserId
-
-
 class TagAssignRequest(Model):
-    user_id: UserId
-    tag_id: TagId
-
-
-class TagAssignmentResponse(Model):
     user_id: UserId
     tag_id: TagId
 

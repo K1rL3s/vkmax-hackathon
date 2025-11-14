@@ -31,18 +31,8 @@ class TagNotFound(EntityNotFound):
         super().__init__(message)
 
 
-class TagAssignmentNotFound(EntityNotFound):
-    def __init__(self, message: str = "Tag assignment not found") -> None:
-        super().__init__(message)
-
-
 class RespondNotFound(EntityNotFound):
     def __init__(self, message: str = "Respond not found") -> None:
-        super().__init__(message)
-
-
-class ParticipantNotFound(EntityNotFound):
-    def __init__(self, message: str = "Participant not found") -> None:
         super().__init__(message)
 
 

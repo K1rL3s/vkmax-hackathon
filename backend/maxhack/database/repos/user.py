@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 from maxhack.core.exceptions import MaxHackError
 from maxhack.core.ids import MaxChatId, MaxId, UserId
-from maxhack.database.models import GroupModel, UserModel, UsersToGroupsModel
+from maxhack.database.models import UserModel
 from maxhack.database.repos.base import BaseAlchemyRepo
 
 
@@ -56,17 +56,3 @@ class UserRepo(BaseAlchemyRepo):
         await self._session.refresh(user)
 
         return user
-
-    async def get_user_groups(
-        self,
-        user_id: UserId,
-    ) -> list[tuple[UsersToGroupsModel, GroupModel]]:
-        pass
-        # stmt = (
-        #     select(UsersToGroupsModel, GroupModel)
-        #     .join(GroupModel, UsersToGroupsModel.group_id == GroupModel.id)
-        #     .where(UsersToGroupsModel.user_id == user_id)
-        # )
-        #
-        # result = await self._session.execute(stmt)
-        # return result.all()

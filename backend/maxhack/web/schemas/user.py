@@ -1,4 +1,5 @@
 from typing import Literal
+
 from .core import Model
 from maxhack.core.enums.notify_mode import NotifyMode
 
