@@ -44,21 +44,14 @@ class SchedulerConfig:
 class AppConfig:
     host: str = "localhost"
     port: int = 7001
-    portal_address: str | None  # TODO: Удалить или использовать
-    debug_mode: bool = False  # TODO: Удалить или использовать
     cors_policy_disabled: bool = True
     cors: list[str] = field(default_factory=list[str])
-    secret: str = "Pepa the pig"
-    file_directory: str | None
     additional_debug: bool = False
-    reload: bool | None  # TODO: Удалить или использовать
 
 
 @dataclass(slots=True, frozen=True, kw_only=True)
 class SwaggerConfig:
-    root_path: str = ""  # TODO: Удалить или использовать
-    testing_path: str = ""  # TODO: Удалить или использовать
-    testing_description: str = "Отсутствует"  # TODO: Удалить или использовать
+    root_path: str = ""
 
 
 @dataclass(slots=True, frozen=True, kw_only=True)
@@ -68,7 +61,7 @@ class Config:
     redis: RedisConfig
     scheduler: SchedulerConfig
     app: AppConfig
-    swagger: SwaggerConfig  # TODO: Удалить или использовать
+    swagger: SwaggerConfig
     log_level: str
 
 
@@ -96,23 +89,16 @@ def load_config(env: str | Path | None = None) -> Config:
         ),
         scheduler=SchedulerConfig(),
         app=AppConfig(
-            host=os.getenv("HOST", "localhost"),
-            port=int(os.getenv("PORT", 7001)),
-            portal_address=os.getenv("PORTAL_ADDRESS"),
-            debug_mode=os.getenv("DEBUG_MODE", "").lower() == "true",
+            host=os.getenv("API_HOST", "localhost"),
+            port=int(os.getenv("API_PORT", 7001)),
             cors_policy_disabled=(
                 os.getenv("CORS_POLICY_DISABLED", "True").lower() == "true"
             ),
             cors=os.getenv("CORS", "").split(","),
-            secret=os.getenv("SECRET", "Pepa the pig"),
-            file_directory=os.getenv("FILE_DIRECTORY", None),
             additional_debug=os.getenv("ADDITIONAL_DEBUG", "False").lower() == "true",
-            reload=os.getenv("RELOAD", "False").lower() == "true",
         ),
         swagger=SwaggerConfig(
             root_path=os.getenv("ROOT_PATH", ""),
-            testing_path=os.getenv("TESTING_PATH", ""),
-            testing_description=os.getenv("TESTING_DESCRIPTION", "Отсутствует"),
         ),
         log_level=os.getenv("LOG_LEVEL", "DEBUG"),
     )

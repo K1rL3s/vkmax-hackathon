@@ -5,7 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 healthcheck_router = APIRouter(
-    prefix="/healthcheck",
+    prefix="/health",
     tags=["Healthcheck"],
     route_class=DishkaRoute,
 )

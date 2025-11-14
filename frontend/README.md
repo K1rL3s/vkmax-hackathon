@@ -21,8 +21,8 @@ pnpm run dev
 ### В контейнере
 
 ```bash
-docker build . -t max/frontend:
-docker run -p "3000:80" max/frontend
+docker build . -t maxhack-frontend --build-arg VITE_API_URL=http://localhost:7001
+docker run -p "7002:80" max/frontend
 ```
 
-Приложение будет доступно по адрессу http://localhost:3000
+Приложение будет доступно по адрессу http://localhost:7002

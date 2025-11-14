@@ -10,7 +10,7 @@ ENV PATH="/venv/bin:${PATH}" \
 FROM base AS build
 
 RUN apt update && \
-    apt-get install -y --no-install-recommends gcc git && \
+    apt-get install -y --no-install-recommends gcc libc6-dev git && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=ghcr.io/astral-sh/uv:0.9.7 /uv /uvx /usr/local/bin/
@@ -20,6 +20,10 @@ COPY ./pyproject.toml /pyproject.toml
 RUN uv sync --no-default-groups --no-install-project --link-mode=copy
 
 FROM base
+
+RUN apt update && \
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /venv /venv
 
