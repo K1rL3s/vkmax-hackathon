@@ -19,7 +19,6 @@ _menu = Window(
     WebApp(
         Const("🖼️ Вебапп"),
         Format("{middleware_data[bot].state.info.username}"),
-        id="webapp",
     ),
     getter=get_current_user,
     state=Menu.menu,
