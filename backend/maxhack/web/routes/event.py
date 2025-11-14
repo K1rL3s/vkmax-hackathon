@@ -6,9 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from maxhack.core.event.models import Cron, EventCreate, EventUpdate
 from maxhack.core.event.service import EventService
+from maxhack.core.ics.service import IcsService
 from maxhack.core.ids import EventId, GroupId, TagId, UserId
 from maxhack.web.dependencies import CurrentUser
-from maxhack.web.utils.ics import generate_ics_for_events
 from maxhack.web.schemas.event import (
     EventAddTagRequest,
     EventAddUserRequest,
@@ -265,14 +265,14 @@ async def get_user_events_route(
     description="Импортировать события из .ics файла в личную группу пользователя",
 )
 async def import_ics_route(
-    event_service: FromDishka[EventService],
+    ics_service: FromDishka[IcsService],
     session: FromDishka[AsyncSession],
     current_user: CurrentUser,
     file: UploadFile = File(..., description=".ics файл для импорта"),
 ) -> EventsResponse:
     """Импортирует события из .ics файла в личную группу пользователя."""
     ics_content = await file.read()
-    created_events = await event_service.import_events_from_ics(
+    created_events = await ics_service.import_events(
         user_id=UserId(current_user.db_user.id),
         ics_content=ics_content,
     )
@@ -304,15 +304,13 @@ async def import_ics_route(
     response_class=Response,
 )
 async def export_user_events_all_groups_route(
-    event_service: FromDishka[EventService],
+    ics_service: FromDishka[IcsService],
     current_user: CurrentUser,
 ) -> Response:
     """Выгружает все события, в которых участвует пользователь, из всех его групп."""
     user_id = UserId(current_user.db_user.id)
 
-    events, groups_dict = await event_service.get_user_events_all_groups_for_export(user_id)
-
-    ics_content = generate_ics_for_events(events, groups_dict)
+    ics_content = await ics_service.export_user_events_all_groups(user_id)
 
     return Response(
         content=ics_content,
@@ -330,18 +328,16 @@ async def export_user_events_all_groups_route(
 )
 async def export_user_events_in_group_route(
     group_id: GroupId,
-    event_service: FromDishka[EventService],
+    ics_service: FromDishka[IcsService],
     current_user: CurrentUser,
 ) -> Response:
     """Выгружает все события пользователя в рамках одной группы."""
     user_id = UserId(current_user.db_user.id)
 
-    events, groups_dict = await event_service.get_user_events_in_group_for_export(
+    ics_content = await ics_service.export_user_events_in_group(
         group_id=group_id,
         user_id=user_id,
     )
-
-    ics_content = generate_ics_for_events(events, groups_dict)
 
     return Response(
         content=ics_content,
@@ -359,18 +355,16 @@ async def export_user_events_in_group_route(
 )
 async def export_all_group_events_route(
     group_id: GroupId,
-    event_service: FromDishka[EventService],
+    ics_service: FromDishka[IcsService],
     current_user: CurrentUser,
 ) -> Response:
     """Выгружает все события группы. Доступно только для ролей 1 (CREATOR) и 2 (EDITOR)."""
     user_id = UserId(current_user.db_user.id)
 
-    events, groups_dict = await event_service.get_all_group_events_for_export(
+    ics_content = await ics_service.export_all_group_events(
         group_id=group_id,
         user_id=user_id,
     )
-
-    ics_content = generate_ics_for_events(events, groups_dict)
 
     return Response(
         content=ics_content,
