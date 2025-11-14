@@ -3,6 +3,7 @@ from typing import Any
 
 from sqlalchemy import and_, delete, func, select, update
 from sqlalchemy.exc import IntegrityError, ProgrammingError
+from sqlalchemy.orm import joinedload, selectinload
 
 from maxhack.core.exceptions import MaxHackError
 from maxhack.core.ids import EventId, EventNotifyId, GroupId, TagId, UserId
@@ -23,9 +24,17 @@ logger = logging.getLogger(__name__)
 
 class EventRepo(BaseAlchemyRepo):
     async def get_by_id(self, event_id: EventId) -> EventModel | None:
-        stmt = select(EventModel).where(
-            EventModel.id == event_id,
-            EventModel.is_not_deleted,
+        stmt = (
+            select(EventModel)
+            .options(
+                selectinload(EventModel.notifies),
+                selectinload(EventModel.tags).joinedload(TagsToEvents.tag),
+                joinedload(EventModel.group),
+            )
+            .where(
+                EventModel.id == event_id,
+                EventModel.is_not_deleted,
+            )
         )
         return await self._session.scalar(stmt)
 

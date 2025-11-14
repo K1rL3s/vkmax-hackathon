@@ -4,16 +4,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from maxhack.core.event.models import Cron, EventCreate, EventUpdate
 from maxhack.core.event.service import EventService
-from maxhack.core.ids import EventId, GroupId
+from maxhack.core.ids import EventId, GroupId, UserId
 from maxhack.web.dependencies import CurrentUser
 from maxhack.web.schemas.event import (
     EventAddTagRequest,
     EventAddUserRequest,
     EventCreateRequest,
+    EventDetailsResponse,
+    EventNotifyResponse,
     EventResponse,
     EventUpdateRequest,
     EventsResponse,
 )
+from maxhack.web.schemas.group import GroupResponse
+from maxhack.web.schemas.tag import TagResponse
 
 event_router = APIRouter(
     prefix="/events",
@@ -71,14 +75,29 @@ async def add_tag_to_event_route(
 async def get_event_route(
     event_id: EventId,
     event_service: FromDishka[EventService],
-    session: FromDishka[AsyncSession],
     current_user: CurrentUser,
-) -> EventResponse:
+) -> EventDetailsResponse:
     event = await event_service.get_event(
         event_id=event_id,
-        user_id=current_user.db_user.id,
+        user_id=UserId(current_user.db_user.id),
     )
-    return await EventResponse.from_orm_async(event, session)
+    return EventDetailsResponse(
+        id=event.id,
+        title=event.title,
+        description=event.description,
+        cron=event.cron,
+        is_cycle=event.is_cycle,
+        type=event.type,  # type: ignore  # noqa: PGH003
+        creator_id=event.creator_id,
+        group=GroupResponse.model_validate(event.group),
+        tags=[
+            TagResponse.model_validate(tag_to_event.tag) for tag_to_event in event.tags
+        ],
+        notifies=[
+            EventNotifyResponse.model_validate(notify) for notify in event.notifies
+        ],
+        timezone=event.timezone,
+    )
 
 
 @event_router.patch(

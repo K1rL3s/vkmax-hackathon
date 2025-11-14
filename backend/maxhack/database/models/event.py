@@ -1,9 +1,12 @@
 from sqlalchemy import Boolean, ForeignKey, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from maxhack.core.ids import EventId, GroupId, UserId
 from maxhack.database.models._mixins import IdMixin
 from maxhack.database.models.base import BaseAlchemyModel
+from maxhack.database.models.event_notify import EventNotifyModel
+from maxhack.database.models.group import GroupModel
+from maxhack.database.models.tags_to_events import TagsToEvents
 
 EVENT_TITLE_LEN = 128
 EVENT_DESCRIPTION_LEN = 1024
@@ -24,3 +27,7 @@ class EventModel(BaseAlchemyModel, IdMixin[EventId]):
     group_id: Mapped[GroupId] = mapped_column(ForeignKey("groups.id"), nullable=False)
     timezone: Mapped[int] = mapped_column(Integer, nullable=False)
     event_happened: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    notifies: Mapped[list[EventNotifyModel]] = relationship()
+    tags: Mapped[list[TagsToEvents]] = relationship()
+    group: Mapped[list[GroupModel]] = relationship()

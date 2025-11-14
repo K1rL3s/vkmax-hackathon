@@ -1,8 +1,9 @@
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from maxhack.core.ids import EventId, TagId
 from maxhack.database.models.base import BaseAlchemyModel
+from maxhack.database.models.tag import TagModel
 
 
 # TODO: Сделать IdMixin и убрать pk с tag_id, event_id,
@@ -20,3 +21,5 @@ class TagsToEvents(BaseAlchemyModel):
         nullable=False,
         primary_key=True,
     )
+
+    tag: Mapped[TagModel] = relationship()

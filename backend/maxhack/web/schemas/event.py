@@ -4,6 +4,8 @@ from typing import Literal
 from pydantic import Field
 
 from .core import Model
+from .group import GroupResponse
+from .tag import TagResponse
 from maxhack.core.enums.respond_action import RespondStatus
 from maxhack.core.ids import EventId, GroupId, RespondId, TagId, UserId
 
@@ -53,6 +55,24 @@ class EventResponse(Model):
     timezone: int
     # TODO: сделать возврат notifies
     # notifies: list[int]
+
+
+class EventNotifyResponse(Model):
+    minutes_before: int
+
+
+class EventDetailsResponse(Model):
+    id: EventId
+    title: str
+    description: str | None = None
+    cron: str
+    is_cycle: bool
+    type: Literal["event", "message"]
+    creator_id: UserId
+    group: GroupResponse
+    tags: list[TagResponse]
+    notifies: list[EventNotifyResponse]
+    timezone: int
 
 
 class EventAddTagRequest(Model):
