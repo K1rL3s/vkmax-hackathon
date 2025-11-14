@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import {
   Button,
   CellList,
@@ -11,34 +11,86 @@ import {
 } from '@maxhub/max-ui'
 import { Bell, Clock3, Globe, Paperclip, RefreshCcw } from 'lucide-react'
 import { useForm } from '@tanstack/react-form'
+import { z } from 'zod'
 import type { TagResponse } from '@/lib/api/gen.schemas'
 import { DynamicPageLayout } from '@/components/layout/dynamic-page-layout'
 import { TimezoneInput } from '@/components/timezone-input'
 import { TIMEZONES } from '@/components/timezone-select-modal'
 import { TagsInput } from '@/components/member/tags-input'
 import { RetryInput } from '@/components/retry-input'
+import { usePersonalGroupWithTags } from '@/hooks/groups'
+import { useCreateEvent } from '@/hooks/events'
+import { toLocalDatetimeString } from '@/lib/utils/datetime'
 
 export const Route = createFileRoute('/events/create')({
   component: CreateEventForm,
 })
 
 function CreateEventForm() {
+  const router = useRouter()
+  const personalGroupQuery = usePersonalGroupWithTags()
+  const createEventMutation = useCreateEvent()
   const form = useForm({
     defaultValues: {
       title: '',
       description: '',
-      timezone: TIMEZONES[0],
+      timezone:
+        TIMEZONES.find(
+          (ts) => ts.value === personalGroupQuery.data?.timezone,
+        ) ?? TIMEZONES[0],
       retry: {
         everyDay: false,
         everyWeek: false,
         everyMonth: false,
       },
-      date: '',
+      date: toLocalDatetimeString(new Date()),
       minutesBefore: 60,
-      tagsIds: [] as Array<TagResponse>,
+      tagsIds: personalGroupQuery.data?.group.tags || [],
+    },
+    validators: {
+      onChange: z.object({
+        title: z.string().min(1, { error: 'Название не должно быть пустым' }),
+        description: z.string(),
+        timezone: z.object({
+          value: z.number(),
+          label: z.string(),
+        }),
+        date: z.string().min(1, { error: 'Дата не должна быть пустой' }),
+        minutesBefore: z
+          .number()
+          .min(1, { error: 'Значение должно быть не меньше 1' }),
+        retry: z.object({
+          everyDay: z.boolean(),
+          everyWeek: z.boolean(),
+          everyMonth: z.boolean(),
+        }),
+        tagsIds: z.array(
+          z.object({
+            id: z.number(),
+            name: z.string(),
+            color: z.string(),
+            groupId: z.number(),
+          }),
+        ),
+      }),
     },
     onSubmit: ({ value }) => {
-      console.log(value)
+      createEventMutation.mutate(
+        {
+          title: value.title,
+          description: value.description,
+          timezone: value.timezone.value,
+          cron: { date: value.date, ...value.retry },
+          minutesBefore: [value.minutesBefore],
+          tagsIds: value.tagsIds.map((tag) => tag.id),
+          groupId: personalGroupQuery.data!.group.id,
+        },
+        {
+          onSuccess: () => {
+            router.history.back()
+          },
+        },
+      )
     },
   })
 
@@ -47,9 +99,20 @@ function CreateEventForm() {
       footer={
         <Container className="w-full pb-4">
           <div className="px-3">
-            <Button form="create-event" type="submit" className="w-full">
-              Создать
-            </Button>
+            <form.Subscribe
+              selector={(state) => state.isFormValid && !state.isDefaultValue}
+              children={(state) => (
+                <Button
+                  loading={createEventMutation.isPending}
+                  form="create-event"
+                  type="submit"
+                  className="w-full"
+                  disabled={!state}
+                >
+                  Создать
+                </Button>
+              )}
+            />
           </div>
         </Container>
       }
@@ -103,7 +166,9 @@ function CreateEventForm() {
                       step={-1}
                       type="datetime-local"
                       value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(e) => {
+                        field.handleChange(e.target.value)
+                      }}
                     />
                   )}
                 />
@@ -140,10 +205,21 @@ function CreateEventForm() {
                   )}
                 />
                 <div className="border-b border-gray-200/10" />
-                <Input
-                  iconBefore={<Bell size={18} />}
-                  placeholder="Напомнить за минут"
+                <form.Field
+                  name="minutesBefore"
+                  children={(field) => (
+                    <Input
+                      value={field.state.value}
+                      onChange={(e) => {
+                        if (isNaN(Number(e.target.value))) return
+                        field.handleChange(Number(e.target.value))
+                      }}
+                      iconBefore={<Bell size={18} />}
+                      placeholder="Напомнить за минут"
+                    />
+                  )}
                 />
+
                 <div className="border-b border-gray-200/10" />
                 <form.Field
                   name="tagsIds"
@@ -163,22 +239,7 @@ function CreateEventForm() {
                       }}
                       value={field.state.value}
                       before={<Paperclip size={18} />}
-                      options={[
-                        {
-                          color: 'red',
-                          groupId: 32,
-                          name: '123',
-                          id: 1,
-                          description: '123',
-                        },
-                        {
-                          color: 'green',
-                          groupId: 32,
-                          name: '123',
-                          id: 2,
-                          description: '123',
-                        },
-                      ]}
+                      options={personalGroupQuery.data?.group.tags || []}
                     />
                   )}
                 />

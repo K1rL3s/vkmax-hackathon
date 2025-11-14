@@ -12,7 +12,7 @@ import {
 } from '@/lib/api/groups/groups'
 import { useMaxUser } from '@/integrations/max-ui/hooks/max-user'
 import {
-  getPersonalGroupUsersMeGroupsPersonalGet,
+  getPersonalGroupRouteUsersMeGroupsPersonalGet,
   getUserByIdRouteUsersMeGet,
   listUserGroupsRouteUsersMeGroupsGet,
 } from '@/lib/api/users/users'
@@ -37,13 +37,32 @@ export function usePersonalGroup() {
     queryKey: ['me', 'groups', 'personal'],
     queryFn: async () => {
       const [group, user] = await Promise.all([
-        getPersonalGroupUsersMeGroupsPersonalGet(),
+        getPersonalGroupRouteUsersMeGroupsPersonalGet(),
         getUserByIdRouteUsersMeGet(),
       ])
 
       return {
         ...user,
         group: { ...group },
+      }
+    },
+  })
+}
+
+export function usePersonalGroupWithTags() {
+  return useQuery({
+    queryKey: ['me', 'groups', 'personal', 'tagged'],
+    queryFn: async () => {
+      const [group, user] = await Promise.all([
+        getPersonalGroupRouteUsersMeGroupsPersonalGet(),
+        getUserByIdRouteUsersMeGet(),
+      ])
+
+      const tags = await listGroupTagsRouteGroupsGroupIdTagsGet(group.id)
+
+      return {
+        ...user,
+        group: { ...group, tags: tags },
       }
     },
   })

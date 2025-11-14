@@ -10,7 +10,6 @@ export const api = axios.create({
 api.interceptors.request.use((config) => {
   const initData = useWebAppData()
   config.headers.set('WebAppData', initData)
-  console.log('WebAppData', initData)
   return config
 })
 

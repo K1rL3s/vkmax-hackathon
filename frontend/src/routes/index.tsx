@@ -1,21 +1,28 @@
 import { Flex, IconButton, Typography } from '@maxhub/max-ui'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Loader, PlusIcon, Search } from 'lucide-react'
+import { PlusIcon, Search } from 'lucide-react'
 import { useEffect, useRef } from 'react'
-import { useEventsList } from '@/hooks/events'
+import { usePersonalEvents } from '@/hooks/events'
 import { Header } from '@/components/header'
 import { EventList } from '@/components/event/event-list'
 import { FloatingIconButton } from '@/components/ui/floating-button'
 import { FallbackLoader } from '@/components/ui/fallback-loader'
+import { expandCronEvents } from '@/lib/utils/cron'
 
 export const Route = createFileRoute('/')({
   component: Home,
 })
 
 function Home() {
-  const { data, isPending } = useEventsList()
+  const { data, isPending } = usePersonalEvents()
   const navigate = useNavigate()
   const scrollRef = useRef<{ scrollToToday: () => void }>(null)
+
+  const now = new Date()
+  const start = new Date(now.getFullYear(), now.getMonth() - 2, now.getDate())
+  const end = new Date(now.getFullYear(), now.getMonth() + 2, now.getDate())
+
+  const formatted = data ? expandCronEvents(data.events, start, end) : []
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -42,10 +49,17 @@ function Home() {
           </Flex>
         </Header>
         <FallbackLoader isLoading={isPending || !data}>
-          <EventList events={data!} ref={scrollRef} />
+          <EventList events={formatted} ref={scrollRef} />
         </FallbackLoader>
       </Flex>
-      <FloatingIconButton onClick={() => navigate({ to: '/events/create' })}>
+      <FloatingIconButton
+        onClick={() =>
+          navigate({
+            to: '/events/create',
+            search: { groupId: String(data?.id) },
+          })
+        }
+      >
         <PlusIcon />
       </FloatingIconButton>
     </>
