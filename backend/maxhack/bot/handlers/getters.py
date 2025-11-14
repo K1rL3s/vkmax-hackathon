@@ -1,9 +1,9 @@
 from typing import Any
 
-from maxhack.core.utils.datehelp import datetime_now
 from maxo.dialogs import DialogManager
 from maxo.dialogs.integrations.dishka import inject
 
+from maxhack.core.utils.datehelp import datetime_now
 from maxhack.core.utils.timezones import TIMEZONES
 from maxhack.database.models import UserModel
 
@@ -26,9 +26,8 @@ async def get_current_user(dialog_manager: DialogManager, **__: Any) -> dict[str
 def _get_greeting_by_hour(hour: int) -> str:
     if 5 <= hour <= 11:
         return "☀️ Доброе утро"
-    elif 12 <= hour < 16:
+    if 12 <= hour < 16:
         return "🌤️ Добрый день"
-    elif 17 <= hour <= 22:
+    if 17 <= hour <= 22:
         return "🌅 Добрый вечер"
-    else:
-        return "🌙 Доброй ночи"
+    return "🌙 Доброй ночи"

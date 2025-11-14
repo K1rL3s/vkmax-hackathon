@@ -16,4 +16,5 @@ class Profile(StatesGroup):
 
 class Groups(StatesGroup):
     all = State()
+    one = State()
     join = State()
