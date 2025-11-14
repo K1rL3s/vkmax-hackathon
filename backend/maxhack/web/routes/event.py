@@ -1,7 +1,7 @@
 from typing import Any
 
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, Query, Response, status
+from fastapi import APIRouter, File, Query, Response, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from maxhack.core.event.models import Cron, EventCreate, EventUpdate
@@ -257,6 +257,45 @@ async def get_user_events_route(
             "notifies": [notify.minutes_before for notify in event.notifies],
         }
         response_events.append(EventResponse.model_validate(event_dict))
+    return EventsResponse(events=response_events)
+
+
+@event_router.post(
+    "/import/ics",
+    status_code=status.HTTP_201_CREATED,
+    description="Импортировать события из .ics файла в личную группу пользователя",
+)
+async def import_ics_route(
+    event_service: FromDishka[EventService],
+    session: FromDishka[AsyncSession],
+    current_user: CurrentUser,
+    file: UploadFile = File(..., description=".ics файл для импорта"),
+) -> EventsResponse:
+    """Импортирует события из .ics файла в личную группу пользователя."""
+    ics_content = await file.read()
+    created_events = await event_service.import_events_from_ics(
+        user_id=UserId(current_user.db_user.id),
+        ics_content=ics_content,
+    )
+
+    response_events = []
+    for event in created_events:
+        event_dict = {
+            "id": event.id,
+            "title": event.title,
+            "description": event.description,
+            "cron": event.cron,
+            "is_cycle": event.is_cycle,
+            "type": event.type,
+            "creator_id": event.creator_id,
+            "group_id": event.group_id,
+            "timezone": event.timezone,
+            "duration": event.duration,
+            "event_happened": event.event_happened,
+            "notifies": [notify.minutes_before for notify in event.notifies],
+        }
+        response_events.append(EventResponse.model_validate(event_dict))
+
     return EventsResponse(events=response_events)
 
 

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import pycron
 from redis.asyncio import Redis
 
-from maxhack.core.event.models import EventCreate, EventUpdate
+from maxhack.core.event.models import Cron, EventCreate, EventUpdate
 from maxhack.core.exceptions import (
     EventNotFound,
     GroupNotFound,
@@ -529,6 +529,76 @@ class EventService(BaseService):
 
         logger.info(f"Found {len(matching_notify)} matching notifications")
         return matching_notify
+
+    async def import_events_from_ics(
+        self,
+        user_id: UserId,
+        ics_content: bytes,
+    ) -> list[EventModel]:
+        """Импортирует события из .ics файла в личную группу пользователя.
+
+        Args:
+            user_id: ID пользователя
+            ics_content: Содержимое .ics файла в формате bytes
+
+        Returns:
+            list[EventModel]: Список созданных событий
+        """
+        from maxhack.web.utils.ics import parse_ics_file
+
+        logger.debug(f"Importing events from .ics file for user {user_id}")
+        await self._ensure_user_exists(user_id)
+
+        # Получаем личную группу пользователя
+        personal_group = await self._users_to_groups_repo.personal_group(user_id)
+        if personal_group is None:
+            logger.error(f"Personal group for user {user_id} not found")
+            raise GroupNotFound(message="Личная группа не найдена")
+
+        # Парсим .ics файл
+        parsed_events = parse_ics_file(ics_content)
+        logger.info(f"Parsed {len(parsed_events)} events from .ics file")
+
+        created_events: list[EventModel] = []
+
+        for parsed_event in parsed_events:
+            try:
+                # Создаем событие из распарсенного события
+                cron = Cron(
+                    date=parsed_event["date"],
+                    every_day=parsed_event["every_day"],
+                    every_week=parsed_event["every_week"],
+                    every_month=parsed_event["every_month"],
+                )
+
+                event_create = EventCreate(
+                    title=parsed_event["title"],
+                    description=parsed_event["description"] or "",
+                    cron=cron,
+                    creator_id=user_id,
+                    type="event",
+                    timezone=parsed_event["timezone"],
+                    group_id=personal_group.id,
+                    duration=parsed_event["duration"],
+                    participants_ids=[user_id],  # Добавляем пользователя как участника
+                    tags_ids=[],
+                    minutes_before=[],
+                )
+
+                event, _ = await self.create_event(event_create)
+                created_events.append(event)
+                logger.debug(f"Created event {event.id} from .ics import")
+
+            except Exception as e:
+                logger.error(
+                    f"Error importing event '{parsed_event.get('title', 'Unknown')}': {e}",
+                )
+                continue
+
+        logger.info(
+            f"Successfully imported {len(created_events)} events from .ics file for user {user_id}",
+        )
+        return created_events
 
     async def get_user_events_all_groups_for_export(
         self,

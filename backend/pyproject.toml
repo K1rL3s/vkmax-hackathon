@@ -37,6 +37,7 @@ dependencies = [
     "timezonefinder>=8.1.0",
     "icalendar==5.0.11",
     "croniter==3.0.4",
+    "python-multipart==0.0.12"
 ]
 
 [project.optional-dependencies]
