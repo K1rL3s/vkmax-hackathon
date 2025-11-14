@@ -20,9 +20,9 @@ export function RoleSelect({
   onChange,
 }: RoleSelectProps) {
   const colorsStyles = {
-    1: 'bg-amber-600',
-    2: 'bg-blue-600',
-    3: 'bg-green-600',
+    1: 'bg-amber-500',
+    2: 'bg-blue-500',
+    3: 'bg-green-500',
     4: 'bg-slate-500',
   }
   return (
@@ -30,12 +30,12 @@ export function RoleSelect({
       <DropDown.Trigger disabled={disabled}>
         <div
           className={clsx(
-            'px-3 py-1.5 rounded-3xl flex items-center space-x-2',
+            'px-3 py-1.5 rounded-3xl flex items-center space-x-2 text-(--text-contrast-static)',
             colorsStyles[value?.id as keyof typeof colorsStyles],
           )}
         >
           <Typography.Body>{value?.name}</Typography.Body>
-          {!disabled && <ChevronDown size={16} />}
+          {!disabled && <ChevronDown color="currentColor" size={16} />}
         </div>
       </DropDown.Trigger>
       <DropDown.Content
@@ -51,6 +51,7 @@ export function RoleSelect({
             .map((variant) => (
               <DropDown.Item key={variant.id}>
                 <CellSimple
+                  innerClassNames={{ title: 'text-(--text-contrast-static)' }}
                   title={variant.name}
                   onClick={() => !disabled && onChange(variant)}
                   height="compact"

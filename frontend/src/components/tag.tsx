@@ -10,19 +10,19 @@ type TagProps = {
 
 export function Tag({ tag, onClick }: TagProps) {
   const tagColorStyles = {
-    red: 'bg-red-700',
-    blue: 'bg-blue-700',
-    green: 'bg-green-700',
-    yellow: 'bg-yellow-700',
-    purple: 'bg-purple-700',
-    cyan: 'bg-cyan-700',
-    pink: 'bg-pink-700',
-    orange: 'bg-orange-700',
+    red: 'bg-red-500',
+    blue: 'bg-blue-500',
+    green: 'bg-green-500',
+    yellow: 'bg-yellow-500',
+    purple: 'bg-purple-500',
+    cyan: 'bg-cyan-500',
+    pink: 'bg-pink-500',
+    orange: 'bg-orange-500',
   }
   return (
     <div
       className={clsx(
-        'rounded-full text-(--text-primary) flex items-center space-x-2 px-2 py-1 w-fit mr-2 my-1',
+        'rounded-full text-(--text-contrast-static) flex items-center space-x-2 px-2 py-1 w-fit mr-2 my-1',
         tagColorStyles[tag.color as keyof typeof tagColorStyles],
       )}
     >

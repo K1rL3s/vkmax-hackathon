@@ -8,9 +8,9 @@ type RoleProps = {
 
 export function Role({ roleId }: RoleProps) {
   const colorsStyles = {
-    1: 'bg-amber-600',
-    2: 'bg-blue-600',
-    3: 'bg-green-600',
+    1: 'bg-amber-500',
+    2: 'bg-blue-500',
+    3: 'bg-green-500',
     4: 'bg-slate-500',
   }
 
@@ -27,7 +27,7 @@ export function Role({ roleId }: RoleProps) {
         colorsStyles[roleId as unknown as keyof typeof colorsStyles],
       )}
     >
-      <Typography.Body className="text-(--text-primary)">
+      <Typography.Body className="text-(--text-contrast-static)">
         {roleNames[roleId as unknown as keyof typeof roleNames]}
       </Typography.Body>
     </div>

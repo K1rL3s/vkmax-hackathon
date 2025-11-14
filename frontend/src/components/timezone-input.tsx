@@ -47,10 +47,6 @@ export function TimezoneInput({
               'bg-(--states-background-disabled-neutral-fade)!':
                 disabled && mode === 'secondary',
             },
-            {
-              'bg-(--states-text-disabled-primary)! text(--states-text-disabled-primary)':
-                disabled && mode === 'secondary',
-            },
           )}
         >
           <Flex align="center" gapX={12}>

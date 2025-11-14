@@ -30,14 +30,14 @@ export function TagsInput({
   fullWidth?: boolean
 }) {
   const tagColorStyles = {
-    red: 'bg-red-700',
-    blue: 'bg-blue-700',
-    green: 'bg-green-700',
-    yellow: 'bg-yellow-700',
-    purple: 'bg-purple-700',
-    cyan: 'bg-cyan-700',
-    pink: 'bg-pink-700',
-    orange: 'bg-orange-700',
+    red: 'bg-red-500',
+    blue: 'bg-blue-500',
+    green: 'bg-green-500',
+    yellow: 'bg-yellow-500',
+    purple: 'bg-purple-500',
+    cyan: 'bg-cyan-500',
+    pink: 'bg-pink-500',
+    orange: 'bg-orange-500',
   }
 
   return (
@@ -71,10 +71,19 @@ export function TagsInput({
                       )}
                       key={tag.id}
                     >
-                      <Typography.Title variant="small">
+                      <Typography.Title
+                        className="text-(--text-contrast-static)"
+                        variant="small"
+                      >
                         {tag.name}
                       </Typography.Title>
-                      {!disabled && <X size={16} />}
+                      {!disabled && (
+                        <X
+                          color="currentColor"
+                          className="text-(--text-contrast-static)"
+                          size={16}
+                        />
+                      )}
                     </div>
                   ))}
                 </Flex>
@@ -85,7 +94,10 @@ export function TagsInput({
                         type="button"
                         className="rounded-full p-1 bg-(--accent-themed) mr-2 my-1 cursor-pointer hover:bg-(--states-background-hovered-themed) active:bg-(--states-background-hovered-themed)"
                       >
-                        <Plus />
+                        <Plus
+                          color="currentColor"
+                          className="text-(--text-contrast-static)"
+                        />
                       </button>
                     </DropDown.Trigger>
                     <DropDown.Content className="w-full mt-4.5 -ml-3">
@@ -116,7 +128,7 @@ export function TagsInput({
                                     <div
                                       onClick={() => onChange?.(tag)}
                                       className={clsx(
-                                        'rounded-full px-2 py-1 w-fit mr-2 my-1 cursor-pointer',
+                                        'rounded-full px-2 py-1 w-fit mr-2 my-1 cursor-pointer text-(--text-contrast-static)',
                                         tagColorStyles[
                                           tag.color as keyof typeof tagColorStyles
                                         ],

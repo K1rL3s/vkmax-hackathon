@@ -11,7 +11,7 @@ export function EventCard({ event }: { event: CalendarEvent }) {
 
   return (
     <Link to="/events/$id" params={{ id: event.id.toString() }}>
-      <Container className="w-full bg-(--background-accent-themed)/40 rounded-xl py-2">
+      <Container className="w-full bg-(--accent-themed)/70 text-(--text-contrast-static) rounded-xl py-2">
         <Flex align="center" gapX={8}>
           {beforeIcon}
           <Flex direction="column" gapY={6}>

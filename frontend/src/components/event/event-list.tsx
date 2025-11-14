@@ -80,7 +80,7 @@ export const EventList = forwardRef(function EventList(
             >
               <Flex gapX={8} align="center">
                 {isToday && (
-                  <div className="bg-(--accent-themed) rounded-full pb-1 px-2">
+                  <div className="bg-(--accent-themed) text-(--text-contrast-static) rounded-full pb-1 px-2">
                     <span className="text-xs">Сегодня</span>
                   </div>
                 )}
