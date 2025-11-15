@@ -289,11 +289,9 @@ async def get_user_events_route(
 )
 async def import_ics_route(
     ics_service: FromDishka[IcsService],
-    session: FromDishka[AsyncSession],
     current_user: CurrentUser,
     file: UploadFile = File(..., description=".ics файл для импорта"),
 ) -> EventsResponse:
-    """Импортирует события из .ics файла в личную группу пользователя."""
     ics_content = await file.read()
     created_events = await ics_service.import_events(
         user_id=UserId(current_user.db_user.id),

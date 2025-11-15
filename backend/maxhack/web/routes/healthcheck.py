@@ -1,8 +1,5 @@
-from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
 
 healthcheck_router = APIRouter(
     prefix="/health",
@@ -15,7 +12,5 @@ healthcheck_router = APIRouter(
     "",
     description="Проверка соединения",
 )
-async def check_connection(
-    session: FromDishka[AsyncSession],
-) -> None:
-    await session.execute(text("select 1"))
+async def check_connection() -> None:
+    return

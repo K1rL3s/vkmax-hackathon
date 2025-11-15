@@ -33,16 +33,9 @@ def main(config: Config) -> fastapi.FastAPI:
         },
     ]
 
-    description = """
-    ### Права доступа к сущностям
-    
-    Для каждой сущности предусмотрен определённый набор прав, которые, в зависимости от логики, могут назначаться различному
-    набору ролей. Также, помимо основного набора прав, ограничения могут быть выставлены непосредственно на уровне определённых ролей.
-    """
     app = fastapi.FastAPI(
         root_path="/api",
         title="Таск трекер для МАКС",
-        description=description,
         version="0.1.0",
         openapi_tags=sorted(tags_metadata, key=lambda i: i["name"]),
         swagger_ui_parameters={
