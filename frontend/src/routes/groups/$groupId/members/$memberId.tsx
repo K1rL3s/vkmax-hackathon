@@ -29,8 +29,12 @@ function MemberPage() {
     from: '/groups/$groupId/members/$memberId',
   })
   const navigate = useNavigate()
-  const canEditRole = useMemberHasRole(Number(groupId), [1])
-  const canEditTags = useMemberHasRole(Number(groupId), [1, 2])
+  const canEditRole = useMemberHasRole(Number(groupId), [1], Number(memberId))
+  const canEditTags = useMemberHasRole(
+    Number(groupId),
+    [1, 2],
+    Number(memberId),
+  )
   const memberQuery = useMember(Number(groupId), Number(memberId))
   const memberMutation = useEditMember()
   const kickMemberMutation = useRemoveMember()
@@ -72,7 +76,11 @@ function MemberPage() {
   return (
     <DynamicPageLayout
       footer={
-        <MemberCan groupId={groupId} rolesIds={[1, 2]}>
+        <MemberCan
+          groupId={groupId}
+          rolesIds={[1, 2]}
+          memberId={Number(memberId)}
+        >
           <Flex
             className="w-full py-1 px-3 bg-(--background-surface-card) rounded-t-4xl"
             gapX={12}

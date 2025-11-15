@@ -17,7 +17,6 @@ import {
   getGroupGroupsGroupIdGet,
   updateGroupRouteGroupsGroupIdPatch,
 } from '@/lib/api/groups/groups'
-import { useCurrentUser } from '@/integrations/max-ui/hooks/max-user'
 import {
   getPersonalGroupRouteUsersMeGroupsPersonalGet,
   getUserByIdRouteUsersMeGet,
@@ -120,9 +119,12 @@ export function useCreateGroup() {
   })
 }
 
-export function useMemberHasRole(groupId: number, rolesIds: Array<number>) {
-  const { id } = useCurrentUser()
-  const { data } = useMember(groupId, id)
+export function useMemberHasRole(
+  groupId: number,
+  rolesIds: Array<number>,
+  memberId: number,
+) {
+  const { data } = useMember(groupId, memberId)
   return data && rolesIds.includes(data.member.role.id)
 }
 

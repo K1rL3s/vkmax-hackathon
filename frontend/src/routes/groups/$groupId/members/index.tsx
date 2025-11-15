@@ -9,6 +9,7 @@ import { MemberCard } from '@/components/member/member-card'
 import { MemberInvite } from '@/components/member/member-invite'
 
 import { useMembers } from '@/hooks/members'
+import { useMe } from '@/hooks/user'
 
 export const Route = createFileRoute('/groups/$groupId/members/')({
   component: GroupMembersListPage,
@@ -16,6 +17,7 @@ export const Route = createFileRoute('/groups/$groupId/members/')({
 
 function GroupMembersListPage() {
   const { groupId } = useParams({ from: '/groups/$groupId/members/' })
+  const meQuery = useMe()
   const { data, isPending } = useMembers(Number(groupId))
   const [query, setQuery] = useState('')
 
@@ -55,7 +57,11 @@ function GroupMembersListPage() {
             </>
           )}
         </Card>
-        <MemberCan groupId={groupId} rolesIds={[1, 2]}>
+        <MemberCan
+          groupId={groupId}
+          rolesIds={[1, 2]}
+          memberId={Number(meQuery.data?.id)}
+        >
           <MemberInvite groupId={groupId} />
         </MemberCan>
       </Flex>
