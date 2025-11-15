@@ -25,27 +25,6 @@ user_router = APIRouter(
 )
 
 
-# TODO: Удалить на проде
-@user_router.post(
-    "",
-    status_code=status.HTTP_201_CREATED,
-    description="Создание пользователя",
-)
-async def create_user_route(
-    body: UserCreateRequest,
-    user_service: FromDishka[UserService],
-    session: FromDishka[AsyncSession],
-) -> UserResponse:
-    user = await user_service.create_user(
-        max_id=MaxId(body.max_id),
-        max_chat_id=MaxChatId(body.max_chat_id),
-        first_name=body.first_name,
-        last_name=body.last_name,
-        phone=body.phone,
-        timezone=body.timezone,
-    )
-    return await UserResponse.from_orm_async(user, session)
-
 
 @user_router.get(
     "/me",

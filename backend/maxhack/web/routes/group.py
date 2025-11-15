@@ -251,31 +251,6 @@ async def delete_invite_route(
         user_id=current_user.db_user.id,
     )
 
-
-# TODO: Удалить на проде
-@group_router.post(
-    "/join",
-    status_code=status.HTTP_201_CREATED,
-    description="Добавление пользователя в группу",
-)
-async def join_group(
-    body: GroupMemberAddRequest,
-    group_service: FromDishka[GroupService],
-    current_user: CurrentUser,
-) -> GroupMemberResponse:
-    group = await group_service.join_group(
-        user_id=current_user.db_user.id,
-        invite_key=body.invite_key,
-    )
-
-    return GroupMemberResponse(
-        user_id=current_user.db_user.id,
-        group_id=group.id,
-        role_id=MEMBER_ROLE_ID,
-        notify_mode=NotifyMode.DEFAULT,
-    )
-
-
 @group_router.patch(
     "/{group_id}/notify",
     status_code=status.HTTP_200_OK,

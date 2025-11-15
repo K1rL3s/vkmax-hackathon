@@ -481,42 +481,6 @@ class EventService(BaseService):
         logger.info(f"Found {len(events)} events for user {user_id}")
         return events
 
-    async def get_other_user_events(
-        self,
-        target_user_id: UserId,
-        user_id: UserId,
-    ) -> list[EventModel]:
-        # TODO: Удалить или использовать
-        logger.debug(
-            f"Getting events for user {target_user_id} requested by user {user_id}",
-        )
-        await self._ensure_user_exists(target_user_id)
-
-        target_groups = await self._users_to_groups_repo.user_groups(target_user_id)
-        target_group_ids = {group.id for group, _ in target_groups}
-        logger.debug(f"User {target_user_id} is in groups {target_group_ids}")
-
-        user_groups = await self._users_to_groups_repo.user_groups(user_id)
-        user_group_ids = {group.id for group, _ in user_groups}
-        logger.debug(f"User {user_id} is in groups {user_group_ids}")
-
-        common_groups = target_group_ids & user_group_ids
-        if not common_groups:
-            logger.warning(
-                f"Users {user_id} and {target_user_id} have no common groups",
-            )
-            raise NotEnoughRights
-        logger.debug(
-            f"Common groups for users {user_id} and {target_user_id}: {common_groups}",
-        )
-
-        all_events = await self._event_repo.get_created_by_user(target_user_id)
-        events = [event for event in all_events if event.group_id in common_groups]
-        logger.info(
-            f"Found {len(events)} events for user {target_user_id} in common groups",
-        )
-        return events
-
     async def list_user_events(
         self,
         group_id: GroupId,

@@ -97,38 +97,24 @@ class UserService:
         return user
 
     async def update_user(
-        self,
-        user_id: UserId,
-        first_name: str | None = None,
-        last_name: str | None = None,
-        photo: str | None = None,
-        phone: str | None = None,
-        notify_mode: NotifyMode | None = None,
-        timezone: int | None = None,
+            self,
+            user_id: UserId,
+            **kwargs: Any,
     ) -> UserModel:
         logger.debug(f"Updating user {user_id}")
+
         user = await self._user_repo.get_by_id(user_id)
         if user is None:
             logger.error(f"User {user_id} not found for update")
             raise UserNotFound
 
-        # TODO: ???????
-        values: dict[str, Any] = {}
-        if first_name is not None:
-            values["first_name"] = first_name
-        if last_name is not None:
-            values["last_name"] = last_name
-        if photo is not None:
-            values["photo"] = photo
-        if phone is not None:
-            values["phone"] = phone
-        if timezone is not None:
-            if timezone not in TIMEZONES:
-                raise InvalidValue
-            values["timezone"] = timezone
-        if notify_mode is not None:
-            values["notify_mode"] = notify_mode
+        values = {key: value for key, value in kwargs.items() if value is not None}
+
+        if 'timezone' in values and values['timezone'] not in TIMEZONES:
+            raise InvalidValue
+
         logger.debug(f"Updating user {user_id} with values {values}")
+
         user = await self._user_repo.update_user(user_id, **values)
         if user is None:
             logger.error(f"User {user_id} not found after update")

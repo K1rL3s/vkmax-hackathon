@@ -22,7 +22,6 @@ def to_camel(string: str) -> str:
     )
 
 
-# TODO: Вынести длину ключа в конфиг или константу в core
 def generate_invite_key() -> InviteKey:
     return InviteKey(secrets.token_urlsafe(8)[:8])
 
