@@ -34,6 +34,10 @@ _profile = Window(
     ),
     Url(
         Const("🌐 Ввести часовой пояс"),
+        Format("{settings_deeplink}"),
+    ),
+    Url(
+        Const("🪪 Изменить имя-фамилию"),
         Format("{profile_deeplink}"),
     ),
     empty_button("🔔 Режим уведомлений:"),
