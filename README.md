@@ -1,6 +1,8 @@
 ![img.png](content/hakaton.png)
 # MAX Уведомления
 
+[Миро доска](https://miro.com/welcomeonboard/Um1qelFjZGFNYmx2dkJ5WU1rUGVKRGR2ZkVjUmlaeWw0VXdPM1RsR0NBcW5Wb2lLVnhmUHY0ZmZsWEo4V0ZFZHNzUlRQdWxpZGlBT2Z6T3VNbHEwTmJNRytPQ0xGNGw3QU5aMnFxMFM5UXJtbVBLU2YveUpkdjhuZmg4Z3JCYkZhWWluRVAxeXRuUUgwWDl3Mk1qRGVRPT0hdjE=?share_link_id=933724555292)
+
 ## 🎯 Целевая аудитория
 
 - **Руководители отделов** - которым важно не тратить время на ручные напоминания сотрудникам;
@@ -85,13 +87,17 @@
 ## Запуск
 
 1. Склонировать репозиторий и перейти в него:
-    ```
+    ```commandline
     git clone https://github.com/K1rL3s/vkmax_hackathon.git
     cd ./vkmax_hackathon
     ```
 
 2. Создать и заполнить файл `.env` в корневой папке (пример: `.env.example`).\
-   Для локального запуска достаточно заменить `MAX_TOKEN`
+   Для локального запуска достаточно заменить `MAX_TOKEN`:
+   ```commandline
+    cp .env.example .env
+    nano .env
+    ```
 
 3. Иметь установленный [Docker Engine](https://docs.docker.com/engine/) и [docker compose v2](https://docs.docker.com/compose/releases/migrate/)
 
