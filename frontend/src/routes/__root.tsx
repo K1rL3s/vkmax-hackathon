@@ -2,6 +2,7 @@ import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
 
 import type { QueryClient } from '@tanstack/react-query'
 import { RootLayout } from '@/components/layout/root-layout'
+import { MaxBridgeLayout } from '@/components/layout/max-bridge-layout'
 
 interface RouterContext {
   queryClient: QueryClient
@@ -10,7 +11,9 @@ interface RouterContext {
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => (
     <RootLayout>
-      <Outlet />
+      <MaxBridgeLayout>
+        <Outlet />
+      </MaxBridgeLayout>
     </RootLayout>
   ),
 })

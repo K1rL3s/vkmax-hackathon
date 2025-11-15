@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as MaxErrorRouteImport } from './routes/max-error'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GroupsCreateRouteImport } from './routes/groups/create'
 import { Route as EventsCreateRouteImport } from './routes/events/create'
@@ -38,6 +39,11 @@ const SearchRoute = SearchRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MaxErrorRoute = MaxErrorRouteImport.update({
+  id: '/max-error',
+  path: '/max-error',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -107,6 +113,7 @@ const GroupsGroupIdEventsEventIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/max-error': typeof MaxErrorRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/max-error': typeof MaxErrorRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
@@ -142,6 +150,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/max-error': typeof MaxErrorRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/max-error'
     | '/profile'
     | '/search'
     | '/settings'
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/max-error'
     | '/profile'
     | '/search'
     | '/settings'
@@ -195,6 +206,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/max-error'
     | '/profile'
     | '/search'
     | '/settings'
@@ -213,6 +225,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  MaxErrorRoute: typeof MaxErrorRoute
   ProfileRoute: typeof ProfileRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
@@ -250,6 +263,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/max-error': {
+      id: '/max-error'
+      path: '/max-error'
+      fullPath: '/max-error'
+      preLoaderRoute: typeof MaxErrorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -341,6 +361,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  MaxErrorRoute: MaxErrorRoute,
   ProfileRoute: ProfileRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,

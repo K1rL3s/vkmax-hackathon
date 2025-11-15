@@ -98,7 +98,10 @@ function EventDetailsPage() {
 
   const canEdit =
     groupQuery.data?.id === eventQuery.data?.creatorId ||
-    [ADMIN_ROLE_ID, SUPERVISOR_ROLE_ID].includes(groupQuery.data.group.role.id)
+    (groupQuery.data?.group &&
+      [ADMIN_ROLE_ID, SUPERVISOR_ROLE_ID].includes(
+        groupQuery.data.group.role.id,
+      ))
 
   return (
     <DynamicPageLayout
@@ -144,7 +147,7 @@ function EventDetailsPage() {
                   </ToolButton>
                   <ToolButton
                     onClick={() => {
-                      deleteEventMutation.mutate(Number(id))
+                      deleteEventMutation.mutate(Number(eventId))
                       router.history.back()
                     }}
                     key={'delete'}

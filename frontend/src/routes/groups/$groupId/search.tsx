@@ -13,8 +13,8 @@ import { useMemo, useState } from 'react'
 import type { CalendarEvent } from '@/components/event/event-list'
 import type { TagResponse } from '@/lib/api/gen.schemas'
 import { TagsInput } from '@/components/member/tags-input'
-import { useGroupEvents, usePersonalEvents } from '@/hooks/events'
-import { useGroupWithTags, usePersonalGroupWithTags } from '@/hooks/groups'
+import { useGroupEvents } from '@/hooks/events'
+import { useGroupWithTags } from '@/hooks/groups'
 import { expandCronEvents } from '@/lib/utils/cron'
 import { DynamicPageLayout } from '@/components/layout/dynamic-page-layout'
 
@@ -63,7 +63,9 @@ function SearchPersonalEventsPage() {
   return (
     <DynamicPageLayout
       heading={
-        <Typography.Headline>{groupQuery.data?.group.name}</Typography.Headline>
+        <Typography.Headline>
+          {groupQuery.data?.group.group.name}
+        </Typography.Headline>
       }
     >
       <Panel className="w-full">
