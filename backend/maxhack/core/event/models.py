@@ -36,7 +36,6 @@ class EventCreate(DomainModel):
     cron: Cron
     creator_id: UserId
     description: str = field(default="")
-    event_date: datetime | None = field(default=None)
     type: EventType = field(default="event")
     timezone: int | None = field(default=None)
     group_id: GroupId

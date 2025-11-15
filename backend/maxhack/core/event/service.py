@@ -16,7 +16,7 @@ from maxhack.core.responds.service import RespondService
 from maxhack.core.role.ids import CREATOR_ROLE_ID, EDITOR_ROLE_ID
 from maxhack.core.service import BaseService
 from maxhack.core.tag.service import TagService
-from maxhack.core.utils.datehelp import datetime_now, UTC_TIMEZONE
+from maxhack.core.utils.datehelp import UTC_TIMEZONE, datetime_now
 from maxhack.database.models import (
     EventModel,
     EventNotifyModel,
@@ -125,13 +125,22 @@ class EventService(BaseService):
 
         if event_create_scheme.cron.date.tzinfo is None:
             if event_create_scheme.timezone:
-                event_create_scheme.cron.date = event_create_scheme.cron.date.replace(
-                    tzinfo=timezone(offset=timedelta(minutes=event_create_scheme.timezone)),
-                )
+                offset_minutes = event_create_scheme.timezone
+                offset = timedelta(minutes=offset_minutes)
+                tz = timezone(offset=offset)
             else:
-                event_create_scheme.cron.date = event_create_scheme.cron.date.replace(
-                    tzinfo=UTC_TIMEZONE,
-                )
+                tz = UTC_TIMEZONE
+
+            event_create_scheme.cron.date = event_create_scheme.cron.date.replace(
+                tzinfo=tz,
+            )
+
+        utcoffset_minutes = int(
+            event_create_scheme.cron.date.tzinfo.utcoffset(
+                event_create_scheme.cron.date,
+            ).total_seconds()
+            // 60,
+        )
 
         event = await self._event_repo.create(
             title=event_create_scheme.title,
@@ -142,6 +151,7 @@ class EventService(BaseService):
             creator_id=event_create_scheme.creator_id,
             group_id=event_create_scheme.group_id,
             duration=event_create_scheme.duration,
+            timezone=utcoffset_minutes,
         )
         logger.info(f"Event {event.id} created successfully")
         await self.add_tag_to_event(
