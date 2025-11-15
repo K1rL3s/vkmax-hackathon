@@ -9,5 +9,5 @@ async def get_profile_deeplink(
     bot: Bot,
     **__: Any,
 ) -> dict[str, Any]:
-    link = create_startapp_link(bot, json.dumps({"path": "/profile"}), encode=True)
+    link = create_startapp_link(bot, json.dumps({"path": "/settings"}), encode=True)
     return {"profile_deeplink": link}
