@@ -1,5 +1,6 @@
 import logging
 
+from maxhack.logger.formatter import JsonFormatter
 from maxhack.logger.inject import InjectFilter
 
 
@@ -47,7 +48,7 @@ def _stream_handler(groups: tuple[str, ...] | str) -> logging.StreamHandler:
     if isinstance(groups, str):
         groups = (groups,)
 
-    # stream_handler.setFormatter(JsonFormatter(groups=groups))
+    stream_handler.setFormatter(JsonFormatter(groups=groups))
     stream_handler.addFilter(InjectFilter())
 
     return stream_handler
