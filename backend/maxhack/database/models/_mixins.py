@@ -9,7 +9,12 @@ def fresh_timestamp() -> ColumnElement[datetime]:
 
 
 class IdMixin[T]:
-    id: Mapped[T] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[T] = mapped_column(
+        Integer,
+        primary_key=True,
+        autoincrement=True,
+        nullable=False,
+    )
 
 
 class CreatedAtMixin:
