@@ -45,7 +45,6 @@ class PersonalGroupResponse(Model):
     id: int
     name: Literal["Личная"]
     description: str | None = None
-    timezone: int
 
 
 class UserGroupsResponse(Model):
