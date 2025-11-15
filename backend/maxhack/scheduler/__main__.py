@@ -21,7 +21,7 @@ async def main() -> None:
         scheduler=scheduler,
         log_level=LogLevel.DEBUG,  # type: ignore
         modules=["maxhack.scheduler.tasks"],
-        update_interval=10,
+        update_interval=5,
         configure_logging=False,
     )
 

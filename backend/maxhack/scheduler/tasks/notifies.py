@@ -1,3 +1,5 @@
+import asyncio
+
 from dishka import FromDishka
 from dishka.integrations.taskiq import inject
 from taskiq import async_shared_broker
@@ -19,6 +21,7 @@ async def send_notifies(
     max_mailer: FromDishka[MaxMailer],
     events_service: FromDishka[EventService],
 ) -> None:
+    await asyncio.sleep(1)
     notifies = await events_service.get_notify_by_date_interval()
     for users, event in notifies:
         await max_mailer.event_notify(event, users)

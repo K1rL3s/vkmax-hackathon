@@ -1,8 +1,8 @@
 """init
 
-Revision ID: 2025.11.05_21.50
+Revision ID: 2025.11.15_02.23
 Revises:
-Create Date: 2025-11-05 21:50:40.233172
+Create Date: 2025-11-15 05:23:38.143641
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "2025.11.05_21.50"
+revision: str = "2025.11.15_02.23"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -36,8 +36,8 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("name", sa.String(length=64), nullable=False),
-        sa.Column("description", sa.String(length=128), nullable=True),
+        sa.Column("name", sa.String(length=128), nullable=False),
+        sa.Column("description", sa.String(length=1024), nullable=True),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_groups")),
     )
     op.create_table(
@@ -76,16 +76,17 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("username", sa.String(length=32), nullable=True),
-        sa.Column("last_name", sa.String(length=32), nullable=True),
-        sa.Column("first_name", sa.String(length=32), nullable=True),
+        sa.Column("max_id", sa.Integer(), nullable=False),
+        sa.Column("max_chat_id", sa.Integer(), nullable=False),
+        sa.Column("max_photo", sa.String(length=256), nullable=True),
+        sa.Column("first_name", sa.String(length=64), nullable=False),
+        sa.Column("last_name", sa.String(length=64), nullable=True),
         sa.Column("phone", sa.String(length=16), nullable=True),
+        sa.Column("timezone", sa.Integer(), nullable=False),
+        sa.Column("notify_mode", sa.String(length=16), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_users")),
-        sa.UniqueConstraint(
-            "username",
-            name=op.f("uq_users_username"),
-            postgresql_nulls_not_distinct=True,
-        ),
+        sa.UniqueConstraint("max_chat_id", name=op.f("uq_users_max_chat_id")),
+        sa.UniqueConstraint("max_id", name=op.f("uq_users_max_id")),
     )
     op.create_table(
         "events",
@@ -103,13 +104,16 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("title", sa.String(length=64), nullable=False),
-        sa.Column("description", sa.String(length=128), nullable=True),
-        sa.Column("cron", sa.String(length=64), nullable=False),
+        sa.Column("title", sa.String(length=128), nullable=False),
+        sa.Column("description", sa.String(length=1024), nullable=True),
+        sa.Column("cron", sa.String(length=16), nullable=False),
         sa.Column("is_cycle", sa.Boolean(), nullable=False),
         sa.Column("type", sa.String(length=16), nullable=False),
         sa.Column("creator_id", sa.Integer(), nullable=False),
         sa.Column("group_id", sa.Integer(), nullable=False),
+        sa.Column("timezone", sa.Integer(), nullable=False),
+        sa.Column("duration", sa.Integer(), nullable=False),
+        sa.Column("event_happened", sa.Boolean(), nullable=False),
         sa.ForeignKeyConstraint(
             ["creator_id"],
             ["users.id"],
@@ -138,10 +142,9 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("link", sa.String(length=16), nullable=False),
+        sa.Column("key", sa.String(length=8), nullable=False),
         sa.Column("creator_id", sa.Integer(), nullable=False),
         sa.Column("group_id", sa.Integer(), nullable=False),
-        sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(
             ["creator_id"],
             ["users.id"],
@@ -153,7 +156,7 @@ def upgrade() -> None:
             name=op.f("fk_invites_group_id_groups"),
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_invites")),
-        sa.UniqueConstraint("link", name=op.f("uq_invites_link")),
+        sa.UniqueConstraint("key", name=op.f("uq_invites_key")),
     )
     op.create_table(
         "tags",
@@ -173,7 +176,7 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("group_id", sa.Integer(), nullable=False),
         sa.Column("name", sa.String(length=32), nullable=False),
-        sa.Column("descriptions", sa.String(length=128), nullable=True),
+        sa.Column("description", sa.String(length=128), nullable=True),
         sa.Column("color", sa.String(length=8), nullable=False),
         sa.ForeignKeyConstraint(
             ["group_id"],
@@ -181,41 +184,6 @@ def upgrade() -> None:
             name=op.f("fk_tags_group_id_groups"),
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_tags")),
-    )
-    op.create_table(
-        "users_to_groups",
-        sa.Column("user_id", sa.Integer(), nullable=False),
-        sa.Column("group_id", sa.Integer(), nullable=False),
-        sa.Column("role_id", sa.Integer(), nullable=False),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("timezone('UTC', now())"),
-            nullable=False,
-        ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("timezone('UTC', now())"),
-            nullable=False,
-        ),
-        sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["group_id"],
-            ["groups.id"],
-            name=op.f("fk_users_to_groups_group_id_groups"),
-        ),
-        sa.ForeignKeyConstraint(
-            ["role_id"],
-            ["roles.id"],
-            name=op.f("fk_users_to_groups_role_id_roles"),
-        ),
-        sa.ForeignKeyConstraint(
-            ["user_id"],
-            ["users.id"],
-            name=op.f("fk_users_to_groups_user_id_users"),
-        ),
-        sa.PrimaryKeyConstraint("user_id", "group_id", name=op.f("pk_users_to_groups")),
     )
     op.create_table(
         "events_notifies",
@@ -275,8 +243,7 @@ def upgrade() -> None:
     )
     op.create_table(
         "tags_to_events",
-        sa.Column("tag_id", sa.Integer(), nullable=False),
-        sa.Column("event_id", sa.Integer(), nullable=False),
+        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -295,17 +262,25 @@ def upgrade() -> None:
             ["events.id"],
             name=op.f("fk_tags_to_events_event_id_events"),
         ),
+        sa.Column("tag_id", sa.Integer(), nullable=False),
+        sa.Column("event_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["tag_id"],
             ["tags.id"],
             name=op.f("fk_tags_to_events_tag_id_tags"),
         ),
-        sa.PrimaryKeyConstraint("tag_id", "event_id", name=op.f("pk_tags_to_events")),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_tags_to_events")),
+    )
+    op.create_index(
+        op.f("ix_tags_to_events_tag_id"),
+        "tags_to_events",
+        ["tag_id", "event_id"],
+        unique=True,
+        postgresql_where="tags_to_events.deleted_at IS NULL",
     )
     op.create_table(
         "users_to_events",
-        sa.Column("user_id", sa.Integer(), nullable=False),
-        sa.Column("event_id", sa.Integer(), nullable=False),
+        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -324,17 +299,25 @@ def upgrade() -> None:
             ["events.id"],
             name=op.f("fk_users_to_events_event_id_events"),
         ),
+        sa.Column("user_id", sa.Integer(), nullable=False),
+        sa.Column("event_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["user_id"],
             ["users.id"],
             name=op.f("fk_users_to_events_user_id_users"),
         ),
-        sa.PrimaryKeyConstraint("user_id", "event_id", name=op.f("pk_users_to_events")),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_users_to_events")),
+    )
+    op.create_index(
+        op.f("ix_users_to_events_user_id"),
+        "users_to_events",
+        ["user_id", "event_id"],
+        unique=True,
+        postgresql_where="users_to_events.deleted_at IS NULL",
     )
     op.create_table(
-        "users_to_invites",
-        sa.Column("user_id", sa.Integer(), nullable=False),
-        sa.Column("invite_id", sa.Integer(), nullable=False),
+        "users_to_groups",
+        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -348,26 +331,43 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("user_id", sa.Integer(), nullable=False),
+        sa.Column("group_id", sa.Integer(), nullable=False),
+        sa.Column("role_id", sa.Integer(), nullable=False),
+        sa.Column("invite_id", sa.Integer(), nullable=True),
+        sa.Column("notify_mode", sa.String(length=16), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["group_id"],
+            ["groups.id"],
+            name=op.f("fk_users_to_groups_group_id_groups"),
+        ),
         sa.ForeignKeyConstraint(
             ["invite_id"],
             ["invites.id"],
-            name=op.f("fk_users_to_invites_invite_id_invites"),
+            name=op.f("fk_users_to_groups_invite_id_invites"),
+        ),
+        sa.ForeignKeyConstraint(
+            ["role_id"],
+            ["roles.id"],
+            name=op.f("fk_users_to_groups_role_id_roles"),
         ),
         sa.ForeignKeyConstraint(
             ["user_id"],
             ["users.id"],
-            name=op.f("fk_users_to_invites_user_id_users"),
+            name=op.f("fk_users_to_groups_user_id_users"),
         ),
-        sa.PrimaryKeyConstraint(
-            "user_id",
-            "invite_id",
-            name=op.f("pk_users_to_invites"),
-        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_users_to_groups")),
+    )
+    op.create_index(
+        op.f("ix_users_to_groups_user_id"),
+        "users_to_groups",
+        ["user_id", "group_id"],
+        unique=True,
+        postgresql_where="users_to_groups.deleted_at IS NULL",
     )
     op.create_table(
         "users_to_tags",
-        sa.Column("user_id", sa.Integer(), nullable=False),
-        sa.Column("tag_id", sa.Integer(), nullable=False),
+        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -381,6 +381,8 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("user_id", sa.Integer(), nullable=False),
+        sa.Column("tag_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["tag_id"],
             ["tags.id"],
@@ -391,20 +393,46 @@ def upgrade() -> None:
             ["users.id"],
             name=op.f("fk_users_to_tags_user_id_users"),
         ),
-        sa.PrimaryKeyConstraint("user_id", "tag_id", name=op.f("pk_users_to_tags")),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_users_to_tags")),
+    )
+    op.create_index(
+        op.f("ix_users_to_tags_user_id"),
+        "users_to_tags",
+        ["user_id", "tag_id"],
+        unique=True,
+        postgresql_where="users_to_tags.deleted_at IS NULL",
     )
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(
+        op.f("ix_users_to_tags_user_id"),
+        table_name="users_to_tags",
+        postgresql_where="users_to_tags.deleted_at IS NULL",
+    )
     op.drop_table("users_to_tags")
-    op.drop_table("users_to_invites")
+    op.drop_index(
+        op.f("ix_users_to_groups_user_id"),
+        table_name="users_to_groups",
+        postgresql_where="users_to_groups.deleted_at IS NULL",
+    )
+    op.drop_table("users_to_groups")
+    op.drop_index(
+        op.f("ix_users_to_events_user_id"),
+        table_name="users_to_events",
+        postgresql_where="users_to_events.deleted_at IS NULL",
+    )
     op.drop_table("users_to_events")
+    op.drop_index(
+        op.f("ix_tags_to_events_tag_id"),
+        table_name="tags_to_events",
+        postgresql_where="tags_to_events.deleted_at IS NULL",
+    )
     op.drop_table("tags_to_events")
     op.drop_table("responds")
     op.drop_table("events_notifies")
-    op.drop_table("users_to_groups")
     op.drop_table("tags")
     op.drop_table("invites")
     op.drop_table("events")
