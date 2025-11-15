@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pycron
 from redis.asyncio import Redis
@@ -122,6 +122,11 @@ class EventService(BaseService):
                     f"User {creator.id} has no rights to create event in group {group.id}",
                 )
                 raise NotEnoughRights
+
+        if event_create_scheme.timezone:
+            event_create_scheme.cron.date = event_create_scheme.cron.date.astimezone(
+                tz=timezone(offset=timedelta(minutes=event_create_scheme.timezone)),
+            )
 
         event = await self._event_repo.create(
             title=event_create_scheme.title,

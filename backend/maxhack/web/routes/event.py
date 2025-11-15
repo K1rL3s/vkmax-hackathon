@@ -38,7 +38,6 @@ event_router = APIRouter(
 async def create_event_route(
     body: EventCreateRequest,
     event_service: FromDishka[EventService],
-    session: FromDishka[AsyncSession],
     current_user: CurrentUser,
 ) -> EventResponse:
     event, notifies = await event_service.create_event(
