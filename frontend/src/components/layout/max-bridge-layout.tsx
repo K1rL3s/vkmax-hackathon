@@ -4,7 +4,6 @@ import { useAuth } from '@/hooks/auth'
 
 export function MaxBridgeLayout({ children }: { children: React.ReactNode }) {
   const { isPending, isError } = useAuth()
-
   if (isError) {
     return <Navigate to={'/max-error'} />
   }

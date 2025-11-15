@@ -32,7 +32,6 @@ function CreateEventForm() {
     defaultValues: {
       title: '',
       description: '',
-
       retry: {
         everyDay: false,
         everyWeek: false,
