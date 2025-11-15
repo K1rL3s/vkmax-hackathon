@@ -525,6 +525,8 @@ class EventService(BaseService):
             last_start = time_now
             logger.debug("Last start time not found in redis, using current time")
 
+        last_start -= timedelta(seconds=5)  # подпёр костылём
+
         events_with_notifies = await self._event_repo.get_notifies()
         logger.debug(f"Found {len(events_with_notifies)} events with notifies")
         matching_notify: list[
