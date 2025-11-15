@@ -123,8 +123,6 @@ class EventService(BaseService):
                 )
                 raise NotEnoughRights
 
-            event_create_scheme.timezone = group.timezone
-
         event = await self._event_repo.create(
             title=event_create_scheme.title,
             description=event_create_scheme.description,

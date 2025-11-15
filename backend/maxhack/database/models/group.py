@@ -17,4 +17,3 @@ class GroupModel(BaseAlchemyModel, IdMixin[GroupId]):
         String(GROUP_DESCRIPTION_LEN),
         nullable=True,
     )
-    timezone: Mapped[int] = mapped_column(Integer, nullable=False)

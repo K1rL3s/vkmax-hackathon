@@ -32,9 +32,8 @@ class GroupRepo(BaseAlchemyRepo):
         name: str,
         description: str | None,
         creator_id: UserId,
-        timezone: int = 0,
     ) -> GroupModel:
-        group = GroupModel(name=name, description=description, timezone=timezone)
+        group = GroupModel(name=name, description=description)
         try:
             self._session.add(group)
             await self._session.flush()

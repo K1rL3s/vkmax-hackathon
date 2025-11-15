@@ -13,20 +13,17 @@ from maxhack.web.schemas.role import RoleResponse
 class GroupCreateRequest(Model):
     name: str
     description: str | None = None
-    timezone: int | None = None
 
 
 class GroupUpdateRequest(Model):
     name: str
     description: str | None = None
-    timezone: int | None = None
 
 
 class GroupResponse(Model):
     id: GroupId
     name: str
     description: str | None = None
-    timezone: int = 0
 
 
 class GetGroupResponse(Model):

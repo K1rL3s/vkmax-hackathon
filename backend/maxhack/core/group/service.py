@@ -30,7 +30,6 @@ class GroupService(BaseService):
         master_id: UserId,
         name: str,
         description: str | None,
-        timezone: int | None = None,
     ) -> GroupModel:
         logger.debug(f"Creating group with name '{name}' by user {master_id}")
         if name == PRIVATE_GROUP_NAME:
@@ -41,15 +40,10 @@ class GroupService(BaseService):
             logger.error(f"User {master_id} not found")
             raise UserNotFound
 
-        if timezone is None:
-            timezone = creator.timezone
-            logger.debug(f"Timezone not provided, using creator's timezone: {timezone}")
-
         group = await self._group_repo.create(
             name=name,
             description=description,
             creator_id=creator.id,
-            timezone=timezone,
         )
         logger.info(f"Group {group.id} created successfully")
         return group
@@ -74,7 +68,6 @@ class GroupService(BaseService):
         master_id: UserId,
         name: str | None,
         description: str | None,
-        timezone: int = 0,
     ) -> GroupModel:
         logger.debug(
             f"Updating group {group_id} by user {master_id} with name '{name}' and description '{description}'",
@@ -93,7 +86,6 @@ class GroupService(BaseService):
             group_id,
             name=name,
             description=description,
-            timezone=timezone,
         )
         if updated_group is None:
             logger.error(f"Group {group_id} not found for update")

@@ -40,7 +40,6 @@ async def create_group_route(
         master_id=current_user.db_user.id,
         name=body.name,
         description=body.description,
-        timezone=body.timezone,
     )
 
     return GetGroupResponse.model_validate(
