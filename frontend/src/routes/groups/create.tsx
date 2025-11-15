@@ -11,7 +11,6 @@ import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
 import { Header } from '@/components/header'
 import { useCreateGroup } from '@/hooks/groups'
-import { TimezoneInput } from '@/components/timezone-input'
 
 export const Route = createFileRoute('/groups/create')({
   component: CreateGroupFormPage,

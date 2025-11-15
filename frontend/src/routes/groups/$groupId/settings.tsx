@@ -3,10 +3,8 @@ import { Button, Flex, Input, Textarea, Typography } from '@maxhub/max-ui'
 import { useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { GroupPageLayout } from '@/components/layout/group-page-layout'
-import { TimezoneInput } from '@/components/timezone-input'
 import { useDeleteGroup, useEditGroup, useGroup } from '@/hooks/groups'
 import { GroupTags } from '@/components/group/tag/group-tags'
-import { TIMEZONES } from '@/constants'
 
 export const Route = createFileRoute('/groups/$groupId/settings')({
   component: GroupSettingsPage,
