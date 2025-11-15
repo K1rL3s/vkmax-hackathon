@@ -26,6 +26,11 @@ _groups = Window(
             id="select_group",
         ),
     ),
+    Button(
+        Const("📆 Выгрузить все события"),
+        on_click=handlers.on_get_all_my_events,
+        id="all_events",
+    ),
     TO_MENU_BUTTON,
     getter=getters.get_my_groups,
     state=Groups.all,
@@ -35,13 +40,13 @@ _one_group = Window(
     Format("👫 Группа {group.name}"),
     Url(Const("⬆️ В группу"), Format("{group_url}")),
     Button(
-        Const("📆 Выгрузить все события"),
+        Const("📆 Выгрузить события группы"),
         on_click=handlers.on_get_all_group_events,
         when=F["role"].id.in_((CREATOR_ROLE_ID, EDITOR_ROLE_ID)),
         id="all_events",
     ),
     Button(
-        Const("📆 Выгрузить свои события"),
+        Const("📆 Выгрузить мои события"),
         on_click=handlers.on_get_my_group_events,
         when=F["group"].name != PRIVATE_GROUP_NAME,
         id="my_events",

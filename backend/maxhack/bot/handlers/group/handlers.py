@@ -1,13 +1,18 @@
+import time
 from typing import Any
 
 from dishka import FromDishka
 
 from maxo.dialogs import DialogManager, ShowMode
 from maxo.dialogs.integrations.dishka import inject
+from maxo.enums import UploadType
+from maxo.utils.facades import MessageCreatedFacade
+from maxo.utils.upload_media import BufferedInputFile
 
 from maxhack.bot.states import Groups, Menu
 from maxhack.core.exceptions import MaxHackError
 from maxhack.core.group.service import GroupService
+from maxhack.core.ics.service import IcsService
 from maxhack.core.ids import GroupId, InviteKey
 from maxhack.database.models import UserModel
 
@@ -43,17 +48,46 @@ async def on_join_group(
 
 
 @inject
+async def on_get_all_my_events(
+    _: Any,
+    __: Any,
+    dialog_manager: DialogManager,
+    ics_service: FromDishka[IcsService],
+) -> None:
+    current_user: UserModel = dialog_manager.middleware_data["current_user"]
+    facade: MessageCreatedFacade = dialog_manager.middleware_data["facade"]
+
+    raw_ics = await ics_service.export_user_events_all_groups(current_user.id)
+    filename = f"user{current_user.id}_events_{int(time.time())}.ics"
+    await facade.send_media(
+        text="📆 Все твои события во всех группах",
+        media=BufferedInputFile(raw_ics, filename, UploadType.FILE),
+    )
+
+    dialog_manager.show_mode = ShowMode.DELETE_AND_SEND
+
+
+@inject
 async def on_get_all_group_events(
     _: Any,
     __: Any,
     dialog_manager: DialogManager,
+    ics_service: FromDishka[IcsService],
+    group_service: FromDishka[GroupService],
 ) -> None:
     current_user: UserModel = dialog_manager.middleware_data["current_user"]
+    facade: MessageCreatedFacade = dialog_manager.middleware_data["facade"]
     group_id: GroupId = dialog_manager.dialog_data["group_id"]
 
-    # TODO: Выброс календаря
+    raw_ics = await ics_service.export_all_group_events(group_id, current_user.id)
+    group, _ = await group_service.get_group(current_user.id, group_id)
+    filename = f"group{group_id}_events_{int(time.time())}.ics"
+    await facade.send_media(
+        text=f"📆 Все события в группе {group.name}",
+        media=BufferedInputFile(raw_ics, filename, UploadType.FILE),
+    )
 
-    dialog_manager.show_mode = ShowMode.SEND
+    dialog_manager.show_mode = ShowMode.DELETE_AND_SEND
 
 
 @inject
@@ -61,10 +95,21 @@ async def on_get_my_group_events(
     _: Any,
     __: Any,
     dialog_manager: DialogManager,
+    ics_service: FromDishka[IcsService],
+    group_service: FromDishka[GroupService],
 ) -> None:
     current_user: UserModel = dialog_manager.middleware_data["current_user"]
+    facade: MessageCreatedFacade = dialog_manager.middleware_data["facade"]
     group_id: GroupId = dialog_manager.dialog_data["group_id"]
 
-    # TODO: Выброс календаря
+    raw_ics = await ics_service.export_user_events_in_group(group_id, current_user.id)
+    if raw_ics:
+        timestamp = int(time.time())
+        group, _ = await group_service.get_group(current_user.id, group_id)
+        filename = f"user{current_user.id}_group{group_id}_events_{timestamp}.ics"
+        await facade.send_media(
+            text=f"📆 Все твои события в группе {group.name}",
+            media=BufferedInputFile(raw_ics, filename, UploadType.FILE),
+        )
 
-    dialog_manager.show_mode = ShowMode.SEND
+    dialog_manager.show_mode = ShowMode.DELETE_AND_SEND
