@@ -1,4 +1,7 @@
 ![img.png](content/img.png)
+
+<img alt="gg" src="https://github.com/user-attachments/assets/0a83556a-c089-4d94-b8fd-1df655e5e559" />
+
 # MAX Уведомления
 
 Также есть информация в [backend/README.md](backend/README.md) и [frontend/README.md](frontend/README.md)
